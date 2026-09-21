@@ -687,10 +687,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 10e1d4b0-e76a-4513-a580-9ac2c5471a5e
+  cloudProjectId: 05501adf-1f47-461e-906f-fd34a31a5259
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: CloundFinal (1)
+  projectName: CloundFinal
   organizationId: j3sus2415
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

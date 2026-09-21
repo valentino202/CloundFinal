@@ -170,10 +170,15 @@ public class AuthUIController : MonoBehaviour
 
     private async void OnAuthSuccess()
     {
-        // Descargar Remote Config si está presente en la escena
+        // UIManager es la fuente de verdad para navegacion y carga (RemoteConfig + Profile).
+        // Se replica aqui para no depender del orden de botones en escena.
         if (UGSRemoteConfigManager.Instance != null)
         {
             await UGSRemoteConfigManager.Instance.FetchRemoteConfigValues();
+        }
+        if (UGSProfileManager.Instance != null)
+        {
+            await UGSProfileManager.Instance.LoadProfileAsync();
         }
 
         // Cambiar la pantalla al HomeMenu

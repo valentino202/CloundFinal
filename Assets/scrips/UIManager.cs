@@ -241,6 +241,10 @@ public class UIManager : MonoBehaviour
         {
             await UGSRemoteConfigManager.Instance.FetchRemoteConfigValues();
         }
+        if (UGSProfileManager.Instance != null)
+        {
+            await UGSProfileManager.Instance.LoadProfileAsync();
+        }
         ShowHomeMenu();
     }
 

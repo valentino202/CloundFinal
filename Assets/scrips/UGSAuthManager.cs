@@ -93,6 +93,12 @@ public class UGSAuthManager : MonoBehaviour
     // =========================================================================
     public async Task<bool> SignUpWithUsernamePasswordAsync(string username, string password)
     {
+        if (!isInitialized || AuthenticationService.Instance == null)
+        {
+            Debug.LogError("Intento de registro antes de inicializar UGS o AuthenticationService no disponible.");
+            return false;
+        }
+
         try
         {
             await AuthenticationService.Instance.SignUpWithUsernamePasswordAsync(username, password);
@@ -134,6 +140,12 @@ public class UGSAuthManager : MonoBehaviour
     // =========================================================================
     public async Task<bool> LinkAnonymousToUsernamePasswordAsync(string username, string password)
     {
+        if (!isInitialized || AuthenticationService.Instance == null)
+        {
+            Debug.LogError("Intento de vincular antes de inicializar UGS.");
+            return false;
+        }
+
         try
         {
             if (AuthenticationService.Instance.IsSignedIn)
@@ -168,7 +180,8 @@ public class UGSAuthManager : MonoBehaviour
         // Si no tiene un PlayerName registrado (caso invitado), mostramos "Invitado_XXXX"
         if (string.IsNullOrEmpty(playerName))
         {
-            string shortId = AuthenticationService.Instance.PlayerId.Substring(0, 5);
+            string pid = AuthenticationService.Instance.PlayerId ?? "";
+            string shortId = pid.Length >= 5 ? pid.Substring(0, 5) : pid;
             return $"Invitado_{shortId}";
         }
 

@@ -11,6 +11,8 @@ public class UGSRemoteConfigManager : MonoBehaviour
     [Header("Parámetros del Tablero (Valores Por Defecto)")]
     public int gridSize = 6;
     public int maxCellLevel = 4;
+    [Header("Bot (sobreescribible desde dashboard)")]
+    [Range(0, 2)] public int botDifficulty = 1; // 0=Facil 1=Medio 2=Dificil
 
     // Estructuras requeridas por Remote Config
     public struct UserAttributes { }
@@ -49,7 +51,8 @@ public class UGSRemoteConfigManager : MonoBehaviour
         {
             Debug.Log("[RemoteConfig] Solicitando configuración remota...");
 
-            // Suscribirse al evento de respuesta
+            // Evitar doble suscripcion si se llama 2 veces seguidas
+            RemoteConfigService.Instance.FetchCompleted -= ApplyRemoteSettings;
             RemoteConfigService.Instance.FetchCompleted += ApplyRemoteSettings;
 
             // Solicitar configuración desde los servidores de UGS
@@ -80,8 +83,9 @@ public class UGSRemoteConfigManager : MonoBehaviour
                 // Leer las variables enviadas desde el Dashboard de Unity
                 gridSize = RemoteConfigService.Instance.appConfig.GetInt("GRID_SIZE", 6);
                 maxCellLevel = RemoteConfigService.Instance.appConfig.GetInt("MAX_CELL_LEVEL", 4);
+                botDifficulty = RemoteConfigService.Instance.appConfig.GetInt("BOT_DIFFICULTY", 1);
 
-                Debug.Log($"[RemoteConfig] Configuración cargada con éxito. GRID_SIZE: {gridSize}, MAX_CELL_LEVEL: {maxCellLevel}");
+                Debug.Log($"[RemoteConfig] Configuración cargada con éxito. GRID_SIZE: {gridSize}, MAX_CELL_LEVEL: {maxCellLevel}, BOT_DIFFICULTY: {botDifficulty}");
                 break;
 
             case ConfigRequestStatus.Pending:
