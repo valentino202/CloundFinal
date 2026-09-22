@@ -9,6 +9,8 @@ public class UGSAuthManager : MonoBehaviour
     public static UGSAuthManager Instance;
     private bool isInitialized = false;
     public bool IsInitialized => isInitialized;
+    public bool IsSignedIn => isInitialized && AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn;
+    public static event Action AutoLoginSucceeded;
     private void Awake()
     {
         if (Instance == null)
@@ -22,6 +24,8 @@ public class UGSAuthManager : MonoBehaviour
         }
     }
 
+    private bool _busy = false;
+
     private async void Start()
     {
         try
@@ -30,11 +34,37 @@ public class UGSAuthManager : MonoBehaviour
             Debug.Log("UGS Inicializado Correctamente.");
             SetupEvents();
             isInitialized = true;
+            await TryAutoLoginAsync();
         }
         catch (Exception e)
         {
             Debug.LogError("Error al inicializar UGS: " + e.Message);
         }
+    }
+
+    private async Task TryAutoLoginAsync()
+    {
+        if (_busy) return;
+        _busy = true;
+        try
+        {
+            if (AuthenticationService.Instance == null || AuthenticationService.Instance.IsSignedIn)
+                return;
+
+            // Login transparente: usa sesion cacheada si existe, si no crea anonimo.
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log($"[AUTH] Auto-login transparente OK. PlayerID: {AuthenticationService.Instance.PlayerId}");
+            AutoLoginSucceeded?.Invoke();
+        }
+        catch (AuthenticationException ex)
+        {
+            Debug.LogWarning($"[AUTH] Auto-login no disponible: {ex.Message}. El usuario puede loguearse manual.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[AUTH] Auto-login fallo: {ex.Message}");
+        }
+        finally { _busy = false; }
     }
 
     private void SetupEvents()
@@ -126,12 +156,85 @@ public class UGSAuthManager : MonoBehaviour
         {
             await AuthenticationService.Instance.SignInWithUsernamePasswordAsync(username, password);
             Debug.Log("Inicio de sesión exitoso con Usuario/Contraseña!");
+            await EnsurePlayerNameAsync(username);
             return true;
         }
         catch (AuthenticationException ex)
         {
             Debug.LogError($"Error al iniciar sesión: {ex.Message}");
             return false;
+        }
+    }
+
+    // Cambio explicito de cuenta desde un boton (cierra sesion previa primero).
+    public async Task<bool> SwitchToAnonymousAsync()
+    {
+        if (!isInitialized || AuthenticationService.Instance == null) return false;
+        if (_busy) { Debug.LogWarning("[AUTH] Operacion en curso, espera."); return false; }
+        _busy = true;
+        try
+        {
+            if (AuthenticationService.Instance.IsSignedIn)
+            {
+                Debug.Log("[AUTH] Cambiando de cuenta: cerrando sesion previa...");
+                AuthenticationService.Instance.SignOut();
+            }
+            // Sin esto, el token de la cuenta con contrasena queda en disco
+            // y SignInAnonymously restaura esa misma cuenta en vez del invitado.
+            AuthenticationService.Instance.ClearSessionToken();
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log($"[AUTH] Sesion invitado OK. PlayerID: {AuthenticationService.Instance.PlayerId}");
+            return true;
+        }
+        catch (AuthenticationException ex)
+        {
+            Debug.LogError($"Error al cambiar a invitado: {ex.Message}");
+            return false;
+        }
+        finally { _busy = false; }
+    }
+
+    public async Task<bool> SwitchToUsernamePasswordAsync(string username, string password)
+    {
+        if (!isInitialized || AuthenticationService.Instance == null) return false;
+        if (_busy) { Debug.LogWarning("[AUTH] Operacion en curso, espera."); return false; }
+        _busy = true;
+        try
+        {
+            if (AuthenticationService.Instance.IsSignedIn)
+            {
+                Debug.Log("[AUTH] Cambiando de cuenta: cerrando sesion previa...");
+                AuthenticationService.Instance.SignOut();
+            }
+            AuthenticationService.Instance.ClearSessionToken();
+            await AuthenticationService.Instance.SignInWithUsernamePasswordAsync(username, password);
+            Debug.Log($"Inicio de sesión exitoso con Usuario/Contraseña! PlayerID: {AuthenticationService.Instance.PlayerId}");
+            await EnsurePlayerNameAsync(username);
+            return true;
+        }
+        catch (AuthenticationException ex)
+        {
+            Debug.LogError($"Error al iniciar sesión: {ex.Message}");
+            return false;
+        }
+        finally { _busy = false; }
+    }
+
+    // Si la cuenta no tiene PlayerName (creada antes o desde dashboard),
+    // lo repara con el username del login para no mostrar Invitado_XXXX.
+    private async Task EnsurePlayerNameAsync(string username)
+    {
+        try
+        {
+            if (AuthenticationService.Instance == null) return;
+            if (!string.IsNullOrEmpty(AuthenticationService.Instance.PlayerName)) return;
+            if (string.IsNullOrEmpty(username)) return;
+            await AuthenticationService.Instance.UpdatePlayerNameAsync(username);
+            Debug.Log($"[AUTH] PlayerName reparado: {username}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[AUTH] No se pudo reparar PlayerName: {ex.Message}");
         }
     }
 

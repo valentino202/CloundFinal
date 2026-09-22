@@ -29,6 +29,27 @@ public class UIManager : MonoBehaviour
 
         ShowAuthScreen();
         ShowMainMenu();
+
+        // Si el auto-login ya termino antes de que la UI existiera, entra directo al Home.
+        if (UGSAuthManager.Instance != null && UGSAuthManager.Instance.IsSignedIn)
+        {
+            _ = FetchConfigAndEnterHome();
+        }
+    }
+
+    private void OnEnable()
+    {
+        UGSAuthManager.AutoLoginSucceeded += HandleAutoLogin;
+    }
+
+    private void OnDisable()
+    {
+        UGSAuthManager.AutoLoginSucceeded -= HandleAutoLogin;
+    }
+
+    private void HandleAutoLogin()
+    {
+        _ = FetchConfigAndEnterHome();
     }
 
     // --- NAVEGACIÓN ---
@@ -84,7 +105,7 @@ public class UIManager : MonoBehaviour
 
         try
         {
-            bool success = await UGSAuthManager.Instance.SignInAnonymouslyAsync();
+            bool success = await UGSAuthManager.Instance.SwitchToAnonymousAsync();
             if (success)
             {
                 SetStatus("Cargando configuración...");
@@ -125,7 +146,7 @@ public class UIManager : MonoBehaviour
         SetStatus("Iniciando sesión...");
         try
         {
-            bool success = await UGSAuthManager.Instance.SignInWithUsernamePasswordAsync(loginUsername.text, loginPassword.text);
+            bool success = await UGSAuthManager.Instance.SwitchToUsernamePasswordAsync(loginUsername.text, loginPassword.text);
             if (success)
             {
                 await FetchConfigAndEnterHome();
@@ -225,10 +246,17 @@ public class UIManager : MonoBehaviour
 
     public void OnClickLogout()
     {
+        Debug.Log("[UI] Click Cerrar Sesion.");
         if (UGSAuthManager.Instance != null)
         {
             UGSAuthManager.Instance.SignOut();
         }
+        else
+        {
+            Debug.LogWarning("[UI] UGSAuthManager.Instance es null en Logout.");
+        }
+        if (loginPassword != null) loginPassword.text = "";
+        if (registerPassword != null) registerPassword.text = "";
         ShowAuthScreen();
         ShowMainMenu();
         SetStatus("Sesión cerrada.");
@@ -237,10 +265,7 @@ public class UIManager : MonoBehaviour
     // --- MÉTODOS AUXILIARES ---
     private async System.Threading.Tasks.Task FetchConfigAndEnterHome()
     {
-        if (UGSRemoteConfigManager.Instance != null)
-        {
-            await UGSRemoteConfigManager.Instance.FetchRemoteConfigValues();
-        }
+        await UGSRemoteConfig.FetchAsync();
         if (UGSProfileManager.Instance != null)
         {
             await UGSProfileManager.Instance.LoadProfileAsync();

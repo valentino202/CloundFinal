@@ -31,7 +31,7 @@ public class AuthUIController : MonoBehaviour
 
         try
         {
-            bool success = await UGSAuthManager.Instance.SignInAnonymouslyAsync();
+            bool success = await UGSAuthManager.Instance.SwitchToAnonymousAsync();
             if (success)
             {
                 SetStatus("Bienvenido (Invitado)");
@@ -60,7 +60,7 @@ public class AuthUIController : MonoBehaviour
         SetStatus("Iniciando sesión...");
         try
         {
-            bool success = await UGSAuthManager.Instance.SignInWithUsernamePasswordAsync(loginUsernameInput.text, loginPasswordInput.text);
+            bool success = await UGSAuthManager.Instance.SwitchToUsernamePasswordAsync(loginUsernameInput.text, loginPasswordInput.text);
             if (success)
             {
                 SetStatus($"Bienvenido, {loginUsernameInput.text}!");
@@ -172,10 +172,7 @@ public class AuthUIController : MonoBehaviour
     {
         // UIManager es la fuente de verdad para navegacion y carga (RemoteConfig + Profile).
         // Se replica aqui para no depender del orden de botones en escena.
-        if (UGSRemoteConfigManager.Instance != null)
-        {
-            await UGSRemoteConfigManager.Instance.FetchRemoteConfigValues();
-        }
+        await UGSRemoteConfig.FetchAsync();
         if (UGSProfileManager.Instance != null)
         {
             await UGSProfileManager.Instance.LoadProfileAsync();

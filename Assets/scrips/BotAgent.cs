@@ -30,6 +30,11 @@ public class BotAgent
     /// <summary>Llamar cuando es turno del bot. Devuelve celda elegida.</summary>
     public Vector2Int ChooseMove(int[,] owner, int[,] level, int gridSize, int maxLevel)
     {
+        // Probabilidad de error por dificultad (personalidad distinta).
+        int roll = rng.Next(0, 100);
+        if (difficulty == Difficulty.Facil && roll < 35) return ChooseRandom(owner, gridSize);
+        if (difficulty == Difficulty.Medio && roll < 12) return ChooseRandom(owner, gridSize);
+
         return difficulty switch
         {
             Difficulty.Facil => ChooseRandom(owner, gridSize),
@@ -70,6 +75,8 @@ public class BotAgent
                 if (IsAdjacentTo(owner, gridSize, x, y, rival)) score += 3;
                 if (IsAdjacentTo(owner, gridSize, x, y, botPlayerId)) score += 1;
                 if (owner[x, y] == 0) score += 1;
+                if (AdjacentRivalAboutToExplode(owner, level, gridSize, maxLevel, x, y, rival)) score -= 6;
+                score += rng.Next(0, 4);
                 if (score > bestScore) { bestScore = score; best = new Vector2Int(x, y); }
             }
         }
@@ -101,8 +108,19 @@ public class BotAgent
         score += CountAdjacent(owner, gridSize, x, y, 0) * 1;
         int rival = botPlayerId == 1 ? 2 : 1;
         score -= CountAdjacent(owner, gridSize, x, y, rival) * 2;
-        score += rng.Next(0, 3);
+        if (AdjacentRivalAboutToExplode(owner, level, gridSize, maxLevel, x, y, rival)) score -= 8;
+        score += rng.Next(0, 5);
         return score;
+    }
+
+    // Hay rival adyacente a punto de explotar: jugar aqui alimenta su cadena.
+    private bool AdjacentRivalAboutToExplode(int[,] owner, int[,] level, int gridSize, int maxLevel, int x, int y, int rival)
+    {
+        if (x > 0 && owner[x - 1, y] == rival && level[x - 1, y] + 1 >= maxLevel) return true;
+        if (x < gridSize - 1 && owner[x + 1, y] == rival && level[x + 1, y] + 1 >= maxLevel) return true;
+        if (y > 0 && owner[x, y - 1] == rival && level[x, y - 1] + 1 >= maxLevel) return true;
+        if (y < gridSize - 1 && owner[x, y + 1] == rival && level[x, y + 1] + 1 >= maxLevel) return true;
+        return false;
     }
 
     private bool IsAdjacentTo(int[,] owner, int gridSize, int x, int y, int value)
