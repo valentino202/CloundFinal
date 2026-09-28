@@ -19,13 +19,19 @@ public class MatchController
     }
 
     public GameLogic.MoveResult PlayHuman(int x, int y)
-        => game.PlacePoint(x, y, humanPlayer);
+    {
+        lastMove = new Vector2Int(x, y);
+        return game.PlacePoint(x, y, humanPlayer);
+    }
 
     public GameLogic.MoveResult PlayBot()
     {
         var m = bot.ChooseMove(game.owner, game.level, game.gridSize, game.maxLevel);
+        lastMove = m;
         return game.PlacePoint(m.x, m.y, bot.botPlayerId);
     }
+
+    public Vector2Int lastMove { get; private set; }
 
     public void Reset() => game.Reset();
 }

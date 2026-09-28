@@ -21,6 +21,9 @@ public class UGSProfileManager
         public string EquippedSkin = "default";
         public int TotalWins = 0;
         public int TotalMatches = 0;
+        // Pack de animaciones equipado (lo cambia el jugador en su UI)
+        public List<string> OwnedPackIds = new List<string> { "clasico" };
+        public string EquippedPackId = "clasico";
     }
 
     public PlayerProfile Profile = new PlayerProfile();
@@ -48,7 +51,7 @@ public class UGSProfileManager
         if (!CanUseCloudSave()) { Debug.LogWarning("[Profile] Sin sesion, perfil local."); return; }
         try
         {
-            var keys = new HashSet<string> { "PlayerName", "SkinsOwned", "EquippedSkin", "TotalWins", "TotalMatches" };
+            var keys = new HashSet<string> { "PlayerName", "SkinsOwned", "EquippedSkin", "TotalWins", "TotalMatches", "OwnedPacks", "EquippedPack" };
             var data = await CloudSaveService.Instance.Data.Player.LoadAsync(keys);
             if (data.TryGetValue("PlayerName", out var n)) Profile.PlayerName = n.Value.GetAs<string>();
             if (data.TryGetValue("EquippedSkin", out var s)) Profile.EquippedSkin = s.Value.GetAs<string>();
@@ -60,6 +63,15 @@ public class UGSProfileManager
                 if (!string.IsNullOrEmpty(skinsJson))
                     Profile.SkinsOwned = JsonUtility.FromJson<SkinList>(skinsJson)?.skins ?? new List<string>();
             }
+            if (data.TryGetValue("OwnedPacks", out var op))
+            {
+                string packsJson = op.Value.GetAs<string>();
+                if (!string.IsNullOrEmpty(packsJson))
+                    Profile.OwnedPackIds = JsonUtility.FromJson<SkinList>(packsJson)?.skins ?? new List<string>();
+            }
+            if (Profile.OwnedPackIds.Count == 0) Profile.OwnedPackIds = new List<string> { "clasico" };
+            if (data.TryGetValue("EquippedPack", out var ep) && !string.IsNullOrEmpty(ep.Value.GetAs<string>()))
+                Profile.EquippedPackId = ep.Value.GetAs<string>();
             Debug.Log($"[Profile] Cargado. WinRate={WinRate:P0} -> Bot sugerido={SuggestedDifficulty}");
         }
         catch (System.Exception e) { Debug.LogError($"[Profile] Error load: {e.Message}"); }
@@ -76,7 +88,9 @@ public class UGSProfileManager
                 { "EquippedSkin", Profile.EquippedSkin },
                 { "TotalWins", Profile.TotalWins },
                 { "TotalMatches", Profile.TotalMatches },
-                { "SkinsOwned", JsonUtility.ToJson(new SkinList { skins = Profile.SkinsOwned }) }
+                { "EquippedPack", Profile.EquippedPackId },
+                { "SkinsOwned", JsonUtility.ToJson(new SkinList { skins = Profile.SkinsOwned }) },
+                { "OwnedPacks", JsonUtility.ToJson(new SkinList { skins = Profile.OwnedPackIds }) }
             };
             await CloudSaveService.Instance.Data.Player.SaveAsync(data);
             Debug.Log("[Profile] Guardado OK.");
@@ -89,6 +103,26 @@ public class UGSProfileManager
         Profile.TotalMatches++;
         if (won) Profile.TotalWins++;
         await SaveProfileAsync();
+    }
+
+    public bool OwnsPack(string packId) => Profile.OwnedPackIds.Contains(packId);
+
+    // Otorga un pack (tu tienda lo llama al comprar). Guarda en la nube.
+    public async Task<bool> UnlockPackAsync(string packId)
+    {
+        if (FxPackCatalog.Get(packId) == null || OwnsPack(packId)) return false;
+        Profile.OwnedPackIds.Add(packId);
+        await SaveProfileAsync();
+        return true;
+    }
+
+    // Equipa el pack: desde aqui el tablero usa sus 4 animaciones. Guarda en la nube.
+    public async Task<bool> EquipPackAsync(string packId)
+    {
+        if (FxPackCatalog.Get(packId) == null || !OwnsPack(packId)) return false;
+        Profile.EquippedPackId = packId;
+        await SaveProfileAsync();
+        return true;
     }
 
     [System.Serializable] private class SkinList { public List<string> skins; }

@@ -27,6 +27,13 @@ public class GameManager : MonoBehaviour
     private readonly Color colNeutral = new Color(0.12f, 0.16f, 0.28f);
     private readonly Color colP1 = new Color(1f, 0.15f, 0.6f);   // rosado neon
     private readonly Color colP2 = new Color(1f, 0.45f, 0.05f);  // naranja electrico
+    private readonly Color colBoom = new Color(1f, 0.85f, 0.3f); // destello explosion
+    private readonly Color[] colLevels = new[] // numeros 1 / 2 / 3
+    {
+        Color.white,
+        new Color(1f, 0.9f, 0.4f),
+        new Color(1f, 0.6f, 0.1f),
+    };
 
     private void Start()
     {
@@ -104,6 +111,7 @@ public class GameManager : MonoBehaviour
         // Botones abajo
         MakeButton(canvasGO.transform, "RestartBtn", "Reiniciar", 0, -300, () =>
         {
+            StopAllCoroutines();
             match.Reset();
             busy = false;
             gameOver = false;
@@ -168,9 +176,9 @@ public class GameManager : MonoBehaviour
             statusText.text = r.error;
             return;
         }
+        PunchCell(x, y); // rebote al colocar el punto (fallback)
+        FireLevelFx(x, y); // tu animacion de nivel 1/2/3 del pack equipado
         AfterMove(r);
-        if (!r.gameOver && game.currentPlayer != match.humanPlayer)
-            StartCoroutine(BotTurn());
     }
 
     private IEnumerator BotTurn()
@@ -182,6 +190,8 @@ public class GameManager : MonoBehaviour
         try
         {
             r = match.PlayBot();
+            PunchCell(match.lastMove.x, match.lastMove.y);
+            FireLevelFx(match.lastMove.x, match.lastMove.y);
         }
         catch (System.Exception ex)
         {
@@ -191,25 +201,62 @@ public class GameManager : MonoBehaviour
             Refresh();
             yield break;
         }
-        busy = false; // liberar ANTES de refrescar para reactivar botones
         if (!r.success)
         {
             Debug.LogWarning("[Game] Bot sin jugada valida, pasa el turno.");
             game.currentPlayer = match.humanPlayer;
+            busy = false;
+            Refresh();
+            yield break;
         }
-        AfterMove(r);
+        AfterMove(r); // maneja busy hasta terminar el fx
     }
 
     private void AfterMove(GameLogic.MoveResult r)
     {
-        Refresh();
-        if (r.explosions != null && r.explosions.Count > 1)
-            statusText.text = $"¡CADENA x{r.explosions.Count}!";
-        else if (r.explosions != null && r.explosions.Count == 1)
-            statusText.text = "¡REACCIÓN!";
-        else if (!r.gameOver)
-            statusText.text = "";
+        if (r.explosions != null && r.explosions.Count > 0)
+            StartCoroutine(ExplosionSequence(r));
+        else
+            FinishMove(r);
+    }
 
+    // Dispara tu animacion de nivel del pack equipado (1/2/3, 4 = boom).
+    private void FireLevelFx(int x, int y)
+    {
+        try
+        {
+            if (BoardFx.LevelFx == null) return;
+            int lvl = game.level[x, y];
+            BoardFx.LevelFx.Invoke(cells[x, y].transform, lvl, BoardFx.Current.KeyForLevel(lvl));
+        }
+        catch (System.Exception ex) { Debug.LogWarning($"[Game] LevelFx fallo: {ex.Message}"); }
+    }
+
+    // Destello celda por celda + lados, con el color del articulo equipado.
+    private IEnumerator ExplosionSequence(GameLogic.MoveResult r)
+    {
+        busy = true;
+        Refresh();
+        try { BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int>(r.explosions), BoardFx.Current.animBoom); }
+        catch (System.Exception ex) { Debug.LogWarning($"[Game] ExplosionFx fallo: {ex.Message}"); }
+        if (BoardFx.SuppressFallback) { busy = false; FinishMove(r); yield break; }
+        int i = 0;
+        foreach (var c in r.explosions)
+        {
+            i++;
+            FlashCell(c.x, c.y, colBoom);
+            FlashNeighbours(c.x, c.y, colBoom);
+            statusText.text = i > 1 ? $"¡CADENA x{i}!" : "¡REACCIÓN!";
+            yield return new WaitForSeconds(0.18f);
+        }
+        busy = false;
+        FinishMove(r);
+    }
+
+    private void FinishMove(GameLogic.MoveResult r)
+    {
+        busy = false;
+        Refresh();
         if (r.gameOver)
         {
             gameOver = true;
@@ -217,7 +264,44 @@ public class GameManager : MonoBehaviour
             else if (r.winner == match.humanPlayer) statusText.text = "¡Ganaste!";
             else statusText.text = "Ganó el Bot.";
             _ = UGSProfileManager.Instance.RecordMatchResultAsync(r.winner == match.humanPlayer);
+            return;
         }
+        statusText.text = "";
+        if (game.currentPlayer != match.humanPlayer)
+            StartCoroutine(BotTurn());
+    }
+
+    private void FlashCell(int x, int y, Color c)
+    {
+        if (x < 0 || y < 0 || x >= game.gridSize || y >= game.gridSize) return;
+        var img = cells[x, y].GetComponent<Image>();
+        if (img != null) img.color = c;
+        PunchCell(x, y);
+    }
+
+    private void FlashNeighbours(int x, int y, Color c)
+    {
+        FlashCell(x - 1, y, c); FlashCell(x + 1, y, c);
+        FlashCell(x, y - 1, c); FlashCell(x, y + 1, c);
+    }
+
+    private void PunchCell(int x, int y)
+    {
+        if (x < 0 || y < 0 || x >= game.gridSize || y >= game.gridSize) return;
+        StartCoroutine(Punch(cells[x, y].transform));
+    }
+
+    private IEnumerator Punch(Transform t)
+    {
+        float k = 0f;
+        while (k < 1f)
+        {
+            k += Time.deltaTime / 0.18f;
+            float s = 1f + Mathf.Sin(Mathf.Clamp01(k) * Mathf.PI) * 0.35f;
+            t.localScale = Vector3.one * s;
+            yield return null;
+        }
+        t.localScale = Vector3.one;
     }
 
     private void Refresh()
@@ -231,7 +315,12 @@ public class GameManager : MonoBehaviour
                 if (img == null || txt == null) continue;
                 int o = game.owner[x, y], l = game.level[x, y];
                 img.color = o == 1 ? colP1 : o == 2 ? colP2 : colNeutral;
-                txt.text = l == 0 ? "" : l.ToString();
+                if (l == 0) txt.text = "";
+                else
+                {
+                    txt.text = l.ToString();
+                    txt.color = colLevels[Mathf.Clamp(l - 1, 0, colLevels.Length - 1)];
+                }
                 btn.interactable = !busy && !gameOver && game.currentPlayer == match.humanPlayer && (o == 0 || o == match.humanPlayer);
             }
         turnText.text = game.currentPlayer == match.humanPlayer ? "Tu turno (Rosa)" : "Turno Bot (Naranja)";

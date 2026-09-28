@@ -51,7 +51,14 @@ public class UGSAuthManager : MonoBehaviour
             if (AuthenticationService.Instance == null || AuthenticationService.Instance.IsSignedIn)
                 return;
 
-            // Login transparente: usa sesion cacheada si existe, si no crea anonimo.
+            // Sin cuenta guardada: quedarse en AuthPanel para elegir registro/login/invitado.
+            if (!AuthenticationService.Instance.SessionTokenExists)
+            {
+                Debug.Log("[AUTH] Sin sesion guardada. Esperando en AuthPanel.");
+                return;
+            }
+
+            // Con sesion guardada: entrar solo (restaura la ultima cuenta).
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
             Debug.Log($"[AUTH] Auto-login transparente OK. PlayerID: {AuthenticationService.Instance.PlayerId}");
             AutoLoginSucceeded?.Invoke();
@@ -310,5 +317,7 @@ public class UGSAuthManager : MonoBehaviour
             AuthenticationService.Instance.SignOut();
             Debug.Log("Usuario desconectado.");
         }
+        // Cerrar sesion borra el token: al reabrir se queda en AuthPanel.
+        AuthenticationService.Instance.ClearSessionToken();
     }
 }

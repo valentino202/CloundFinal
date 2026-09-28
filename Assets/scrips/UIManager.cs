@@ -22,6 +22,8 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        if (authPanel == null) Debug.LogError("UIManager: authPanel NO asignado en el Inspector.");
+        if (homeMenuPanel == null) Debug.LogError("UIManager: homeMenuPanel NO asignado en el Inspector.");
         if (mainMenuPanel == null || loginPanel == null || registerPanel == null)
         {
             Debug.LogError("UIManager: Paneles de UI no asignados en el Inspector.");
@@ -61,8 +63,11 @@ public class UIManager : MonoBehaviour
 
     public void ShowHomeMenu()
     {
+        Debug.Log("[UI] Mostrando HomeMenuPanel.");
         if (authPanel != null) authPanel.SetActive(false);
+        else Debug.LogWarning("[UI] authPanel es null, no se puede ocultar.");
         if (homeMenuPanel != null) homeMenuPanel.SetActive(true);
+        else Debug.LogWarning("[UI] homeMenuPanel es null, no se puede mostrar.");
 
         // Actualizar el nombre del jugador usando la nueva función de UGSAuthManager
         if (playerNameText != null && UGSAuthManager.Instance != null)
