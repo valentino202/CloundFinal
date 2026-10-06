@@ -25,6 +25,11 @@ public class UGSAuthManager : MonoBehaviour
     // para eso, que destruiria el invitado y crearia un PlayerID nuevo al reiniciar.
     private const string SignedOutFlag = "UGS_SignedOutOnPurpose";
 
+    // El SDK no recuerda en que profile quedaste: al reabrir arranca en
+    // "default" y SessionTokenExists mira el profile equivocado. Se guarda
+    // aparte para restaurarlo antes del auto-login.
+    private const string ActiveProfileKey = "UGS_ActiveProfile";
+
     private void Awake()
     {
         if (Instance == null)
@@ -65,6 +70,10 @@ public class UGSAuthManager : MonoBehaviour
             if (AuthenticationService.Instance == null || AuthenticationService.Instance.IsSignedIn)
                 return;
 
+            // Primero el profile, despues el token: sin esto SessionTokenExists
+            // mira "default" y el auto-login nunca encuentra la sesion.
+            RestoreActiveProfile();
+
             // El usuario cerro sesion a proposito: quedarse en AuthPanel pero
             // SIN borrar el session token, para no perder la cuenta existente.
             if (PlayerPrefs.GetInt(SignedOutFlag, 0) == 1)
@@ -80,6 +89,7 @@ public class UGSAuthManager : MonoBehaviour
             {
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 Debug.Log($"[AUTH] Auto-login transparente OK ({AuthenticationService.Instance.Profile}). PlayerID: {AuthenticationService.Instance.PlayerId}");
+                RememberActiveProfile();
                 AutoLoginSucceeded?.Invoke();
                 return;
             }
@@ -167,6 +177,35 @@ public class UGSAuthManager : MonoBehaviour
             AuthenticationService.Instance.SignOut();
         if (AuthenticationService.Instance.Profile != profile)
             AuthenticationService.Instance.SwitchProfile(profile);
+        RememberActiveProfile();
+    }
+
+    private static void RememberActiveProfile()
+    {
+        if (AuthenticationService.Instance == null) return;
+        PlayerPrefs.SetString(ActiveProfileKey, AuthenticationService.Instance.Profile ?? "");
+        PlayerPrefs.Save();
+    }
+
+    // Al arrancar el SDK siempre vuelve al profile "default". Sin restaurar el
+    // guardado, SessionTokenExists consultaria el profile equivocado y el
+    // auto-login fallaria aunque haya sesion.
+    private static void RestoreActiveProfile()
+    {
+        if (AuthenticationService.Instance == null) return;
+        if (AuthenticationService.Instance.IsSignedIn) return;
+        string saved = PlayerPrefs.GetString(ActiveProfileKey, "");
+        if (string.IsNullOrEmpty(saved)) return;
+        if (AuthenticationService.Instance.Profile == saved) return;
+        try
+        {
+            AuthenticationService.Instance.SwitchProfile(saved);
+            Debug.Log($"[AUTH] Profile restaurado: {saved}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[AUTH] No se pudo restaurar profile '{saved}': {ex.Message}");
+        }
     }
 
     // =========================================================================
@@ -186,6 +225,7 @@ public class UGSAuthManager : MonoBehaviour
             // Asignamos el nombre de usuario como PlayerName en el perfil de UGS
             await AuthenticationService.Instance.UpdatePlayerNameAsync(username);
             Debug.Log("Usuario registrado con éxito!");
+            RememberActiveProfile();
             return true;
         }        catch (AuthenticationException ex)
         {

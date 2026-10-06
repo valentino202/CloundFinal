@@ -30,6 +30,14 @@ public class CellVisuals : MonoBehaviour
     [Header("Cristal (0tapa: NUNCA se tinta, solo transparencia)")]
     [Tooltip("1 = solido, 0 = invisible. 70% transparente = 0.3.")]
     [Range(0f, 1f)] public float glassAlpha = 0.3f;
+
+    [Header("Burbujas (prueba, apagado por ahora)")]
+    public bool bubbles = false;
+    [Tooltip("Burbujas por segundo en nivel 3. Se escala por nivel.")]
+    public float bubbleRate = 6f;
+    public float bubbleSize = 0.09f;
+    public float bubbleRise = 0.35f;
+    public int bubbleOrder = 1;
     public AnimationClip clip1;
     public AnimationClip clip2;
     public AnimationClip clip3;
@@ -89,6 +97,7 @@ public class CellVisuals : MonoBehaviour
         /// <summary>Escala normalizada a 1 celda. Nunca se pierde: el juice multiplica sobre ella.</summary>
         public float baseScale = 1f;
         public TextMeshPro label;
+        public ParticleSystem foam;
         public AnimationClipPlayable playable;
         public AnimationPlayableOutput output;
         public bool outputValid;
@@ -332,6 +341,16 @@ graph = PlayableGraph.Create("CellVisuals");
         cv.anim = liqGO.AddComponent<Animator>();
         cv.anim.applyRootMotion = false;
 
+        // --- Burbujas de prueba: suben dentro del liquido ---
+        if (bubbles)
+        {
+            var bubGO = new GameObject($"Bubbles_{x}_{y}");
+            bubGO.transform.SetParent(cellsRoot, false);
+            bubGO.transform.localPosition = pos;
+            cv.foam = bubGO.AddComponent<ParticleSystem>();
+            SetupBubbles(cv.foam);
+        }
+
         // --- Numero de nivel: centrado sobre el cristal, blanco -> rojo ---
         var labelGO = new GameObject($"Label_{x}_{y}");
         labelGO.transform.SetParent(cellsRoot, false);
@@ -359,6 +378,70 @@ graph = PlayableGraph.Create("CellVisuals");
         int maxVisible = match != null ? Mathf.Max(2, match.game.maxLevel - 1) : 3;
         float t = (float)(level - 1) / (maxVisible - 1);
         return Color.Lerp(numberLow, numberHigh, Mathf.Clamp01(t));
+    }
+
+    // Textura de burbuja generada por codigo (anillo suave): sin assets nuevos.
+    private static Texture2D bubbleTex;
+    private static Texture2D BubbleTexture()
+    {
+        if (bubbleTex != null) return bubbleTex;
+        int s = 64;
+        bubbleTex = new Texture2D(s, s, TextureFormat.ARGB32, false);
+        for (int y = 0; y < s; y++)
+            for (int x = 0; x < s; x++)
+            {
+                float dx = (x - s * 0.5f) / (s * 0.5f);
+                float dy = (y - s * 0.5f) / (s * 0.5f);
+                float d = Mathf.Sqrt(dx * dx + dy * dy);
+                float ring = Mathf.Clamp01(1f - Mathf.Abs(d - 0.72f) * 5f);
+                float fill = Mathf.Clamp01(1f - d) * 0.22f;
+                bubbleTex.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Clamp01(ring + fill)));
+            }
+        bubbleTex.Apply();
+        return bubbleTex;
+    }
+
+    private void SetupBubbles(ParticleSystem ps)
+    {
+        var main = ps.main;
+        main.loop = true;
+        main.duration = 3f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(1.2f, 2.2f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(bubbleRise * 0.7f, bubbleRise * 1.3f);
+        main.startSize = new ParticleSystem.MinMaxCurve(bubbleSize * 0.6f, bubbleSize * 1.4f);
+        main.startColor = new Color(1f, 1f, 1f, 0.85f);
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.playOnAwake = false;
+
+        var em = ps.emission;
+        em.rateOverTime = 0f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.scale = new Vector3(BoardFx.CellSize * 0.6f, 0.05f, 0.1f);
+        shape.position = new Vector3(0f, -BoardFx.CellSize * 0.3f, 0f);
+
+        var vel = ps.velocityOverLifetime;
+        vel.enabled = true;
+        vel.space = ParticleSystemSimulationSpace.Local;
+        vel.y = new ParticleSystem.MinMaxCurve(0.1f, 0.3f);
+
+        var rend = ps.GetComponent<ParticleSystemRenderer>();
+        rend.sortingOrder = bubbleOrder;
+        var mat = new Material(Shader.Find("Sprites/Default"));
+        mat.mainTexture = BubbleTexture();
+        rend.material = mat;
+
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
+    private void SetBubbleRate(CellVisual cv, int level)
+    {
+        if (cv.foam == null) return;
+        var em = cv.foam.emission;
+        // Sin liquido no hay burbujas; mas nivel = mas burbujeo.
+        em.rateOverTime = level <= 0 ? 0f : bubbleRate * level / 3f;
+        if (level > 0 && !cv.foam.isPlaying) cv.foam.Play();
     }
 
     /// <summary>
@@ -430,6 +513,9 @@ graph = PlayableGraph.Create("CellVisuals");
                 cv.label.color = nc;
             }
         }
+
+        // Burbujas solo con liquido.
+        SetBubbleRate(cv, level);
 
         if (!Ready) return;
 
