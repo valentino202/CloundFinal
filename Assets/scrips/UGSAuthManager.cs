@@ -11,6 +11,20 @@ public class UGSAuthManager : MonoBehaviour
     public bool IsInitialized => isInitialized;
     public bool IsSignedIn => isInitialized && AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn;
     public static event Action AutoLoginSucceeded;
+
+    // UGS 3.7.4 no expone IdentityToken: la persistencia del invitado la lleva
+    // el session token, que SignInAnonymouslyAsync() ya reutiliza solo. El truco
+    // es NO llamar ClearSessionToken() y ademas aislar cada cuenta en un Profile,
+    // porque cada profile guarda su propio session token en PlayerPrefs.
+    // - "guest": cuenta anonima (una sola por instalacion)
+    // - "user" : cuentas con usuario/contrasena
+    private const string GuestProfile = "guest";
+    private const string UserProfile = "user";
+
+    // Marca que el usuario cerro sesion a proposito. Evita usar ClearSessionToken()
+    // para eso, que destruiria el invitado y crearia un PlayerID nuevo al reiniciar.
+    private const string SignedOutFlag = "UGS_SignedOutOnPurpose";
+
     private void Awake()
     {
         if (Instance == null)
@@ -51,17 +65,27 @@ public class UGSAuthManager : MonoBehaviour
             if (AuthenticationService.Instance == null || AuthenticationService.Instance.IsSignedIn)
                 return;
 
-            // Sin cuenta guardada: quedarse en AuthPanel para elegir registro/login/invitado.
-            if (!AuthenticationService.Instance.SessionTokenExists)
+            // El usuario cerro sesion a proposito: quedarse en AuthPanel pero
+            // SIN borrar el session token, para no perder la cuenta existente.
+            if (PlayerPrefs.GetInt(SignedOutFlag, 0) == 1)
             {
-                Debug.Log("[AUTH] Sin sesion guardada. Esperando en AuthPanel.");
+                Debug.Log("[AUTH] Sesion cerrada manualmente. Esperando en AuthPanel.");
                 return;
             }
 
             // Con sesion guardada: entrar solo (restaura la ultima cuenta).
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log($"[AUTH] Auto-login transparente OK. PlayerID: {AuthenticationService.Instance.PlayerId}");
-            AutoLoginSucceeded?.Invoke();
+            // UGS reutiliza el session token del profile activo, asi que esto
+            // devuelve siempre el MISMO jugador, no uno nuevo.
+            if (AuthenticationService.Instance.SessionTokenExists)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                Debug.Log($"[AUTH] Auto-login transparente OK ({AuthenticationService.Instance.Profile}). PlayerID: {AuthenticationService.Instance.PlayerId}");
+                AutoLoginSucceeded?.Invoke();
+                return;
+            }
+
+            // Sin sesion guardada: quedarse en AuthPanel para elegir registro/login/invitado.
+            Debug.Log("[AUTH] Sin sesion guardada. Esperando en AuthPanel.");
         }
         catch (AuthenticationException ex)
         {
@@ -111,11 +135,20 @@ public class UGSAuthManager : MonoBehaviour
 
         try
         {
+            // El invitado vive en su propio profile: asi su session token no se
+            // pisa con el de una cuenta con contrasena.
+            SwitchToProfile(GuestProfile);
+
             if (!AuthenticationService.Instance.IsSignedIn)
             {
+                // Si el profile ya tiene session token, UGS devuelve el MISMO
+                // jugador. Solo crea uno nuevo la primera vez.
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 Debug.Log("Login Anónimo Exitoso!");
             }
+
+            PlayerPrefs.SetInt(SignedOutFlag, 0);
+            PlayerPrefs.Save();
             return true;
         }
         catch (AuthenticationException ex)
@@ -123,6 +156,17 @@ public class UGSAuthManager : MonoBehaviour
             Debug.LogError($"Error en Login Anónimo: {ex.Message}");
             return false;
         }
+    }
+
+    // SwitchProfile exige estar desconectado, asi que cierra sesion conservando
+    // las credenciales del profile actual (clearCredentials=false por defecto).
+    private static void SwitchToProfile(string profile)
+    {
+        if (AuthenticationService.Instance == null) return;
+        if (AuthenticationService.Instance.IsSignedIn)
+            AuthenticationService.Instance.SignOut();
+        if (AuthenticationService.Instance.Profile != profile)
+            AuthenticationService.Instance.SwitchProfile(profile);
     }
 
     // =========================================================================
@@ -143,8 +187,7 @@ public class UGSAuthManager : MonoBehaviour
             await AuthenticationService.Instance.UpdatePlayerNameAsync(username);
             Debug.Log("Usuario registrado con éxito!");
             return true;
-        }
-        catch (AuthenticationException ex)
+        }        catch (AuthenticationException ex)
         {
             Debug.LogError($"Error al registrar usuario: {ex.Message}");
             return false;
@@ -181,15 +224,15 @@ public class UGSAuthManager : MonoBehaviour
         _busy = true;
         try
         {
-            if (AuthenticationService.Instance.IsSignedIn)
-            {
-                Debug.Log("[AUTH] Cambiando de cuenta: cerrando sesion previa...");
-                AuthenticationService.Instance.SignOut();
-            }
-            // Sin esto, el token de la cuenta con contrasena queda en disco
-            // y SignInAnonymously restaura esa misma cuenta en vez del invitado.
-            AuthenticationService.Instance.ClearSessionToken();
+            Debug.Log("[AUTH] Cambiando al invitado...");
+            // Sin ClearSessionToken: el profile "guest" conserva su session token,
+            // y UGS devuelve SIEMPRE el mismo invitado. Ese era el bug que
+            // generaba un PlayerID nuevo en cada pulsacion del boton.
+            SwitchToProfile(GuestProfile);
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+            PlayerPrefs.SetInt(SignedOutFlag, 0);
+            PlayerPrefs.Save();
             Debug.Log($"[AUTH] Sesion invitado OK. PlayerID: {AuthenticationService.Instance.PlayerId}");
             return true;
         }
@@ -208,13 +251,13 @@ public class UGSAuthManager : MonoBehaviour
         _busy = true;
         try
         {
-            if (AuthenticationService.Instance.IsSignedIn)
-            {
-                Debug.Log("[AUTH] Cambiando de cuenta: cerrando sesion previa...");
-                AuthenticationService.Instance.SignOut();
-            }
-            AuthenticationService.Instance.ClearSessionToken();
+            Debug.Log("[AUTH] Cambiando de cuenta: cerrando sesion previa...");
+            // El profile "user" es independiente del "guest": el invitado no se pisa.
+            SwitchToProfile(UserProfile);
             await AuthenticationService.Instance.SignInWithUsernamePasswordAsync(username, password);
+
+            PlayerPrefs.SetInt(SignedOutFlag, 0);
+            PlayerPrefs.Save();
             Debug.Log($"Inicio de sesión exitoso con Usuario/Contraseña! PlayerID: {AuthenticationService.Instance.PlayerId}");
             await EnsurePlayerNameAsync(username);
             return true;
@@ -262,6 +305,11 @@ public class UGSAuthManager : MonoBehaviour
             {
                 await AuthenticationService.Instance.AddUsernamePasswordAsync(username, password);
                 await AuthenticationService.Instance.UpdatePlayerNameAsync(username);
+                // La cuenta del profile "guest" ya tiene contrasena. El token
+                // sigue sirviendo (mismo PlayerId), asi que se deja intacto:
+                // "Invitado" seguira llevando a ESTA cuenta, no a otra.
+                PlayerPrefs.SetInt(SignedOutFlag, 0);
+                PlayerPrefs.Save();
                 Debug.Log("¡Cuenta Anónima unificada con éxito a Usuario/Contraseña!");
                 return true;
             }
@@ -314,10 +362,31 @@ public class UGSAuthManager : MonoBehaviour
 
         if (AuthenticationService.Instance.IsSignedIn)
         {
+            // SignOut() sin clearCredentials conserva el session token: la cuenta
+            // NO se pierde y no se crea un PlayerID nuevo al volver a entrar.
             AuthenticationService.Instance.SignOut();
             Debug.Log("Usuario desconectado.");
         }
-        // Cerrar sesion borra el token: al reabrir se queda en AuthPanel.
+
+        // Marca la intention de stay en AuthPanel. Antes esto se hacia con
+        // ClearSessionToken(), que destruia la cuenta anonima: por eso salia
+        // una cuenta "Invitado" nueva en cada arranque.
+        PlayerPrefs.SetInt(SignedOutFlag, 1);
+        PlayerPrefs.Save();
+        Debug.Log("[AUTH] Sesion cerrada. La cuenta se conserva para el proximo acceso.");
+    }
+
+    // Borra la cuenta anonima de verdad (crea una nueva la proxima vez).
+    // Solo para depurar/testing; el flujo normal ya no lo necesita.
+    public void ResetGuest()
+    {
+        if (AuthenticationService.Instance == null) return;
+        if (AuthenticationService.Instance.IsSignedIn) AuthenticationService.Instance.SignOut();
+        if (AuthenticationService.Instance.Profile != GuestProfile)
+            AuthenticationService.Instance.SwitchProfile(GuestProfile);
         AuthenticationService.Instance.ClearSessionToken();
+        PlayerPrefs.DeleteKey(SignedOutFlag);
+        PlayerPrefs.Save();
+        Debug.LogWarning("[AUTH] Invitado borrado. El proximo acceso creara una cuenta nueva.");
     }
 }

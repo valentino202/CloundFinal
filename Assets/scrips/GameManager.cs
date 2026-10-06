@@ -24,16 +24,7 @@ public class GameManager : MonoBehaviour
     private bool busy = false;
     private bool gameOver = false;
 
-    private readonly Color colNeutral = new Color(0.12f, 0.16f, 0.28f);
-    private readonly Color colP1 = new Color(1f, 0.15f, 0.6f);   // rosado neon
-    private readonly Color colP2 = new Color(1f, 0.45f, 0.05f);  // naranja electrico
-    private readonly Color colBoom = new Color(1f, 0.85f, 0.3f); // destello explosion
-    private readonly Color[] colLevels = new[] // numeros 1 / 2 / 3
-    {
-        Color.white,
-        new Color(1f, 0.9f, 0.4f),
-        new Color(1f, 0.6f, 0.1f),
-    };
+    private CellVisuals visuals;
 
     private void Start()
     {
@@ -42,6 +33,17 @@ public class GameManager : MonoBehaviour
         else diff = (BotAgent.Difficulty)Mathf.Clamp(UGSRemoteConfig.botDifficulty, 0, 2);
 
         match = new MatchController(UGSRemoteConfig.gridSize, UGSRemoteConfig.maxCellLevel, UGSRemoteConfig.maxTurns, diff);
+
+        visuals = GetComponent<CellVisuals>();
+        if (visuals == null)
+        {
+            // Fallback: si falta el componente se crea en runtime, pero entonces
+            // sus camposSerialized quedan vacios y no habra arte. El aviso de
+            // CellVisuals lo explica; aqui solo se avisa de forma explicita.
+            Debug.LogWarning("[Game] CellVisuals no esta en la escena. Agregalo al GameObject 'Game' (Component > Add Component > Cell Visuals) y arrastra el cristal + los 4 clips.");
+            visuals = gameObject.AddComponent<CellVisuals>();
+        }
+        visuals.Bind(match);
 
         BuildUI();
         Refresh();
@@ -66,20 +68,28 @@ public class GameManager : MonoBehaviour
         canvasGO.AddComponent<CanvasScaler>();
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        // Titulo turno
-        turnText = MakeLabel(canvasGO.transform, "TurnText", 0, 250, 34);
-        statusText = MakeLabel(canvasGO.transform, "StatusText", 0, 200, 24);
+        // El tablero ocupa +-3.6 unidades (+-389px). El texto va arriba libre
+        // y SIN raycast: antes tapaba la fila superior y robaba los clics.
+        turnText = MakeLabel(canvasGO.transform, "TurnText", 0, 440, 34);
+        statusText = MakeLabel(canvasGO.transform, "StatusText", 0, 400, 24);
 
-        // Tablero
+        // Tablero: los sprites world-space los dibuja CellVisuals. Aqui solo
+        // van botones invisibles que capturan el click, alineados a la misma
+        // rejilla para que el clic caiga en la celda correcta.
         var boardGO = new GameObject("Board");
         boardGO.transform.SetParent(canvasGO.transform, false);
         var rt = boardGO.AddComponent<RectTransform>();
-        rt.anchoredPosition = new Vector2(0, -40);
-        rt.sizeDelta = new Vector2(420, 420);
+        rt.anchoredPosition = Vector2.zero;
         var gridLayout = boardGO.AddComponent<GridLayoutGroup>();
-        int cellPx = Mathf.FloorToInt((420 - (game.gridSize - 1) * 4) / game.gridSize);
+        float pxPerUnit = PixelsPerWorldUnit();
+        float cellPx = BoardFx.CellSize * pxPerUnit;
+        float gapPx = BoardFx.CellGap * pxPerUnit;
         gridLayout.cellSize = new Vector2(cellPx, cellPx);
-        gridLayout.spacing = new Vector2(4, 4);
+        gridLayout.spacing = new Vector2(gapPx, gapPx);
+        float boardPx = cellPx * game.gridSize + gapPx * (game.gridSize - 1);
+        rt.sizeDelta = new Vector2(boardPx, boardPx);
+
+        bool spriteArt = SpriteArt;
 
         cells = new Button[game.gridSize, game.gridSize];
         for (int y = game.gridSize - 1; y >= 0; y--)
@@ -91,25 +101,37 @@ public class GameManager : MonoBehaviour
                 bGO.AddComponent<RectTransform>(); // primero: los UI necesitan RectTransform
                 bGO.AddComponent<CanvasRenderer>();
                 var img = bGO.AddComponent<Image>();
-                img.color = colNeutral;
+                // Con arte activo el sprite manda; el Image solo queda como raycast target.
+                img.color = spriteArt ? new Color(0f, 0f, 0f, 0f) : BoardFx.ColNeutral;
                 var btn = bGO.AddComponent<Button>();
+                btn.transition = Selectable.Transition.None;
+                btn.targetGraphic = img;
                 btn.onClick.AddListener(() => OnCellClick(cx, cy));
-                var labelGO = new GameObject("Label");
-                labelGO.transform.SetParent(bGO.transform, false);
-                var lrt = labelGO.AddComponent<RectTransform>();
-                lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one;
-                lrt.offsetMin = Vector2.zero; lrt.offsetMax = Vector2.zero;
-                labelGO.AddComponent<CanvasRenderer>();
-                var txt = labelGO.AddComponent<TextMeshProUGUI>();
-                if (txt == null) { Debug.LogError("[Game] TextMeshProUGUI null en celda."); continue; }
-                txt.alignment = TextAlignmentOptions.Center;
-                txt.fontSize = 28;
-                txt.color = Color.white;
                 cells[x, y] = btn;
+
+                // El numero de nivel solo hace falta en el fallback por codigo;
+                // con arte activo lo comunica la animacion del liquido.
+                if (!spriteArt)
+                {
+                    var labelGO = new GameObject("Label");
+                    labelGO.transform.SetParent(bGO.transform, false);
+                    var lrt = labelGO.AddComponent<RectTransform>();
+                    lrt.anchorMin = Vector2.zero; lrt.anchorMax = Vector2.one;
+                    lrt.offsetMin = Vector2.zero; lrt.offsetMax = Vector2.zero;
+                    labelGO.AddComponent<CanvasRenderer>();
+                    var txt = labelGO.AddComponent<TextMeshProUGUI>();
+                    if (txt != null)
+                    {
+                        txt.alignment = TextAlignmentOptions.Center;
+                        txt.fontSize = 28;
+                        txt.color = Color.white;
+                    }
+                    else { Debug.LogError("[Game] TextMeshProUGUI null en celda."); }
+                }
             }
 
-        // Botones abajo
-        MakeButton(canvasGO.transform, "RestartBtn", "Reiniciar", 0, -300, () =>
+        // Botones abajo, libres del tablero (+-389px)
+        MakeButton(canvasGO.transform, "RestartBtn", "Reiniciar", 0, -440, () =>
         {
             StopAllCoroutines();
             match.Reset();
@@ -118,10 +140,19 @@ public class GameManager : MonoBehaviour
             statusText.text = "";
             Refresh();
         });
-        MakeButton(canvasGO.transform, "BackBtn", "Menu", 0, -350, () =>
+        MakeButton(canvasGO.transform, "BackBtn", "Menu", 0, -485, () =>
         {
             SceneManager.LoadScene("SampleScene");
         });
+    }
+
+    // Convierte unidades de mundo a pixeles de pantalla usando la camara
+    // ortografica, para que los botones coincidan con los sprites.
+    private static float PixelsPerWorldUnit()
+    {
+        var cam = Camera.main;
+        if (cam == null || !cam.orthographic || Screen.height <= 0) return 100f;
+        return Screen.height / (2f * cam.orthographicSize);
     }
 
     private TMP_Text MakeLabel(Transform parent, string name, float x, float y, int size)
@@ -135,6 +166,8 @@ public class GameManager : MonoBehaviour
         t.alignment = TextAlignmentOptions.Center;
         t.fontSize = size;
         t.color = Color.white;
+        // Decorativo: no debe interceptar clics del tablero.
+        t.raycastTarget = false;
         return t;
     }
 
@@ -159,6 +192,8 @@ public class GameManager : MonoBehaviour
         t.alignment = TextAlignmentOptions.Center;
         t.fontSize = 22;
         t.color = Color.white;
+        // El clic lo recibe la imagen del boton; la etiqueta no intercepta.
+        t.raycastTarget = false;
     }
 
     private void OnCellClick(int x, int y)
@@ -176,6 +211,7 @@ public class GameManager : MonoBehaviour
             statusText.text = r.error;
             return;
         }
+        BoardFx.LastAttacker = match.humanPlayer;
         PunchCell(x, y); // rebote al colocar el punto (fallback)
         FireLevelFx(x, y); // tu animacion de nivel 1/2/3 del pack equipado
         AfterMove(r);
@@ -190,6 +226,7 @@ public class GameManager : MonoBehaviour
         try
         {
             r = match.PlayBot();
+            BoardFx.LastAttacker = match.botPlayerId;
             PunchCell(match.lastMove.x, match.lastMove.y);
             FireLevelFx(match.lastMove.x, match.lastMove.y);
         }
@@ -237,15 +274,21 @@ public class GameManager : MonoBehaviour
     {
         busy = true;
         Refresh();
-        try { BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int>(r.explosions), BoardFx.Current.animBoom); }
-        catch (System.Exception ex) { Debug.LogWarning($"[Game] ExplosionFx fallo: {ex.Message}"); }
-        if (BoardFx.SuppressFallback) { busy = false; FinishMove(r); yield break; }
         int i = 0;
         foreach (var c in r.explosions)
         {
             i++;
-            FlashCell(c.x, c.y, colBoom);
-            FlashNeighbours(c.x, c.y, colBoom);
+            // Cada explosion de la cadena dispara su propio boom, con el ritmo
+            // natural de la secuencia. Asi una gota que cae en un 3 y lo lleva
+            // a 4 tambien hace su animacion de explosion.
+            try { BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int> { c }, BoardFx.Current.animBoom); }
+            catch (System.Exception ex) { Debug.LogWarning($"[Game] ExplosionFx fallo: {ex.Message}"); }
+
+            if (!BoardFx.SuppressFallback)
+            {
+                FlashCell(c.x, c.y, BoardFx.ColBoom);
+                FlashNeighbours(c.x, c.y, BoardFx.ColBoom);
+            }
             statusText.text = i > 1 ? $"¡CADENA x{i}!" : "¡REACCIÓN!";
             yield return new WaitForSeconds(0.18f);
         }
@@ -261,8 +304,8 @@ public class GameManager : MonoBehaviour
         {
             gameOver = true;
             if (r.winner == 0) statusText.text = "Empate.";
-            else if (r.winner == match.humanPlayer) statusText.text = "¡Ganaste!";
-            else statusText.text = "Ganó el Bot.";
+            else if (r.winner == match.humanPlayer) statusText.text = "Ã‚Â¡Ganaste!";
+            else statusText.text = "GanÃƒÂ³ el Bot.";
             _ = UGSProfileManager.Instance.RecordMatchResultAsync(r.winner == match.humanPlayer);
             return;
         }
@@ -271,9 +314,14 @@ public class GameManager : MonoBehaviour
             StartCoroutine(BotTurn());
     }
 
+    private bool SpriteArt => visuals != null && visuals.Ready;
+
+    // Con arte activo el destello y el rebote los dan las animaciones, y los
+    // botones son transparentes: pintar aqui solo los ensuciaria.
     private void FlashCell(int x, int y, Color c)
     {
         if (x < 0 || y < 0 || x >= game.gridSize || y >= game.gridSize) return;
+        if (SpriteArt) return;
         var img = cells[x, y].GetComponent<Image>();
         if (img != null) img.color = c;
         PunchCell(x, y);
@@ -288,6 +336,7 @@ public class GameManager : MonoBehaviour
     private void PunchCell(int x, int y)
     {
         if (x < 0 || y < 0 || x >= game.gridSize || y >= game.gridSize) return;
+        if (SpriteArt) return;
         StartCoroutine(Punch(cells[x, y].transform));
     }
 
@@ -306,23 +355,30 @@ public class GameManager : MonoBehaviour
 
     private void Refresh()
     {
+        // Con arte activo, Refresh solo sincroniza sprites; los botones solo
+        // cambian su estado de interaccion.
+        bool spriteArt = SpriteArt;
+
         for (int x = 0; x < game.gridSize; x++)
             for (int y = 0; y < game.gridSize; y++)
             {
                 var btn = cells[x, y];
-                var img = btn.GetComponent<Image>();
-                var txt = btn.GetComponentInChildren<TextMeshProUGUI>();
-                if (img == null || txt == null) continue;
-                int o = game.owner[x, y], l = game.level[x, y];
-                img.color = o == 1 ? colP1 : o == 2 ? colP2 : colNeutral;
-                if (l == 0) txt.text = "";
-                else
-                {
-                    txt.text = l.ToString();
-                    txt.color = colLevels[Mathf.Clamp(l - 1, 0, colLevels.Length - 1)];
-                }
+                int o = game.owner[x, y];
                 btn.interactable = !busy && !gameOver && game.currentPlayer == match.humanPlayer && (o == 0 || o == match.humanPlayer);
+
+                if (spriteArt) continue;
+
+                // Fallback por codigo: cuadrado de color + numero de nivel.
+                var img = btn.GetComponent<Image>();
+                if (img != null) img.color = BoardFx.LiquidColorFor(o);
+                var txt = btn.GetComponentInChildren<TextMeshProUGUI>();
+                if (txt == null) continue;
+                int l = game.level[x, y];
+                txt.text = l > 0 ? l.ToString() : "";
             }
+
+        if (spriteArt) visuals.SyncAll();
+
         turnText.text = game.currentPlayer == match.humanPlayer ? "Tu turno (Rosa)" : "Turno Bot (Naranja)";
     }
 }
