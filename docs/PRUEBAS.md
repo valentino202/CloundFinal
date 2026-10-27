@@ -1,6 +1,10 @@
 # Actividades de testing
 
-Estas pruebas son **tuyas**: el profesor y Claude Code hicieron los cambios, pero **nadie los ha ejecutado dentro de Unity ni contra UGS**. Lo único verificado hasta ahora es que el Core y el módulo de Cloud Code **compilan y pasan sus pruebas con `dotnet`** (37 pruebas del Core y 7 del módulo). Tu retroalimentación es la que cierra el ciclo.
+Estas pruebas son **tuyas**: el profesor y Claude Code hicieron los cambios, pero **nadie los ha jugado en el editor ni ejecutado contra UGS**. Lo verificado hasta ahora:
+- Con `dotnet`: el Core compila **sin Unity** y pasa sus 37 pruebas; el módulo de Cloud Code compila y pasa sus 7 pruebas.
+- Con **Unity 6000.3.23f1 en modo batch** (una copia del proyecto, sin abrir el editor): el proyecto completo **compila sin errores** (incluidas las *Assembly Definitions* y los cambios en `GameManager`/`MatchController`) y las **37 pruebas EditMode pasan**. Tu proyecto pide la 6000.3.24f1; no estaba instalada.
+
+Tu retroalimentación es la que cierra el ciclo: P1, P2 y P4 siguen siendo tuyas porque quien las corrió no jugó ni abrió el editor con interfaz.
 
 **Cómo reportar:** responde en el PR (un comentario por actividad) con este formato:
 
@@ -133,6 +137,6 @@ Con la partida `rd-PRUEBA1` en juego (turno del asiento 1 = cuenta A):
 
 ## Qué NO está probado (y por tanto es sospechoso)
 
-- Que Unity compile los cambios del PR #2 (P1–P2): solo se comprobó el Core y el módulo con `dotnet`, no el proyecto completo.
+- Que el **juego funcione jugando** (P2): compila y las pruebas del Core pasan, pero nadie ha dado Play ni visto las animaciones de explosión con el cambio de `GridPoint`.
 - Que las llamadas a Cloud Save y al push funcionen contra UGS real: **compilan**, pero nunca se ejecutaron (P6–P11).
 - Plazo por turno, abandono, reconexión con la partida a medias, y partidas simultáneas del mismo jugador: no existen todavía.
