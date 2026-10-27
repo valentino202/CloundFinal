@@ -32,13 +32,20 @@ public static class BoardFx
     public static readonly Color ColBoom = new Color(1f, 0.85f, 0.3f);  // destello explosion
 
     /// <summary>
-    /// Aplica el color del jugador. El enemigo NO se elige: sale automáticamente
-    /// opuesto (matiz +180°) para que nunca coincidan.
+    /// Aplica el color del jugador. Modos clasicos: 0=Rosa, 1=Naranja y se
+    /// respetan mutuamente (P1 Rosa -> P2 Naranja, P1 Naranja -> P2 Rosa).
+    /// Solo el modo Personalizado (rueda) calcula al enemigo como opuesto HSV.
     /// </summary>
     public static void ApplyColors(int playerMode, Color custom)
     {
         ColP1 = PlayerColorOptions.Get(playerMode, custom);
-        ColP2 = PlayerColorOptions.OppositeOf(ColP1);
+
+        if (playerMode == PlayerColorOptions.RosaIndex)
+            ColP2 = PlayerColorOptions.Naranja;
+        else if (playerMode == PlayerColorOptions.NaranjaIndex)
+            ColP2 = PlayerColorOptions.Rosa;
+        else
+            ColP2 = PlayerColorOptions.OppositeOf(ColP1);
     }
 
     // --- Layout del tablero en unidades de mundo (camara ortografica) ---

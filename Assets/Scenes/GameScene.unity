@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   botDelay: 0.6
-  mode: 1
+  mode: 0
   maxTurnsOverride: 30
 --- !u!4 &795379540
 Transform:

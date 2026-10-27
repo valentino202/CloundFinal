@@ -58,10 +58,19 @@ public class GameManager : MonoBehaviour
         if (UGSProfileManager.Instance != null) diff = UGSProfileManager.Instance.SuggestedDifficulty;
         else diff = (BotAgent.Difficulty)Mathf.Clamp(UGSRemoteConfig.botDifficulty, 0, 2);
 
+        // Leer el modo de juego elegido en el menú (PlayerPrefs). Si no hay selección,
+        // se usa el valor del Inspector de este GameObject.
+        MatchMode chosenMode = mode;
+        int chosenTurns = maxTurnsOverride;
+        if (PlayerPrefs.HasKey("SelectedMatchMode"))
+            chosenMode = (MatchMode)Mathf.Clamp(PlayerPrefs.GetInt("SelectedMatchMode"), 0, 1);
+        if (PlayerPrefs.HasKey("SelectedMaxTurns"))
+            chosenTurns = Mathf.Clamp(PlayerPrefs.GetInt("SelectedMaxTurns"), 30, 100);
+
         match = new MatchController(
             UGSRemoteConfig.gridSize,
             UGSRemoteConfig.maxCellLevel,
-            mode == MatchMode.Infinito ? 0 : Mathf.Clamp(maxTurnsOverride, 30, 100),
+            chosenMode == MatchMode.Infinito ? 0 : chosenTurns,
             diff);
 
         visuals = GetComponent<CellVisuals>();

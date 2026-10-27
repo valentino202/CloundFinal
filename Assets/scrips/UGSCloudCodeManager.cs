@@ -63,6 +63,12 @@ public class UGSCloudCodeManager
             if (response.valid)
             {
                 bool iWon = result.winnerId == AuthenticationService.Instance.PlayerId;
+
+                // Sumar las monedas que el servidor ya validó y otorgó en la nube.
+                // Sin esto, gems/coins nunca suben en el perfil local.
+                await UGSProfileManager.Instance.GrantCurrencyAsync(response.coinsAwarded, response.gemsAwarded);
+
+                // Contar la partida (victoria/derrota) en el progreso local.
                 await UGSProfileManager.Instance.RecordMatchResultAsync(iWon);
             }
             return response;

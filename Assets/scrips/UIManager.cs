@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -26,6 +27,123 @@ public class UIManager : MonoBehaviour
     public TMP_Text[] coinsTexts;
     public TMP_Text[] gemsTexts;
 
+    [Header("Modo de juego (seleccionar antes de darle a Jugar)")]
+    [Tooltip("Modo que se usará al cargar GameScene.")]
+    public GameManager.MatchMode selectedMatchMode = GameManager.MatchMode.Normal;
+    [Range(30, 100)] public int selectedMaxTurns = 30;
+
+    [Tooltip("Texto que muestra el número de turnos mientras mueves la rueda/slider.")]
+    public TMP_Text turnsText;
+
+    [Tooltip("Scrollbar que selecciona el límite de turnos.")]
+    public Scrollbar maxTurnsScrollbar;
+
+    const string PREF_MODE = "SelectedMatchMode";
+    const string PREF_TURNS = "SelectedMaxTurns";
+
+    private void LoadSelection()
+    {
+        if (PlayerPrefs.HasKey(PREF_MODE))
+            selectedMatchMode = (GameManager.MatchMode)Mathf.Clamp(PlayerPrefs.GetInt(PREF_MODE), 0, 1);
+        if (PlayerPrefs.HasKey(PREF_TURNS))
+            selectedMaxTurns = Mathf.Clamp(PlayerPrefs.GetInt(PREF_TURNS), 30, 100);
+
+        UpdateTurnsText();
+    }
+
+    private void UpdateTurnsText()
+    {
+        if (turnsText != null)
+            turnsText.text = selectedMaxTurns.ToString();
+    }
+
+    private void SaveSelection()
+    {
+        PlayerPrefs.SetInt(PREF_MODE, (int)selectedMatchMode);
+        PlayerPrefs.SetInt(PREF_TURNS, selectedMaxTurns);
+        PlayerPrefs.Save();
+    }
+
+    /// <summary>Conecta el botón 'Modo Normal (30 turnos)' a este método.</summary>
+    public void SetMatchModeNormal()
+    {
+        selectedMatchMode = GameManager.MatchMode.Normal;
+        SaveSelection();
+        Debug.Log("[Modo] Normal seleccionado.");
+    }
+
+    /// <summary>Conecta el botón 'Modo Infinito' a este método.</summary>
+    public void SetMatchModeInfinito()
+    {
+        selectedMatchMode = GameManager.MatchMode.Infinito;
+        SaveSelection();
+        Debug.Log("[Modo] Infinito seleccionado.");
+    }
+
+    /// <summary>Lo conecta el botón 'Jugar'. Abre tu panel de selección de modo y oculta el anterior.</summary>
+    public void OnClickPlay()
+    {
+        if (modeSelectionPanel == null)
+        {
+            Debug.LogWarning("[UI] Asigna un panel en 'Mode Selection Panel' del UIManager.");
+            return;
+        }
+
+        // Oculta el panel anterior (Home o Auth) para que no quede detrás
+        if (homeMenuPanel != null) homeMenuPanel.SetActive(false);
+        if (authPanel != null) authPanel.SetActive(false);
+
+        modeSelectionPanel.SetActive(true);
+    }
+
+    /// <summary>Lo conecta el botón 'Volver'. Oculta el panel de selección y muestra el anterior.</summary>
+    public void HideModeSelectionPanel()
+    {
+        if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
+
+        var back = panelToShowOnBack != null ? panelToShowOnBack : homeMenuPanel;
+        if (back != null) back.SetActive(true);
+    }
+
+    /// <summary>Elige el modo, guarda la selección y carga GameScene contra la IA.</summary>
+    public void SelectModeAndPlay(GameManager.MatchMode mode, int turns = 30)
+    {
+        selectedMatchMode = mode;
+        selectedMaxTurns = Mathf.Clamp(turns, 30, 100);
+        SaveSelection();
+
+        if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+    }
+
+    /// <summary>Selecciona Normal y carga GameScene (para botón sin parámetros).</summary>
+    public void SelectNormalAndPlay()
+    {
+        SelectModeAndPlay(GameManager.MatchMode.Normal, selectedMaxTurns);
+    }
+
+    /// <summary>Selecciona Infinito y carga GameScene (para botón sin parámetros).</summary>
+    public void SelectInfinitoAndPlay()
+    {
+        SelectModeAndPlay(GameManager.MatchMode.Infinito, selectedMaxTurns);
+    }
+
+    /// <summary>Llama tu rueda/slider para ajustar los turnos (30, 40, ... 100).</summary>
+    public void SetMaxTurns(int turns)
+    {
+        selectedMaxTurns = Mathf.Clamp(turns, 30, 100);
+        SaveSelection();
+        UpdateTurnsText();
+        Debug.Log($"[Turnos] Límite ajustado a {selectedMaxTurns}.");
+    }
+
+    public void SetMaxTurnsFromScrollbar(float normalizedValue)
+    {
+        int step = Mathf.RoundToInt(Mathf.Clamp01(normalizedValue) * 7f);
+        SetMaxTurns(30 + step * 10);
+    }
+
     [Header("Personalizacion de colores (todo con imagenes, sin texto)")]
     [Tooltip("El GameObject que tiene el script ColorWheel (arrastra el mismo, no la Image).")]
     public ColorWheel colorWheel;
@@ -36,12 +154,45 @@ public class UIManager : MonoBehaviour
     [Tooltip("Image que muestra el color del ENEMIGO (siempre opuesto al tuyo).")]
     public UnityEngine.UI.Image enemyColorPreview;
 
+    [Header("Panel emergente de selección de modo (opcional)")]
+    [Tooltip("Si no asignas uno, se crea automático al darle a Jugar.")]
+    public GameObject modeSelectionPanel;
+
+    [Tooltip("Panel que se muestra al darle a Volver (por defecto HomeMenuPanel).")]
+    public GameObject panelToShowOnBack;
+
     [Header("Botones de color (cada uno con el script ColorSwatch)")]
     [Tooltip("Cada uno es un GameObject con Button + ColorSwatch. El seleccionado se agranda.")]
     public ColorSwatch[] playerColorSwatches;
 
+    [Header("Boton Personalizado (gris / rueda de colores)")]
+    [Tooltip("El swatch gris que muestra el color elegido de la rueda en vivo.")]
+    public ColorSwatch customColorSwatch;
+
+    private void Awake()
+    {
+        // Auto-cableado: si no se asignaron a mano, se buscan en el panel de personalizacion.
+        if (customizationPanel != null)
+        {
+            if (colorWheel == null) colorWheel = customizationPanel.GetComponentInChildren<ColorWheel>(true);
+            if (playerColorSwatches == null || playerColorSwatches.Length == 0)
+                playerColorSwatches = customizationPanel.GetComponentsInChildren<ColorSwatch>(true);
+            if (customColorSwatch == null && playerColorSwatches != null && playerColorSwatches.Length > PlayerColorOptions.CustomIndex)
+                customColorSwatch = playerColorSwatches[PlayerColorOptions.CustomIndex];
+        }
+    }
+
     private void Start()
     {
+        LoadSelection(); // modo de juego elegido antes de darle a Jugar
+
+        if (maxTurnsScrollbar != null)
+        {
+            maxTurnsScrollbar.onValueChanged.RemoveListener(SetMaxTurnsFromScrollbar);
+            maxTurnsScrollbar.onValueChanged.AddListener(SetMaxTurnsFromScrollbar);
+            maxTurnsScrollbar.SetValueWithoutNotify((selectedMaxTurns - 30f) / 70f);
+        }
+
         if (authPanel == null) Debug.LogError("UIManager: authPanel NO asignado en el Inspector.");
         if (homeMenuPanel == null) Debug.LogError("UIManager: homeMenuPanel NO asignado en el Inspector.");
         if (mainMenuPanel == null || loginPanel == null || registerPanel == null)
@@ -49,24 +200,27 @@ public class UIManager : MonoBehaviour
             Debug.LogError("UIManager: Paneles de UI no asignados en el Inspector.");
         }
 
-        ShowAuthScreen();
-        ShowMainMenu();
-
-        // Si el auto-login ya termino antes de que la UI existiera, entra directo al Home.
+        // Si ya hay sesion, ir directo al Home; si no, mostrar Auth + MainMenu
         if (UGSAuthManager.Instance != null && UGSAuthManager.Instance.IsSignedIn)
         {
-            _ = FetchConfigAndEnterHome();
+            ShowHomeMenu();
+        }
+        else
+        {
+            ShowAuthScreen();
         }
     }
 
     private void OnEnable()
     {
         UGSAuthManager.AutoLoginSucceeded += HandleAutoLogin;
+        if (colorWheel != null) colorWheel.OnColorChanged = OnWheelColorChanged;
     }
 
     private void OnDisable()
     {
         UGSAuthManager.AutoLoginSucceeded -= HandleAutoLogin;
+        if (colorWheel != null) colorWheel.OnColorChanged = null;
     }
 
     private void HandleAutoLogin()
@@ -75,23 +229,33 @@ public class UIManager : MonoBehaviour
     }
 
     // --- NAVEGACIÓN ---
+    /// <summary>Oculta todos los paneles para evitar solapamientos.</summary>
+    private void HideAllPanels()
+    {
+        if (authPanel != null) authPanel.SetActive(false);
+        if (homeMenuPanel != null) homeMenuPanel.SetActive(false);
+        if (shopPanel != null) shopPanel.SetActive(false);
+        if (customizationPanel != null) customizationPanel.SetActive(false);
+        if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
+    }
+
     public void ShowAuthScreen()
     {
+        HideAllPanels();
         if (authPanel != null) authPanel.SetActive(true);
-        if (homeMenuPanel != null) homeMenuPanel.SetActive(false);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        if (loginPanel != null) loginPanel.SetActive(false);
+        if (registerPanel != null) registerPanel.SetActive(false);
     }
 
     public void ShowHomeMenu()
     {
         Debug.Log("[UI] Mostrando HomeMenuPanel.");
-        if (authPanel != null) authPanel.SetActive(false);
-        else Debug.LogWarning("[UI] authPanel es null, no se puede ocultar.");
+        HideAllPanels();
         if (homeMenuPanel != null) homeMenuPanel.SetActive(true);
         else Debug.LogWarning("[UI] homeMenuPanel es null, no se puede mostrar.");
-        if (shopPanel != null) shopPanel.SetActive(false);
-        if (customizationPanel != null) customizationPanel.SetActive(false);
 
-        // Actualizar el nombre del jugador usando la nueva función de UGSAuthManager
+        // Actualizar el nombre del jugador
         if (playerNameText != null && UGSAuthManager.Instance != null)
         {
             playerNameText.text = "Jugador: " + UGSAuthManager.Instance.GetPlayerName();
@@ -100,24 +264,40 @@ public class UIManager : MonoBehaviour
         _ = RefreshCurrencyTexts();
     }
 
-    /// <summary>Tienda: apaga Home y prende Shop. Conecta tu boton Tienda a este metodo.</summary>
+    public void ShowLoginPanel()
+    {
+        HideAllPanels();
+        if (authPanel != null) authPanel.SetActive(true);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        if (loginPanel != null) loginPanel.SetActive(true);
+        if (registerPanel != null) registerPanel.SetActive(false);
+    }
+
+    public void ShowRegisterPanel()
+    {
+        HideAllPanels();
+        if (authPanel != null) authPanel.SetActive(true);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        if (loginPanel != null) loginPanel.SetActive(false);
+        if (registerPanel != null) registerPanel.SetActive(true);
+    }
+
+    /// <summary>Tienda: apaga todo y prende Shop. Conecta tu boton Tienda a este metodo.</summary>
     public void ShowShop()
     {
         Debug.Log("[UI] Mostrando ShopPanel.");
-        if (homeMenuPanel != null) homeMenuPanel.SetActive(false);
-        if (customizationPanel != null) customizationPanel.SetActive(false);
+        HideAllPanels();
         if (shopPanel != null) shopPanel.SetActive(true);
         else Debug.LogWarning("[UI] shopPanel es null, asignalo en el Inspector.");
 
         _ = RefreshCurrencyTexts();
     }
 
-    /// <summary>Personalizacion: apaga Home y prende Custom. Conecta tu boton a este metodo.</summary>
+    /// <summary>Personalizacion: apaga todo y prende Custom. Conecta tu boton a este metodo.</summary>
     public void ShowCustomization()
     {
         Debug.Log("[UI] Mostrando CustomizationPanel.");
-        if (homeMenuPanel != null) homeMenuPanel.SetActive(false);
-        if (shopPanel != null) shopPanel.SetActive(false);
+        HideAllPanels();
         if (customizationPanel != null) customizationPanel.SetActive(true);
         else Debug.LogWarning("[UI] customizationPanel es null, asignalo en el Inspector.");
 
@@ -139,23 +319,11 @@ public class UIManager : MonoBehaviour
 
     public void ShowMainMenu()
     {
+        HideAllPanels();
+        if (authPanel != null) authPanel.SetActive(true);
         if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
         if (loginPanel != null) loginPanel.SetActive(false);
         if (registerPanel != null) registerPanel.SetActive(false);
-    }
-
-    public void ShowLoginPanel()
-    {
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
-        if (loginPanel != null) loginPanel.SetActive(true);
-        if (registerPanel != null) registerPanel.SetActive(false);
-    }
-
-    public void ShowRegisterPanel()
-    {
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
-        if (loginPanel != null) loginPanel.SetActive(false);
-        if (registerPanel != null) registerPanel.SetActive(true);
     }
 
     // --- Personalizacion: color de tu ficha (el enemigo sale opuesto) ---
@@ -167,15 +335,25 @@ public class UIManager : MonoBehaviour
         if (playerColorSwatches == null || mode < 0 || mode >= playerColorSwatches.Length) return;
         var sw = playerColorSwatches[mode];
         if (sw == null) return;
-        // El color sale del propio boton (cristal + liquido ya armados).
-        _ = UGSProfileManager.Instance.SetCustomColorAsync(sw.Color);
+        // Modos 0 y 1 usan los colores fijos del juego (Rosa / Naranja); el 2
+        // (rueda) usa el color elegido del boton gris (actualizado en vivo por la rueda).
+        if (mode == PlayerColorOptions.CustomIndex)
+        {
+            _ = UGSProfileManager.Instance.SetCustomColorAsync(sw.Color);
+        }
+        else
+        {
+            _ = UGSProfileManager.Instance.SetPlayerColorModeAsync(mode);
+        }
         RefreshColorPreviews();
     }
 
-    /// <summary>Lo llama la rueda al arrastrar. Activa modo Personalizado.</summary>
+    /// <summary>Lo llama la rueda al arrastrar. Activa modo Personalizado y pinta el boton gris en vivo.</summary>
     public void OnWheelColorChanged(Color c)
     {
         if (UGSProfileManager.Instance == null) return;
+        // El boton gris muestra el color elegido mientras arrastras la rueda.
+        if (customColorSwatch != null) customColorSwatch.SetColor(c);
         _ = UGSProfileManager.Instance.SetCustomColorAsync(c);
         RefreshColorPreviews();
     }
@@ -210,7 +388,7 @@ public class UIManager : MonoBehaviour
             var sw = playerColorSwatches[i];
             if (sw == null) continue;
             bool selected = ColorCloseEnough(sw.Color, current);
-            sw.transform.localScale = selected ? Vector3.one * 1.18f : Vector3.one;
+            sw.SetSelected(selected);
 
             var frame = sw.transform.Find("SelectedFrame");
             if (frame != null) frame.gameObject.SetActive(selected);
@@ -385,9 +563,22 @@ public class UIManager : MonoBehaviour
         }
         if (loginPassword != null) loginPassword.text = "";
         if (registerPassword != null) registerPassword.text = "";
-        ShowAuthScreen();
-        ShowMainMenu();
+
+        HideAllPanels();
+        if (authPanel != null) authPanel.SetActive(true);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+
         SetStatus("Sesión cerrada.");
+    }
+
+    /// <summary>Cierra la aplicacion (en Editor detiene el Play). Conecta tus botones de salir aquí.</summary>
+    public void OnClickQuit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     // --- MÉTODOS AUXILIARES ---
