@@ -116,3 +116,9 @@ InitTestScene*.unity*
 # Escenas de recuperacion del editor de Unity (se generan tras un cierre inesperado)
 /Assets/_Recovery/
 /Assets/_Recovery.meta
+
+# Modulo de Cloud Code (C#): se versiona su codigo y su proyecto, no lo compilado
+!/CloudCode~/**/*.csproj
+!/CloudCode~/**/*.sln
+CloudCode~/**/bin/
+CloudCode~/**/obj/

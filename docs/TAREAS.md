@@ -4,6 +4,19 @@ Este documento lo escribió el profesor (con ayuda de Claude Code) tras revisar 
 
 > Objetivo del curso: dos jugadores, en dos equipos distintos, juegan una partida completa de Reaction Domino por turnos. **El servidor decide** qué jugadas son válidas y quién gana, y **avisa al rival con un mensaje push** de Cloud Code cuando hay una jugada nueva.
 
+## Estado actual (actualizado con el PR #2 del profesor)
+
+El profesor adelantó la **base técnica** para que tengas algo concreto que leer, probar y ampliar. **Tu trabajo ahora no es copiarla, sino entenderla**: léela, ejecútala, rómpela a propósito y explícala con tus palabras. Las pruebas de cada parte están en [`PRUEBAS.md`](PRUEBAS.md).
+
+| Tarea | Estado | Qué te toca a ti |
+|---|---|---|
+| 1. Protocolo en papel | **Tuya, pendiente** | Rellenar `MENSAJES.md` y compararlo con lo que hizo el PR #2. Si tu diseño difiere, discútelo con el profesor. |
+| 2. Core sin Unity + pruebas | **Hecha en el PR #2** (37 pruebas) | Entender por qué `GameLogic` ya no usa `UnityEngine`, qué es `MatchReplay` y por qué `PlacePoint` devuelve un `MoveOutcome`. **Añade al menos 3 pruebas nuevas** de reglas que se te ocurran. |
+| 3. Parar la hemorragia de premios | **Tuya, pendiente** | El PR #2 **no** toca `ValidateMatchResult.js` ni `UGSProfileManager`. Sigue pudiendo abusarse. |
+| 4. Partida en el servidor | **Base hecha en el PR #2** (`GetGameConfig`, `CreateMatch`, `PlayMove`, `GetMatchState`, push, premios en Protected) | Desplegarlo, probarlo (ver `PRUEBAS.md`), leer la config de Remote Config, y entender cada comprobación de `PlayMove`. Lo que **no** está hecho: ver la lista al final de la Tarea 4. |
+| 5. Cliente online con push | **Tuya, pendiente** | Hoy el juego no llama al módulo. Hay que escribir el servicio de cliente, suscribirse al push y leer el saldo de Protected. |
+| 6. Plazos y abandono | **Tuya, pendiente** | El módulo todavía no tiene plazo por turno ni abandono. |
+
 ## La idea central
 
 **El cliente nunca decide nada.** El cliente envía intenciones ("pongo un punto en (x, y)"). El servidor (Cloud Code) las valida con las **mismas reglas del juego**, guarda el resultado y avisa al rival con un push. El rival no confía en el contenido del mensaje: solo lo usa como señal para volver a pedirle el estado al servidor.
@@ -80,6 +93,16 @@ Tu juego es de **información perfecta y sin azar**: todo el tablero es público
 - Las preferencias (color, pack) pueden seguir en Default; las monedas, no.
 
 **Listo cuando:** dos clientes (dos editores, o editor + build) juegan una partida completa. Una jugada fuera de turno, con celda rival o con otro jugador es rechazada con un motivo claro sin cambiar el estado. Llamar a Cloud Code "a mano" no da premios.
+
+**Lo que ya hizo el PR #2 y lo que NO** (para que sepas qué te falta):
+- ✅ `GetGameConfig`, `CreateMatch` (por código de partida, idempotente), `PlayMove`, `GetMatchState`; estado como lista de jugadas con *replay*; push `match_updated`; premios liquidados una sola vez en **Protected** (clave `onlineProfile`); `GameProtocol.Version`.
+- ❌ Leer la configuración de Remote Config en `GetGameConfig` (hoy son constantes en `GameProtocol.cs`).
+- ❌ Matchmaker (hoy se empareja con un código de partida compartido a mano).
+- ❌ Tope diario / anti-colusión de premios: hoy dos cuentas tuyas podrían jugar entre sí y farmear monedas. Piensa cómo evitarlo (por ejemplo, un contador por rival y por día).
+- ❌ MMR / leaderboard `ranked_mmr` desde el servidor.
+- ❌ Retirar `ValidateMatchResult.js` y migrar el cliente (`UGSProfileManager`, `UGSEconomy`) para que **lea** `onlineProfile` en vez de escribir `Coins`/`Gems`.
+- ❌ Plazo por turno y abandono (Tarea 6).
+- ❌ Probado contra UGS real: el PR #2 se compiló y se probó con `dotnet`, pero **nadie lo ha ejecutado aún contra el servicio**. Tus pruebas de `PRUEBAS.md` son las primeras.
 
 ## Tarea 5 — Cliente online con push
 

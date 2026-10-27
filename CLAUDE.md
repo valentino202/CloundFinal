@@ -20,11 +20,12 @@ El proyecto sigue la misma arquitectura que el proyecto de referencia del profes
 
 ## Arquitectura (resumen)
 
-- `Assets/scrips/GameLogic.cs`: **reglas del juego** (la capa *Core*). Debe ser C# puro: sin `MonoBehaviour`, sin escenas y **sin `UnityEngine`**, para que el módulo de Cloud Code pueda compilar esos mismos archivos y servidor y cliente ejecuten el mismo código.
+- `Assets/Core/` (*ReactionDomino.Core*): **reglas del juego** (`GameLogic`, `MatchReplay`, `RewardRules`, `GridPoint`, `MoveOutcome`). Es C# puro: sin `MonoBehaviour`, sin escenas y **sin `UnityEngine`** (lo garantiza su *Assembly Definition* con `noEngineReferences`). El módulo de Cloud Code compila esos mismos archivos, así servidor y cliente ejecutan el mismo código. Si añades un `using UnityEngine` ahí, la compilación falla: es a propósito.
 - `Assets/scrips/GameManager.cs`: vista y flujo de la partida en `GameScene`. No debe contener reglas.
 - `Assets/scrips/UGS*.cs`: servicios de UGS (auth, perfil, Remote Config, Cloud Code).
-- `Assets/CloudCode/ValidateMatchResult.js`: endpoint actual, **provisional**. Se reemplaza por la liquidación de premios dentro de `PlayMove` (ver `docs/TAREAS.md`).
-- Módulo de Cloud Code (futuro): en una carpeta que Unity ignore (nombre terminado en `~`), compilando los archivos del Core con `<Compile Include>`.
+- `CloudCode~/ReactionDominoModule/`: **módulo de Cloud Code** (C#, .NET 8) con `GetGameConfig`, `CreateMatch`, `PlayMove` y `GetMatchState`. El `~` hace que Unity ignore la carpeta. Compila `Assets/Core/*.cs` con `<Compile Include>`. Se despliega con `Assets/CloudCode/ReactionDominoModule.ccmr` (*Window → Deployment*). Sus pruebas: `CloudCode~/ReactionDominoModule.Tests` (`dotnet test`).
+- `Assets/Tests/EditMode/`: pruebas del Core (Test Runner de Unity).
+- `Assets/CloudCode/ValidateMatchResult.js`: endpoint antiguo, **obsoleto**. Sigue ahí porque el cliente todavía lo llama; se retira en la Tarea 3/5 de `docs/TAREAS.md`.
 
 ## Reglas de diseño del modo online
 

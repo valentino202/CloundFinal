@@ -33,7 +33,7 @@ El juego **no funciona completo** sin esto. Anota aquí los valores reales de tu
 | Authentication | Activar *Anonymous* y *Username/Password* | ☐ |
 | Cloud Save | Se usa para el perfil del jugador; hoy todo se guarda desde el cliente en la clase *Default* (claves `PlayerName`, `Coins`, `Gems`, `TotalWins`, `TotalMatches`, `EquippedPack`, `OwnedPacks`, `SkinsOwned`, `PlayerColor`, `PlayerCustomColor`) | ☐ |
 | Remote Config | `GRID_SIZE` (6), `MAX_CELL_LEVEL` (4), `BOT_DIFFICULTY` (1), `MAX_TURNS` (30) | ☐ |
-| Cloud Code | Desplegar `Assets/CloudCode/ValidateMatchResult.js` (paquete *Deployment* del editor o `ugs deploy`) | ☐ |
+| Cloud Code | Desplegar el módulo `Assets/CloudCode/ReactionDominoModule.ccmr` (*Window → Deployment*; hace falta el SDK de .NET 8). El `ValidateMatchResult.js` antiguo sigue desplegado mientras el cliente lo use | ☐ |
 | Leaderboards | Crear el leaderboard `ranked_mmr` | ☐ |
 
 ## Estructura del proyecto
@@ -41,7 +41,6 @@ El juego **no funciona completo** sin esto. Anota aquí los valores reales de tu
 ```
 Assets/
 ├── scrips/          ← código C# (los nombres de carpeta se pueden renombrar más adelante)
-│   ├── GameLogic.cs        reglas del juego, sin MonoBehaviour
 │   ├── BotAgent.cs         oponente local con 3 dificultades
 │   ├── MatchController.cs  junta GameLogic + BotAgent
 │   ├── GameManager.cs      vista y flujo de la partida (GameScene)
@@ -50,12 +49,18 @@ Assets/
 │   ├── UGSProfileManager.cs, UGSEconomy.cs      perfil y monedas (Cloud Save)
 │   ├── UGSRemoteConfig.cs                       configuración remota
 │   └── UGSCloudCodeManager.cs                   llamada a Cloud Code
-├── CloudCode/ValidateMatchResult.js   endpoint de Cloud Code
+├── Core/            reglas del juego en C# puro (sin UnityEngine): GameLogic, MatchReplay, RewardRules...
+├── Tests/EditMode/  pruebas del Core (Test Runner de Unity)
+├── CloudCode/       ReactionDominoModule.ccmr (referencia al módulo) y ValidateMatchResult.js (obsoleto)
 ├── Scenes/          SampleScene (menú) y GameScene (partida)
 └── animetion/, imagenes/, particulas/, musica y sonidos/   arte y sonido
+CloudCode~/
+├── ReactionDominoModule/        módulo de Cloud Code (C#): GetGameConfig, CreateMatch, PlayMove, GetMatchState
+└── ReactionDominoModule.Tests/  pruebas del módulo (dotnet test)
 docs/
 ├── TAREAS.md        qué falta y en qué orden hacerlo
-└── MENSAJES.md      plantilla del protocolo de mensajes del modo online
+├── MENSAJES.md      plantilla del protocolo de mensajes del modo online
+└── PRUEBAS.md       actividades de testing para probar cada PR y reportar resultados
 ```
 
 ## Seguridad
