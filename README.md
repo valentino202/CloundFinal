@@ -48,7 +48,11 @@ Assets/
 │   ├── UGSAuthManager.cs, AuthUIController.cs, UIManager.cs   login y menús
 │   ├── UGSProfileManager.cs, UGSEconomy.cs      perfil y monedas (Cloud Save)
 │   ├── UGSRemoteConfig.cs                       configuración remota
-│   └── UGSCloudCodeManager.cs                   llamada a Cloud Code
+│   ├── UGSCloudCodeManager.cs                   llamada a Cloud Code (antigua)
+│   └── Online/                                  cliente del modo online
+│       ├── OnlineMatchService.cs   llamadas al módulo + push + sondeo de respaldo
+│       ├── OnlineDtos.cs           contratos con el servidor
+│       └── OnlineDebugHarness.cs   herramienta de pruebas (no es el juego)
 ├── Core/            reglas del juego en C# puro (sin UnityEngine): GameLogic, MatchReplay, RewardRules...
 ├── Tests/EditMode/  pruebas del Core (Test Runner de Unity)
 ├── CloudCode/       ReactionDominoModule.ccmr (referencia al módulo) y ValidateMatchResult.js (obsoleto)

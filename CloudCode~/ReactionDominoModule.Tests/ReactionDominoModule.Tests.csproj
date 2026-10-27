@@ -8,9 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NUnit" Version="3.14.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+  </ItemGroup>
+
+  <!-- Los DTOs del cliente de Unity (sin dependencias de Unity) se compilan aqui para comprobar el contrato. -->
+  <ItemGroup>
+    <Compile Include="../../Assets/scrips/Online/OnlineDtos.cs" LinkBase="ClientDtos" />
   </ItemGroup>
 
   <ItemGroup>

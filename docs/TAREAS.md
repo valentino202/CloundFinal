@@ -14,7 +14,7 @@ El profesor adelantó la **base técnica** para que tengas algo concreto que lee
 | 2. Core sin Unity + pruebas | **Hecha en el PR #2** (37 pruebas) | Entender por qué `GameLogic` ya no usa `UnityEngine`, qué es `MatchReplay` y por qué `PlacePoint` devuelve un `MoveOutcome`. **Añade al menos 3 pruebas nuevas** de reglas que se te ocurran. |
 | 3. Parar la hemorragia de premios | **Tuya, pendiente** | El PR #2 **no** toca `ValidateMatchResult.js` ni `UGSProfileManager`. Sigue pudiendo abusarse. |
 | 4. Partida en el servidor | **Base hecha en el PR #2** (`GetGameConfig`, `CreateMatch`, `PlayMove`, `GetMatchState`, push, premios en Protected) | Desplegarlo, probarlo (ver `PRUEBAS.md`), leer la config de Remote Config, y entender cada comprobación de `PlayMove`. Lo que **no** está hecho: ver la lista al final de la Tarea 4. |
-| 5. Cliente online con push | **Tuya, pendiente** | Hoy el juego no llama al módulo. Hay que escribir el servicio de cliente, suscribirse al push y leer el saldo de Protected. |
+| 5. Cliente online con push | **Servicio hecho en el PR #3** (`OnlineMatchService`, DTOs y un arnés de pruebas); **la pantalla es tuya** | El juego todavía no usa el servicio: falta la pantalla de partida online (lobby con código, tablero que pinta el estado del servidor, bloqueo cuando no es tu turno, animar `lastMoveExplosions`) y leer el saldo de Protected. Ver la lista al final de la Tarea 5. |
 | 6. Plazos y abandono | **Tuya, pendiente** | El módulo todavía no tiene plazo por turno ni abandono. |
 
 ## La idea central
@@ -117,6 +117,16 @@ Mantén el bot como modo "Práctica".
 **Pista:** la lista ordenada de explosiones que devuelve el servidor es justo lo que ya consume `ExplosionSequence`. ¿Qué haces si llega un estado nuevo mientras el anterior aún se anima? Y recuerda: que falle el push nunca debe hacer fallar la jugada, que ya quedó guardada.
 
 **Listo cuando:** los dos clientes se actualizan por push (y el sondeo de respaldo sigue funcionando si lo desactivas). Cerrar un cliente y volver restaura el estado con `GetMatchState`.
+
+**Lo que ya hizo el PR #3 y lo que NO** (para que sepas qué te falta):
+- ✅ `Assets/scrips/Online/OnlineMatchService.cs`: llamadas al módulo (`GetGameConfigAsync` con comprobación de versión del protocolo, `CreateMatchAsync`, `PlayMoveAsync`, `GetMatchStateAsync`), suscripción al push (`StartListeningAsync`) y sondeo de respaldo (`StartPolling`). Los dos avisos terminan en un único evento `MatchUpdated`, que llega en el hilo principal.
+- ✅ `OnlineDtos.cs`: los contratos del cliente. Hay pruebas (`ClientContractTests`) que comprueban que lo que escribe el servidor lo puede leer el cliente.
+- ✅ `OnlineDebugHarness.cs`: herramienta de pruebas (no es el juego) para ejecutar cada mensaje desde el editor.
+- ❌ **La pantalla online.** `GameManager` sigue siendo contra el bot. Piensa si conviene un `OnlineGameManager` aparte o parametrizar el actual: ¿qué parte de `GameManager` es "regla" y cuál es "vista"?
+- ❌ Lobby: pedir el código, esperar al rival (`phase = "waiting"`), mostrar el asiento.
+- ❌ Tablero que **solo pinta** el estado del servidor (`owner`/`level`) y llama a `PlayMoveAsync` en el clic; qué hacer con un `outcome` distinto de `"ok"`.
+- ❌ Animar la cadena con `lastMoveExplosions` (ya tienes `ExplosionSequence`). Pregunta de diseño: si llega un estado nuevo mientras animas el anterior, ¿qué haces?
+- ❌ Leer el saldo (`onlineProfile`, **Protected**) y dejar de escribir `Coins`/`Gems` desde el cliente (Tarea 3). Hoy **no existe ninguna llamada que lea ese item**: tendrás que decidir si añades una función `GetOnlineProfile` al módulo o lo lees del Cloud Save con la API de lectura de datos protegidos.
 
 ## Tarea 6 — Plazos de turno y abandono, con el reloj del servidor
 

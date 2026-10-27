@@ -1,7 +1,7 @@
 # Actividades de testing
 
 Estas pruebas son **tuyas**: el profesor y Claude Code hicieron los cambios, pero **nadie los ha jugado en el editor ni ejecutado contra UGS**. Lo verificado hasta ahora:
-- Con `dotnet`: el Core compila **sin Unity** y pasa sus 37 pruebas; el módulo de Cloud Code compila y pasa sus 7 pruebas.
+- Con `dotnet`: el Core compila **sin Unity** y pasa sus 37 pruebas; el módulo de Cloud Code compila y pasa sus 11 pruebas (incluido el contrato con los DTOs del cliente).
 - Con **Unity 6000.3.23f1 en modo batch** (una copia del proyecto, sin abrir el editor): el proyecto completo **compila sin errores** (incluidas las *Assembly Definitions* y los cambios en `GameManager`/`MatchController`) y las **37 pruebas EditMode pasan**. Tu proyecto pide la 6000.3.24f1; no estaba instalada.
 
 Tu retroalimentación es la que cierra el ciclo: P1, P2 y P4 siguen siendo tuyas porque quien las corrió no jugó ni abrió el editor con interfaz.
@@ -57,7 +57,7 @@ Versión de Unity del proyecto: `6000.3.24f1`. Para las pruebas con `dotnet` nec
   cd CloudCode~/ReactionDominoModule.Tests
   dotnet test
   ```
-- **Resultado esperado:** `Correctas ... Superado: 7`.
+- **Resultado esperado:** `Correctas ... Superado: 11` (7 de la vista del servidor + 4 del contrato con el cliente).
 - **Reporta si falla:** el mensaje de error. Un error de *restore* suele ser falta de internet o del SDK.
 
 ---
@@ -74,25 +74,13 @@ Versión de Unity del proyecto: `6000.3.24f1`. Para las pruebas con `dotnet` nec
 ### P7 · Dos jugadores y un código de partida
 Necesitas **dos sesiones distintas**: el editor con tu cuenta de invitado y otra instancia (otro editor o un build) con una cuenta de usuario/contraseña.
 
-Para llamar al módulo todavía no existe el cliente (es la Tarea 5), así que usa un script **temporal** (no lo subas al repo). Es solo una guía; los nombres de la API pueden variar con la versión del paquete (`2.10.4`) y, si algo no compila, mira la documentación de Cloud Code y repórtalo:
+Para llamar al módulo usa el **arnés de pruebas** `OnlineDebugHarness` (`Assets/scrips/Online`). No es el juego: es una herramienta con acciones numeradas que imprimen en la consola lo que responde el servidor.
+1. Abre `SampleScene`, crea un GameObject vacío y añádele el componente **Online Debug Harness**.
+2. Dale Play e inicia sesión con la interfaz normal (invitado, o usuario y contraseña en la otra instancia).
+3. En el Inspector, clic derecho sobre el nombre del componente: aparecen `1 - Suscribirme al push`, `2 - GetGameConfig`, `3 - CreateMatch`, `4 - PlayMove`, `5 - GetMatchState` y `6 - Prueba de trampa`. El código de partida (`matchCode`) y la jugada (`x`, `y`) se editan en el Inspector.
 
-```csharp
-// Script temporal para probar: adjúntalo a un GameObject, ya con la sesión de UGS iniciada.
-async void Call(string fn, Dictionary<string, object> args)
-{
-    var res = await Unity.Services.CloudCode.CloudCodeService.Instance
-        .CallModuleEndpointAsync<object>("ReactionDominoModule", fn, args);
-    Debug.Log($"{fn} -> {res}");
-}
-// Ejemplos:
-// Call("GetGameConfig", new Dictionary<string, object>());
-// Call("CreateMatch",  new Dictionary<string, object> { { "matchCode", "PRUEBA1" } });
-// Call("PlayMove",     new Dictionary<string, object> { { "matchId", "rd-PRUEBA1" }, { "x", 2 }, { "y", 2 } });
-// Call("GetMatchState", new Dictionary<string, object> { { "matchId", "rd-PRUEBA1" } });
-```
-
-- **Pasos:** 1) sesión A: `GetGameConfig`, 2) A: `CreateMatch` con el código `PRUEBA1`, 3) B: `CreateMatch` con el **mismo** código, 4) los dos: `GetMatchState`.
-- **Resultado esperado:** `GetGameConfig` devuelve `ProtocolVersion: 1` y reglas 6 / 4 / 30. Tras el paso 2: `Phase: "waiting"`, `MySeat: 1`. Tras el paso 3: `Phase: "playing"`, `MySeat: 2` para B y `CurrentSeat: 1`.
+- **Pasos:** 1) sesión A: acción `2 - GetGameConfig`, 2) A: `3 - CreateMatch` con el código `PRUEBA1`, 3) B: `3 - CreateMatch` con el **mismo** código, 4) los dos: `5 - GetMatchState`.
+- **Resultado esperado:** `GetGameConfig` imprime `protocolo=1 tablero=6 nivelMax=4 turnosMax=30`. Tras el paso 2: `fase=waiting tuAsiento=1`. Tras el paso 3: `fase=playing tuAsiento=2` para B y `turnoDe=1`; el tablero se imprime como cuadrícula (`R` = rosado, `N` = naranja, el número es el nivel).
 - **Reporta si falla:** la respuesta o el error completo. Un error de "módulo no encontrado" indica P6 incompleta.
 
 ### P8 · Idempotencia de `CreateMatch`
@@ -112,14 +100,8 @@ Con la partida `rd-PRUEBA1` en juego (turno del asiento 1 = cuenta A):
 
 ### P10 · El push llega al rival
 - **Qué probar:** que el servidor avisa al rival sin mandarle el estado.
-- **Pasos:** 1) en la sesión B, antes de jugar, suscríbete a los mensajes (ver abajo), 2) A juega una jugada válida, 3) mira la consola de B.
-  ```csharp
-  // Script temporal (la API puede variar con la versión del paquete):
-  var callbacks = new Unity.Services.CloudCode.Subscriptions.SubscriptionEventCallbacks();
-  callbacks.MessageReceived += m => Debug.Log($"PUSH tipo={m.MessageType} cuerpo={m.Message}");
-  await Unity.Services.CloudCode.CloudCodeService.Instance.SubscribeToPlayerMessagesAsync(callbacks);
-  ```
-- **Resultado esperado:** B recibe un mensaje de tipo `match_updated` con un cuerpo de la forma `{"type":"match_updated","matchId":"rd-PRUEBA1"}` y **nada más** (sin tablero ni la jugada). Lo mismo ocurre en A cuando B se une a la partida.
+- **Pasos:** 1) en la sesión B, antes de jugar, ejecuta `1 - Suscribirme al push`, 2) A juega una jugada válida (`4 - PlayMove`), 3) mira la consola de B.
+- **Resultado esperado:** B imprime `AVISO recibido para la partida 'rd-PRUEBA1' -> pido el estado al servidor.` y, justo después, el estado actualizado (lo pide el propio B con `GetMatchState`: el aviso **no trae datos**). Lo mismo ocurre en A cuando B se une a la partida. Si no llega ningún push, el sondeo de respaldo debería avisar en ~10 s (consola: mismo mensaje): reporta cuál de los dos pasó.
 - **Reporta si falla:** si no llega nada, si llega con más datos, o si no compila la suscripción. Que el push falle **no** debe hacer fallar la jugada: comprueba que `PlayMove` responde `ok` igual.
 
 ### P11 · Terminar una partida y que el premio se pague una sola vez
@@ -129,7 +111,7 @@ Con la partida `rd-PRUEBA1` en juego (turno del asiento 1 = cuenta A):
 
 ### P12 · El cliente no puede falsificar el saldo (clases de acceso)
 - **Qué probar:** que escribir desde el cliente **no** altera lo que decide el servidor.
-- **Pasos:** 1) desde el cliente, con un script temporal, guarda `onlineProfile` con `CloudSaveService.Instance.Data.Player.SaveAsync(new Dictionary<string, object>{{"onlineProfile","trampa"}})`, 2) mira el Dashboard de esa cuenta, 3) llama a `GetMatchState` de una partida terminada.
+- **Pasos:** 1) ejecuta `6 - Prueba de trampa` (guarda `onlineProfile = "trampa"` desde el cliente con `Data.Player.SaveAsync`), 2) mira el Dashboard de esa cuenta en Cloud Save, 3) ejecuta `5 - GetMatchState` de una partida terminada.
 - **Resultado esperado:** la escritura del cliente crea un item en **Default** (otro dato distinto); el item **Protected** `onlineProfile` queda **intacto**.
 - **Reporta:** qué viste en cada sección. **Explica con tus palabras** por qué el servidor guarda ahí y no en Default (ver el comentario de `PlayerRewardStore.cs`), y qué pasa hoy con `Coins`/`Gems` de `UGSProfileManager`: sigue habiendo **un hueco** que debes cerrar en la Tarea 3.
 
@@ -138,5 +120,6 @@ Con la partida `rd-PRUEBA1` en juego (turno del asiento 1 = cuenta A):
 ## Qué NO está probado (y por tanto es sospechoso)
 
 - Que el **juego funcione jugando** (P2): compila y las pruebas del Core pasan, pero nadie ha dado Play ni visto las animaciones de explosión con el cambio de `GridPoint`.
+- El **arnés y el servicio de cliente** (`OnlineMatchService`, `OnlineDebugHarness`): compilan en Unity y sus DTOs se comprobaron contra el JSON del servidor con `dotnet test`, pero nunca se ejecutaron contra UGS (ni la suscripción al push ni `CallModuleEndpointAsync`).
 - Que las llamadas a Cloud Save y al push funcionen contra UGS real: **compilan**, pero nunca se ejecutaron (P6–P11).
 - Plazo por turno, abandono, reconexión con la partida a medias, y partidas simultáneas del mismo jugador: no existen todavía.
