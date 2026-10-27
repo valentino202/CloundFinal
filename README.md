@@ -31,7 +31,7 @@ El juego **no funciona completo** sin esto. Anota aquí los valores reales de tu
 | Servicio | Qué hay que crear | Estado |
 |---|---|---|
 | Authentication | Activar *Anonymous* y *Username/Password* | ☐ |
-| Cloud Save | Se usa para el perfil del jugador (claves `PlayerName`, `Coins`, `Gems`, `TotalWins`, `TotalMatches`, `EquippedPack`, `OwnedPacks`, `SkinsOwned`, `PlayerColor`, `PlayerCustomColor`) | ☐ |
+| Cloud Save | Se usa para el perfil del jugador; hoy todo se guarda desde el cliente en la clase *Default* (claves `PlayerName`, `Coins`, `Gems`, `TotalWins`, `TotalMatches`, `EquippedPack`, `OwnedPacks`, `SkinsOwned`, `PlayerColor`, `PlayerCustomColor`) | ☐ |
 | Remote Config | `GRID_SIZE` (6), `MAX_CELL_LEVEL` (4), `BOT_DIFFICULTY` (1), `MAX_TURNS` (30) | ☐ |
 | Cloud Code | Desplegar `Assets/CloudCode/ValidateMatchResult.js` (paquete *Deployment* del editor o `ugs deploy`) | ☐ |
 | Leaderboards | Crear el leaderboard `ranked_mmr` | ☐ |
@@ -61,7 +61,7 @@ docs/
 ## Seguridad
 
 - **No subas credenciales ni claves** al repositorio (ni de UGS ni de ningún otro servicio). Los identificadores de proyecto de Unity que aparecen en `ProjectSettings` no son secretos.
-- Las monedas, victorias y puntos de ranking deben calcularse en el **servidor** (Cloud Code), no en el cliente. Hoy no es así del todo; ver `docs/TAREAS.md`.
+- Las monedas, victorias y puntos de ranking deben calcularse en el **servidor** (Cloud Code), no en el cliente, y guardarse en la clase de acceso **Protected** de Cloud Save (la clase *Default* la puede escribir el propio jugador con su token). Hoy no es así; ver `docs/TAREAS.md`.
 
 ## Cómo colaborar
 
