@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>ReactionDomino.CloudCode</RootNamespace>
+    <AssemblyName>ReactionDominoModule</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Com.Unity.Services.CloudCode.Apis" Version="0.0.27" />
+    <PackageReference Include="Com.Unity.Services.CloudCode.Core" Version="0.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+  <!--
+    El Core NO se copia: se compila directamente desde Assets/Core. Asi el servidor y el cliente
+    ejecutan exactamente las mismas reglas (GameLogic, MatchReplay, RewardRules).
+    Si cambias una regla en Assets/Core, el modulo la recoge solo al compilar.
+  -->
+  <ItemGroup>
+    <Compile Include="../../Assets/Core/*.cs" LinkBase="Core" />
+  </ItemGroup>
+
+</Project>
