@@ -378,6 +378,7 @@ private void FinishMove(GameLogic.MoveResult r)
         float duration = Time.time - matchStartTime;
         long gems = won ? FallbackWinGems : FallbackLoseGems;
         long coins = won ? FallbackWinCoins : FallbackLoseCoins;
+        bool serverValid = false;
 
         try
         {
@@ -404,16 +405,39 @@ private void FinishMove(GameLogic.MoveResult r)
                     totalMoves = game.totalMoves,
                     winnerCells = draw ? myCells : (won ? myCells : botCells),
                     loserCells = draw ? botCells : (won ? botCells : myCells),
+                    matchMode = PlayerPrefs.HasKey("SelectedMatchMode") ? Mathf.Clamp(PlayerPrefs.GetInt("SelectedMatchMode"),0,1) : (int)mode,
+                    maxTurns = (PlayerPrefs.HasKey("SelectedMatchMode") && PlayerPrefs.GetInt("SelectedMatchMode")==1) ? 0 : (PlayerPrefs.HasKey("SelectedMaxTurns") ? Mathf.Clamp(PlayerPrefs.GetInt("SelectedMaxTurns"),30,100) : maxTurnsOverride),
+                    duration = duration,
                 });
             if (res != null && res.valid)
             {
                 gems = res.gemsAwarded;
                 coins = res.coinsAwarded;
+                serverValid = true;
+            }
+            else
+            {
+                Debug.LogWarning($"[Game] Cloud Code rechazo el resultado: {res?.message}");
             }
         }
         catch (System.Exception ex)
         {
             Debug.LogWarning($"[Game] Cloud Code no disponible, uso recompensa local: {ex.Message}");
+        }
+
+        // Si el servidor no valido la partida (404, sin red, etc.), igual se
+        // guarda la recompensa de respaldo para que el jugador no quede en cero.
+        if (!serverValid && UGSProfileManager.Instance != null)
+        {
+            try
+            {
+                await UGSProfileManager.Instance.GrantCurrencyAsync(coins, gems);
+                await UGSProfileManager.Instance.RecordMatchResultAsync(won);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[Game] No se pudo guardar la recompensa local: {ex.Message}");
+            }
         }
 
         ShowResultPanel(won, draw, duration, coins, gems);

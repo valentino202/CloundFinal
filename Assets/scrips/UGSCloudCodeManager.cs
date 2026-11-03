@@ -27,6 +27,9 @@ public class UGSCloudCodeManager
         public int totalMoves;
         public int winnerCells;
         public int loserCells;
+        public int matchMode;
+        public int maxTurns;
+        public float duration;
     }
 
     [System.Serializable]
@@ -55,8 +58,12 @@ public class UGSCloudCodeManager
                 { "gridSize", result.gridSize },
                 { "totalMoves", result.totalMoves },
                 { "winnerCells", result.winnerCells },
-                { "loserCells", result.loserCells }
+                { "loserCells", result.loserCells },
+                { "matchMode", result.matchMode },
+                { "maxTurns", result.maxTurns },
+                { "duration", result.duration }
             };
+            Debug.Log($"[CloudCode] Enviando partida: mode={result.matchMode} turns={result.maxTurns} winnerCells={result.winnerCells} loserCells={result.loserCells}");
             var response = await CloudCodeService.Instance.CallEndpointAsync<RewardResponse>(endpoint, args);
             Debug.Log($"[CloudCode] valid={response.valid} gems={response.gemsAwarded} coins={response.coinsAwarded} mmr={response.newMmr} msg={response.message}");
 
@@ -76,6 +83,11 @@ public class UGSCloudCodeManager
         catch (System.Exception e)
         {
             Debug.LogError($"[CloudCode] Error endpoint {endpoint}: {e.Message}");
+            // 404 / "Script could not be found" = el script no esta publicado en
+            // el entorno que usa el cliente. Se sube desde Unity:
+            // Services > Deployment > ValidateMatchResult.js > Deploy Selected.
+            if (e.Message.Contains("404") || e.Message.Contains("not be found") || e.Message.Contains("NotFound"))
+                Debug.LogError($"[CloudCode] El script '{endpoint}' no existe en el entorno actual. Despliegalo con Services > Deployment y verifica que sea el mismo entorno del proyecto.");
             return new RewardResponse { valid = false, message = e.Message };
         }
     }

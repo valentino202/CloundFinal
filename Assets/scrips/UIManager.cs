@@ -9,6 +9,9 @@ public class UIManager : MonoBehaviour
     public GameObject homeMenuPanel;  // El nuevo Menú Principal tras autenticarse
     public GameObject shopPanel;          // Tienda (lo creas tu manual)
     public GameObject customizationPanel; // Personalizacion (lo creas tu manual)
+    public GameObject rankingSelectionPanel; // Panel previo: elige Normal o Infinito
+    public GameObject normalRankingPanel;    // Panel de ranking Normal
+    public GameObject infinitoRankingPanel;  // Panel de ranking Infinito
 
     [Header("Sub-Paneles de Autenticación")]
     public GameObject mainMenuPanel;
@@ -100,6 +103,9 @@ public class UIManager : MonoBehaviour
     public void HideModeSelectionPanel()
     {
         if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
+        if (rankingSelectionPanel != null) rankingSelectionPanel.SetActive(false);
+        if (normalRankingPanel != null) normalRankingPanel.SetActive(false);
+        if (infinitoRankingPanel != null) infinitoRankingPanel.SetActive(false);
 
         var back = panelToShowOnBack != null ? panelToShowOnBack : homeMenuPanel;
         if (back != null) back.SetActive(true);
@@ -237,6 +243,9 @@ public class UIManager : MonoBehaviour
         if (shopPanel != null) shopPanel.SetActive(false);
         if (customizationPanel != null) customizationPanel.SetActive(false);
         if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
+        if (rankingSelectionPanel != null) rankingSelectionPanel.SetActive(false);
+        if (normalRankingPanel != null) normalRankingPanel.SetActive(false);
+        if (infinitoRankingPanel != null) infinitoRankingPanel.SetActive(false);
     }
 
     public void ShowAuthScreen()
@@ -306,6 +315,30 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>Lee balances de la nube y los escribe en los 3 pares de textos.</summary>
+    /// <summary>Muestra el panel de seleccion de ranking (Normal / Infinito).</summary>
+    public void ShowRankingSelection()
+    {
+        HideAllPanels();
+        if (rankingSelectionPanel != null) rankingSelectionPanel.SetActive(true);
+        else Debug.LogWarning("[UI] rankingSelectionPanel no asignado.");
+    }
+
+    /// <summary>Muestra el ranking Normal.</summary>
+    public void ShowNormalRanking()
+    {
+        HideAllPanels();
+        if (normalRankingPanel != null) normalRankingPanel.SetActive(true);
+        else Debug.LogWarning("[UI] normalRankingPanel no asignado.");
+    }
+
+    /// <summary>Muestra el ranking Infinito.</summary>
+    public void ShowInfinitoRanking()
+    {
+        HideAllPanels();
+        if (infinitoRankingPanel != null) infinitoRankingPanel.SetActive(true);
+        else Debug.LogWarning("[UI] infinitoRankingPanel no asignado.");
+    }
+
     public async System.Threading.Tasks.Task RefreshCurrencyTexts()
     {
         await UGSEconomy.RefreshAsync();

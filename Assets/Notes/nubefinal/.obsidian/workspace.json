@@ -11,10 +11,10 @@
             "id": "c2e2fdfafe157d67",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Vista gráfica"
+              "icon": "lucide-file",
+              "title": "Nueva pestaña"
             }
           }
         ]
@@ -184,8 +184,10 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "c2e2fdfafe157d67",
+  "active": "a93269ae5f2a083b",
   "lastOpenFiles": [
+    "Sin título.md",
+    "Sin título.base",
     "particulas/Indice_Particulas.md.meta",
     "CloudCode/Config_CloudCode.md",
     "particulas/Indice_Particulas.md",
@@ -206,8 +208,6 @@
     "scrips/UIManager.md.meta",
     "scrips/Indice_Scripts.md.meta",
     "cree un enlace.md",
-    "00_Inicio.md.meta",
-    "musica y sonido/Audio_SFX.md.meta",
     "Bienvenido.md"
   ]
 }
