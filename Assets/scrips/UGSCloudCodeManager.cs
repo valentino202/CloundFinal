@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Services.Authentication;
 using Unity.Services.CloudCode;
+using Unity.Services.CloudSave;
 
 /// <summary>
 /// Agente 2 (cliente) SIN MonoBehaviour (clase pura).
@@ -39,6 +40,10 @@ public class UGSCloudCodeManager
         public int gemsAwarded;
         public int coinsAwarded;
         public int newMmr;
+        public bool leaderboardOk;
+        public string leaderboardError;
+        public string echo;
+        public string trace;
         public string message;
     }
 
@@ -64,8 +69,32 @@ public class UGSCloudCodeManager
                 { "duration", result.duration }
             };
             Debug.Log($"[CloudCode] Enviando partida: mode={result.matchMode} turns={result.maxTurns} winnerCells={result.winnerCells} loserCells={result.loserCells}");
+
+            // Canal garantizado: deja el resultado en Cloud Save ANTES de llamar
+            // al script. Si params llega vacio al servidor (bug/version del SDK),
+            // el script lo lee de Cloud Save y funciona igual.
+            try
+            {
+                await CloudSaveService.Instance.Data.Player.SaveAsync(new Dictionary<string, object>
+                {
+                    { "_mr_winnerId", result.winnerId },
+                    { "_mr_loserId", result.loserId },
+                    { "_mr_gridSize", result.gridSize },
+                    { "_mr_totalMoves", result.totalMoves },
+                    { "_mr_winnerCells", result.winnerCells },
+                    { "_mr_loserCells", result.loserCells },
+                    { "_mr_matchMode", result.matchMode },
+                    { "_mr_maxTurns", result.maxTurns },
+                    { "_mr_duration", result.duration }
+                });
+            }
+            catch (System.Exception ce)
+            {
+                Debug.LogWarning("[CloudCode] No se pudo pre-cargar el resultado en Cloud Save: " + ce.Message);
+            }
+
             var response = await CloudCodeService.Instance.CallEndpointAsync<RewardResponse>(endpoint, args);
-            Debug.Log($"[CloudCode] valid={response.valid} gems={response.gemsAwarded} coins={response.coinsAwarded} mmr={response.newMmr} msg={response.message}");
+            Debug.Log($"[CloudCode] valid={response.valid} gems={response.gemsAwarded} coins={response.coinsAwarded} msg={response.message} | leaderboardOk={response.leaderboardOk} err={response.leaderboardError} | TRACE={response.trace}");
 
             if (response.valid)
             {

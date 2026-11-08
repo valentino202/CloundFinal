@@ -116,24 +116,18 @@ public class RankingView : MonoBehaviour
         {
             try
             {
-                Debug.LogWarning("[Ranking] State=" + UnityServices.State + " auth=" + (AuthenticationService.Instance != null));
                 var asm = typeof(LeaderboardsService).Assembly;
                 var initType = asm.GetType("Unity.Services.Leaderboards.LeaderboardsInitializer");
                 var coreRegistry = GetCoreRegistryInstance();
-                Debug.LogWarning("[Ranking] initType=" + (initType != null) + " coreRegistry=" + (coreRegistry != null) + " assemblies=" + AppDomain.CurrentDomain.GetAssemblies().Length);
-                if (initType == null) Debug.LogWarning("[Ranking] LeaderboardsInitializer no encontrado.");
-                if (coreRegistry == null) Debug.LogWarning("[Ranking] CoreRegistry.Instance es null.");
                 if (initType != null && coreRegistry != null)
                 {
                     var instance = Activator.CreateInstance(initType, true);
                     var method = initType.GetMethod("InitializeService", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    if (method == null) Debug.LogWarning("[Ranking] InitializeService no encontrado.");
                     if (method != null)
                     {
                         var service = method.Invoke(instance, new object[] { coreRegistry });
                         var field = typeof(LeaderboardsService).GetField("s_Instance", BindingFlags.Static | BindingFlags.NonPublic);
                         if (field != null) field.SetValue(null, service);
-                        Debug.LogWarning("[Ranking] Leaderboards inicializado por reflexion: " + (service != null));
                     }
                 }
             }
@@ -205,12 +199,11 @@ public class RankingView : MonoBehaviour
             Debug.LogWarning($"[Ranking] Results es null para {normalLeaderboardId}.");
             return;
         }
-        Debug.Log($"[Ranking] {normalLeaderboardId}: {page.Results.Count} entradas recibidas.");
 
         foreach (var entry in page.Results)
         {
             var row = Instantiate(rowPrefab, content);
-            SetText(row, "name", string.IsNullOrEmpty(entry.PlayerName) ? entry.PlayerId : entry.PlayerName);
+            SetText(row, "name", FormatName(string.IsNullOrEmpty(entry.PlayerName) ? entry.PlayerId : entry.PlayerName));
 
             NormalRankingMeta meta = null;
             if (!string.IsNullOrEmpty(entry.Metadata))
@@ -246,12 +239,11 @@ public class RankingView : MonoBehaviour
             Debug.LogWarning($"[Ranking] Results es null para {infinitoLeaderboardId}.");
             return;
         }
-        Debug.Log($"[Ranking] {infinitoLeaderboardId}: {page.Results.Count} entradas recibidas.");
 
         foreach (var entry in page.Results)
         {
             var row = Instantiate(rowPrefab, content);
-            SetText(row, "name", string.IsNullOrEmpty(entry.PlayerName) ? entry.PlayerId : entry.PlayerName);
+            SetText(row, "name", FormatName(string.IsNullOrEmpty(entry.PlayerName) ? entry.PlayerId : entry.PlayerName));
 
             InfinitoRankingMeta meta = null;
             if (!string.IsNullOrEmpty(entry.Metadata))
@@ -270,8 +262,15 @@ public class RankingView : MonoBehaviour
         }
     }
 
-    private int GetNormalWins(NormalRankingMeta meta, int turns)
+    // Quita el discriminador (#1234) del nombre para que entre en la fila.
+    private static string FormatName(string raw)
     {
+        if (string.IsNullOrEmpty(raw)) return "Jugador";
+        int h = raw.IndexOf('#');
+        return h > 0 ? raw.Substring(0, h) : raw;
+    }
+
+    private int GetNormalWins(NormalRankingMeta meta, int turns)    {
         if (meta == null) return 0;
         switch (turns)
         {
