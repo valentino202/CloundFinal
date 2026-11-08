@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using ReactionDomino.Core;
 
 /// <summary>
 /// Controlador de escena GameScene (MonoBehaviour OK: gestiona GameObjects).
@@ -339,7 +340,8 @@ public class GameManager : MonoBehaviour
             // Cada explosion de la cadena dispara su propio boom, con el ritmo
             // natural de la secuencia. Asi una gota que cae en un 3 y lo lleva
             // a 4 tambien hace su animacion de explosion.
-            try { BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int> { c }, BoardFx.Current.animBoom); }
+            // El Core usa GridPoint (sin Unity); la capa visual sigue usando Vector2Int.
+            try { BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int> { new Vector2Int(c.x, c.y) }, BoardFx.Current.animBoom); }
             catch (System.Exception ex) { Debug.LogWarning($"[Game] ExplosionFx fallo: {ex.Message}"); }
 
             if (!BoardFx.SuppressFallback)
