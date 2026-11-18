@@ -277,7 +277,8 @@ public class UIManager : MonoBehaviour
     {
         HideAllPanels();
         if (authPanel != null) authPanel.SetActive(true);
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        // El MainMenu se apaga: solo se ve el panel de login (los paneles son transparentes).
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
         if (loginPanel != null) loginPanel.SetActive(true);
         if (registerPanel != null) registerPanel.SetActive(false);
     }
@@ -286,7 +287,8 @@ public class UIManager : MonoBehaviour
     {
         HideAllPanels();
         if (authPanel != null) authPanel.SetActive(true);
-        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        // El MainMenu se apaga: solo se ve el panel de registro (los paneles son transparentes).
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
         if (loginPanel != null) loginPanel.SetActive(false);
         if (registerPanel != null) registerPanel.SetActive(true);
     }
@@ -594,6 +596,9 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogWarning("[UI] UGSAuthManager.Instance es null en Logout.");
         }
+        // Limpia el perfil en memoria: la proxima cuenta no debe heredar economia ni progreso.
+        UGSProfileManager.Instance.ResetProfile();
+
         if (loginPassword != null) loginPassword.text = "";
         if (registerPassword != null) registerPassword.text = "";
 

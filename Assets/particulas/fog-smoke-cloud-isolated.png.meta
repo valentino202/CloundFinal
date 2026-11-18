@@ -1,0 +1,1228 @@
+fileFormatVersion: 2
+guid: e67a0f682ac7a4541af7c961ffa6278d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2988890101342721545
+    second: fog-smoke-cloud-isolated_0
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 824
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f929c4e9445586d0800000000000000
+      internalID: -2988890101342721545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_1
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 824
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6fd10ebbc8e590c46bdfde5d4b321676
+      internalID: -868809864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 708
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 521473189ff1e7d4584a4eab3f780aaf
+      internalID: -1989876374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_3
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 708
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 208175769d153944ba19bca773841d91
+      internalID: -2012446357
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_4
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 708
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 14bef412e720a8b46a73f5b92a85bb5f
+      internalID: 609637471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_5
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 708
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f0a64fd5c23fa64da1aabe6b5c933d6
+      internalID: -1811340366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bacd10f3aa3bf1546a0a5aee82866803
+      internalID: 1833245203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_7
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afc2ea0583ecac8458ef2548cfffaa85
+      internalID: -1096178265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_8
+      rect:
+        serializedVersion: 2
+        x: 570
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 820d761891243d04eafd5d9434c4bd1c
+      internalID: -54034028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_9
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0817f389c9e7b954786116417d6929d1
+      internalID: 101630136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_10
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52f1b1279ec5eb043b1c4aff8e316894
+      internalID: 1252132855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_11
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0d78da4f577dd342870dcef6ebe16de
+      internalID: -181049174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_12
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 592
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1a2d4b7c2cf0fa4aa5b1a5e248668d9
+      internalID: 114337927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_13
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e187d82dba9a6342881df1bb5b30ed1
+      internalID: 1510410905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_14
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eef059894b7b68d4ea9ab2a0038986b6
+      internalID: -1785697100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_15
+      rect:
+        serializedVersion: 2
+        x: 570
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bf2b514e87de694a84accc6fc04b5d9
+      internalID: -1829283986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_16
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a05137b749353c4ca18a5756c47e903
+      internalID: 1692677882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_17
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bec0fb0f48ecc0c47bc276657efc3e0e
+      internalID: -1510382817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_18
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5fc9058f1524b204ebcfc089a55671eb
+      internalID: 450999132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_19
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 476
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fdac0c72c8d24847959bb34ba3be381
+      internalID: 573000722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05aa8b6e0f5a8594b997106d685ed210
+      internalID: 2026121657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_21
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f13543236bc8ba4d9b484bb2b232ba3
+      internalID: -1994516676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_22
+      rect:
+        serializedVersion: 2
+        x: 570
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eadb4edd033081549b6f4b7bc7c69eb1
+      internalID: 870733527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_23
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a66377e1d54517945b54b90f29f04b16
+      internalID: -1984129828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_24
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c15bc5053c96acd479e85cf510a4a4d0
+      internalID: -1347011995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_25
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e08d666fd241da46bd1c72d121f9132
+      internalID: -1456648805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_26
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 360
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e69b75f7cc06d754aa5ffe3409bb9753
+      internalID: 852053576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_27
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea4d384d80850464b828ac3488041b43
+      internalID: 1955561569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_28
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0959175954dfeda499235341e7b0d6b8
+      internalID: 1291370518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_29
+      rect:
+        serializedVersion: 2
+        x: 570
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ba1d1197b9c2edc4cb324bbf86b2e12c
+      internalID: 569865936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_30
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b9f44957084441342bc8c6783c46ca32
+      internalID: 469760686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_31
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ccffd542a16ae5d4ca99f26cd76170c8
+      internalID: 31316679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_32
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68bf1d56ccd5b194e9608828f6573f36
+      internalID: -188273189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_33
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 244
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15f446d6407da5747a0ca246048a8bc2
+      internalID: -81347014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_34
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db0508667c17b4442b4e02ca483ce1e5
+      internalID: 523846112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_35
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4a46f61ae126d94a92f88f691545a0a
+      internalID: 922295245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_36
+      rect:
+        serializedVersion: 2
+        x: 570
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d9c38d45fb1b644ca4e20acea1f5eec
+      internalID: -565541069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_37
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2eb5c48a3e290304da92d85948deadc2
+      internalID: 1859297612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_38
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cfedf2462d0ed69429c839d050d29b03
+      internalID: 597155841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_39
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0215f0ef029bd843a7fe1c9c857784d
+      internalID: -426092929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_40
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 128
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 750e15c2a46bfbc46a6fafd255b5706d
+      internalID: 813883226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_41
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41dda1589b00536408b00a64ee72ab22
+      internalID: -2109592405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_42
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca5ec0cd3e49c654dbb8022625ea23b7
+      internalID: -1491176380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_43
+      rect:
+        serializedVersion: 2
+        x: 570
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0aa28cf3ad1d0c14e8ed8a25424d1ddd
+      internalID: 1275505960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_44
+      rect:
+        serializedVersion: 2
+        x: 855
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24d9fa64bceec0a48b62f7ddc13b805c
+      internalID: -1606784835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_45
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c6993ce915b214428cd01a0adba25c4
+      internalID: 2047149391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_46
+      rect:
+        serializedVersion: 2
+        x: 1425
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3cab8f18a071a1846a0387068d72e09a
+      internalID: 1992795323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fog-smoke-cloud-isolated_47
+      rect:
+        serializedVersion: 2
+        x: 1710
+        y: 12
+        width: 285
+        height: 116
+      alignment: 1
+      pivot: {x: 0, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c30915cdf18dc449af46b7901a42c63
+      internalID: -1077137615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: d027b3ef0256f07449d1d1d9423f4707
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":7.0,"y":13.0},"gridSpriteSize":{"x":285.0,"y":116.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.0,"y":1.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":1,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+      - key: SpriteEditor.SliceOnImport
+        value: False
+    nameFileIdTable:
+      fog-smoke-cloud-isolated_0: -2988890101342721545
+      fog-smoke-cloud-isolated_1: -868809864
+      fog-smoke-cloud-isolated_10: 1252132855
+      fog-smoke-cloud-isolated_11: -181049174
+      fog-smoke-cloud-isolated_12: 114337927
+      fog-smoke-cloud-isolated_13: 1510410905
+      fog-smoke-cloud-isolated_14: -1785697100
+      fog-smoke-cloud-isolated_15: -1829283986
+      fog-smoke-cloud-isolated_16: 1692677882
+      fog-smoke-cloud-isolated_17: -1510382817
+      fog-smoke-cloud-isolated_18: 450999132
+      fog-smoke-cloud-isolated_19: 573000722
+      fog-smoke-cloud-isolated_2: -1989876374
+      fog-smoke-cloud-isolated_20: 2026121657
+      fog-smoke-cloud-isolated_21: -1994516676
+      fog-smoke-cloud-isolated_22: 870733527
+      fog-smoke-cloud-isolated_23: -1984129828
+      fog-smoke-cloud-isolated_24: -1347011995
+      fog-smoke-cloud-isolated_25: -1456648805
+      fog-smoke-cloud-isolated_26: 852053576
+      fog-smoke-cloud-isolated_27: 1955561569
+      fog-smoke-cloud-isolated_28: 1291370518
+      fog-smoke-cloud-isolated_29: 569865936
+      fog-smoke-cloud-isolated_3: -2012446357
+      fog-smoke-cloud-isolated_30: 469760686
+      fog-smoke-cloud-isolated_31: 31316679
+      fog-smoke-cloud-isolated_32: -188273189
+      fog-smoke-cloud-isolated_33: -81347014
+      fog-smoke-cloud-isolated_34: 523846112
+      fog-smoke-cloud-isolated_35: 922295245
+      fog-smoke-cloud-isolated_36: -565541069
+      fog-smoke-cloud-isolated_37: 1859297612
+      fog-smoke-cloud-isolated_38: 597155841
+      fog-smoke-cloud-isolated_39: -426092929
+      fog-smoke-cloud-isolated_4: 609637471
+      fog-smoke-cloud-isolated_40: 813883226
+      fog-smoke-cloud-isolated_41: -2109592405
+      fog-smoke-cloud-isolated_42: -1491176380
+      fog-smoke-cloud-isolated_43: 1275505960
+      fog-smoke-cloud-isolated_44: -1606784835
+      fog-smoke-cloud-isolated_45: 2047149391
+      fog-smoke-cloud-isolated_46: 1992795323
+      fog-smoke-cloud-isolated_47: -1077137615
+      fog-smoke-cloud-isolated_5: -1811340366
+      fog-smoke-cloud-isolated_6: 1833245203
+      fog-smoke-cloud-isolated_7: -1096178265
+      fog-smoke-cloud-isolated_8: -54034028
+      fog-smoke-cloud-isolated_9: 101630136
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

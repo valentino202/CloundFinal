@@ -34,7 +34,10 @@ public class ColorWheel : MonoBehaviour, IPointerDownHandler, IDragHandler
             value = Mathf.Clamp01(brightnessSlider.value);
             brightnessSlider.onValueChanged.AddListener(OnBrightness);
         }
-        if (wheelImage != null && wheelImage.sprite == null)
+        // La rueda SIEMPRE se dibuja con el circulo HSV generado por codigo.
+        // (Antes solo se generaba si el sprite era null; con el UISprite
+        // puesto a mano quedaba un rectangulo celeste, no una rueda.)
+        if (wheelImage != null)
             wheelImage.sprite = Sprite.Create(WheelTexture(256), new Rect(0, 0, 256, 256), new Vector2(0.5f, 0.5f));
     }
 

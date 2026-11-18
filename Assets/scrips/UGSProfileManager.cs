@@ -43,11 +43,20 @@ public class UGSProfileManager
 
     public PlayerProfile Profile = new PlayerProfile();
 
-    // ---- Claves PlayerPrefs (guardado local) ----
-    const string LOCAL_PROFILE_KEY = "LocalPlayerProfile_v1";
-    const string LOCAL_TIMESTAMP_KEY = "LocalPlayerProfileTimestamp_v1";
+    // ---- Claves PlayerPrefs (guardado local, POR JUGADOR para no mezclar cuentas) ----
+    string LocalProfileKey => "LocalPlayerProfile_v1_" + PlayerIdForLocal();
+    string LocalTimestampKey => "LocalPlayerProfileTimestamp_v1_" + PlayerIdForLocal();
 
-    // ---- Eventos ----
+    static string PlayerIdForLocal()
+    {
+        try
+        {
+            return AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn
+                ? AuthenticationService.Instance.PlayerId
+                : "";
+        }
+        catch { return ""; }
+    }    // ---- Eventos ----
     public static event Action<SaveConflictInfo> OnSaveConflictDetected;
     public static event Action OnProfileLoaded;
     public static event Action OnProfileSaved;
@@ -213,8 +222,8 @@ public class UGSProfileManager
         {
             Profile.localTimestamp = DateTime.UtcNow.Ticks;
             string json = JsonUtility.ToJson(Profile);
-            PlayerPrefs.SetString(LOCAL_PROFILE_KEY, json);
-            PlayerPrefs.SetString(LOCAL_TIMESTAMP_KEY, Profile.localTimestamp.ToString());
+            PlayerPrefs.SetString(LocalProfileKey, json);
+            PlayerPrefs.SetString(LocalTimestampKey, Profile.localTimestamp.ToString());
             PlayerPrefs.Save();
             Debug.Log("[Profile] Guardado local OK.");
         }
@@ -229,16 +238,16 @@ public class UGSProfileManager
     {
         try
         {
-            if (!PlayerPrefs.HasKey(LOCAL_PROFILE_KEY)) return false;
+            if (!PlayerPrefs.HasKey(LocalProfileKey)) return false;
 
-            string json = PlayerPrefs.GetString(LOCAL_PROFILE_KEY);
+            string json = PlayerPrefs.GetString(LocalProfileKey);
             var loaded = JsonUtility.FromJson<PlayerProfile>(json);
             if (loaded == null) return false;
 
             Profile = loaded;
 
-            if (PlayerPrefs.HasKey(LOCAL_TIMESTAMP_KEY))
-                long.TryParse(PlayerPrefs.GetString(LOCAL_TIMESTAMP_KEY), out Profile.localTimestamp);
+            if (PlayerPrefs.HasKey(LocalTimestampKey))
+                long.TryParse(PlayerPrefs.GetString(LocalTimestampKey), out Profile.localTimestamp);
 
             ApplyColors();
             Debug.Log("[Profile] Cargado desde local OK.");
@@ -314,6 +323,10 @@ public class UGSProfileManager
     /// </summary>
     public async Task LoadProfileAsync()
     {
+        // Limpia el perfil en memoria: cada cuenta empieza desde cero y solo
+        // hereda datos de SUS claves (nube por jugador + local por jugador).
+        Profile = new PlayerProfile();
+
         bool cloudOk = await LoadProfileFromCloudAsync();
         bool localOk = LoadProfileFromLocal();
 
@@ -338,11 +351,35 @@ public class UGSProfileManager
         // si ninguno existe, Profile queda con valores por defecto
     }
 
-    /// <summary>Guarda perfil en nube y local.</summary>
+    /// <summary>Guarda perfil en nube y local.
+    /// CON DEBOUNCE: si llegan muchos cambios seguidos (ej: arrastrar la
+    /// rueda de colores dispara SetCustomColorAsync por cada frame), se
+    /// agrupan en UN solo guardado a la nube. Sin esto UGS responde
+    /// request_rate_limited. El guardado LOCAL es inmediato (no tiene limite).
+    /// </summary>
+    const int saveDebounceMs = 1500;    // tiempo que espera para agrupar cambios
+    bool guardadoNubeEnMarcha;          // hay un ciclo de guardado corriendo
+    bool cambiosPendientes;             // llegaron cambios mientras guardaba
+
     public async Task SaveProfileAsync()
     {
-        await SaveProfileToCloudAsync();
-        SaveProfileToLocal();
+        SaveProfileToLocal(); // local: instantaneo y sin limite de ritmo
+
+        if (guardadoNubeEnMarcha) { cambiosPendientes = true; return; }
+        guardadoNubeEnMarcha = true;
+        try
+        {
+            do
+            {
+                cambiosPendientes = false;
+                // Espera el debounce: si mientras esperan siguen llegando
+                // cambios, la espera se reinicia (la rafaga se agrupa).
+                await Task.Delay(saveDebounceMs);
+                await SaveProfileToCloudAsync();
+            }
+            while (cambiosPendientes);
+        }
+        finally { guardadoNubeEnMarcha = false; }
     }
 
     public async Task RecordMatchResultAsync(bool won)
@@ -350,6 +387,13 @@ public class UGSProfileManager
         Profile.TotalMatches++;
         if (won) Profile.TotalWins++;
         await SaveProfileAsync();
+    }
+
+    /// <summary>Limpia el perfil en memoria (al cerrar sesion) para que la proxima cuenta empiece desde sus propios datos.</summary>
+    public void ResetProfile()
+    {
+        Profile = new PlayerProfile();
+        ApplyColors();
     }
 
     public bool OwnsPack(string packId) => Profile.OwnedPackIds.Contains(packId);
