@@ -165,10 +165,14 @@ public class CellVisuals : MonoBehaviour
 
     private void Update()
     {
-        // Si el jugador cambio de pack en el menu, reconstruye con el nuevo arte.
+        // Si el jugador cambio de pack en el menu, reconstruye con el nuevo
+        // arte. Un pack recien registrado (paso 4) aun no trae arte: se
+        // ignora aqui para no caer al fallback de cuadrados; se aplica
+        // recien cuando el paso 7 le de sus clips/prefab.
         var current = BoardFx.Current;
         string id = current != null ? current.id : "clasico";
-        if (id != activePackId)
+        bool tieneArte = current == null || current.HasArt;
+        if (id != activePackId && tieneArte)
         {
             activePackId = id;
             pack = current ?? FxPackCatalog.Get("clasico");

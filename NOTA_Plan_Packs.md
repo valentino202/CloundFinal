@@ -11,6 +11,12 @@
 > Esto CAMBIA el paso 3 (el pack del bot ya no es una constante: es el
 > casillero del jugador 2) y el paso 4 (menu con DOS paneles).
 >
+> **ORDEN AJUSTADO (2026-11-18)**: el usuario quiere **ver el pack
+> seleccionado y jugando COMPLETO y sin errores** antes que la tienda.
+> Por eso el **Paso 5 (monedas/compra)** y el **Paso 14 (online)** se
+> dejan para el FINAL, casi antes de ponerlo online. Prioridad ahora:
+> 6 → 6b → 7 → 7b → 8-12 → 13 (render completo del caldero).
+>
 > **CHECKPOINT (Paso 0): commit `ac0cf39`** — "BASE SEGURA: menu caldero
 > aprobado + juego original (pre-plan packs)". Antes de este commit, el
 > ultimo era `3313402` ("ramking terminado"). Si algo se rompe:
@@ -55,7 +61,7 @@
 | 2 | `BoardFx.PackFor(owner)` (pack por dueño) | ⭐ facil | Poco |
 | 3 | Dos casilleros (P1/P2) en el perfil + colores independientes | ⭐⭐ medio | Poco |
 | 3b | Sonido y burbujas: sacar los fijos del juego y tomarlos del pack | ⭐⭐⭐ dificil | SI |
-| 4 | UI de seleccion de packs en el menu con DOS paneles | ⭐⭐ medio | No (solo menu) |
+| 4 | Seleccionar el caldero desde el menu (clic equipar/quitar) | ⭐⭐ medio | No (solo menu) |
 | 5 | Compra de packs con monedas/gemas | ⭐⭐ medio | No (solo menu) |
 | 6 | Registrar el pack "caldero" en el catalogo (datos, sin render) | ⭐⭐ medio | Poco |
 | 6b | Exportar la config visual del boton al pack (con conversion de escala) | ⭐⭐⭐ dificil | Poco |
@@ -160,15 +166,43 @@ pena y se reintenta con celdas de prueba.
   errores en consola.
 - [x] Aprobado por el usuario (commit `1913546`)
 
-### Paso 4 — Menu con DOS casilleros (P1 y P2) ⭐⭐
-- **Que**: el panel de personalizacion muestra dos bloques ("Jugador 1"
-  y "Jugador 2"), cada uno con su selector de pack y su color. Todo via
-  `UGSProfileManager` (Unlock/Equip/SetColor ya existen; se generalizan
-  a "por jugador"). El juego NO se toca aca.
-- **Prueba**: los 4 casos — P1 pack + P2 clasico, ambos clasico,
-  P1 clasico + P2 pack, y cada uno con su pack propio. Colores
-  independientes (P1 morado, P2 naranja, etc.).
-- [ ] Aprobado
+### Paso 4 — Seleccionar el caldero desde el MENU ⭐⭐ (IMPLEMENTADO)
+- **Correccion del usuario**: en online NO hay dos paneles en una misma
+  pantalla: cada jugador usa el MISMO menu en SU dispositivo y escribe
+  SU perfil en la nube (por PlayerId). Los datos de los dos casilleros
+  ya estan hechos (paso 3); lo que faltaba era el BOTON que permita
+  equipar/guardar el pack.
+- **Que hecho**: `SwatchCaldero.SeleccionarPack()` vuelve (toggle): clic
+  desbloquea + equipa + guarda en nube/local; clic otra vez vuelve al
+  "clasico". El boton se sostiene 6% mas grande mientras su pack esta
+  equipado. `packIdSeleccion` / `seleccionarAlClic` son campos nuevos
+  (toman defaults del codigo).
+- **Registro de datos**: el boton registra `new FxPack("caldero", ...)`
+  en el catalogo (SIN arte) para que `EquipPackAsync` lo acepte. El
+  juego NO se rompe: `CellVisuals.Update` ignora packs sin `HasArt`
+  (salvaguarda), asi que sigue dibujando el clasico hasta el paso 7.
+- **GRUPO de seleccion unico** (pidio el usuario): al elegir un color,
+  `ColorSwatch` equipa el pack "clasico" (`equiparClasicoAlClic`) y su
+  boton se agranda; si despues se elige el caldero, todos los colores
+  vuelven a escala normal. La regla vive en el perfil: un color solo se
+  ve seleccionado si su color coincide Y `EquippedPackId == "clasico"`.
+  `ColorSwatch` NO menciona el caldero en ningun lado (cero rastros en
+  scripts compartidos); solo conoce el pack basico.
+- **Ajuste visual del usuario**: el caldero era 1.06 (6%) y se veia chico;
+  ahora `escalaSeleccion = 1.25` (25%, mas resalte, pack premium) y los
+  colores `1.18`. El hover usa `Mathf.Max(hoverScale, escalaSeleccion)`
+  para que un boton seleccionado NUNCA se encoja al pasar el mouse.
+- **Logs de consola** (pidio el usuario, para verificar la caja elegida):
+  al abrir el panel `[Selector] Caja actual del jugador: '...'`; al elegir
+  caldero `[Selector] ✅ Pack 'caldero' EQUIPADO y GUARDADO ... LISTO PARA
+  JUGAR CON CALDERO (el look se aplica en el paso 7)`; al elegir color
+  `[Selector] ✅ Elegiste color ... Caja guardada: 'clasico' → LISTO PARA
+  JUGAR CLASICO`. `ColorSwatch` no nombra el caldero en el log (dice
+  "pack especial"). Importante: la consola confirma la ELECCION guardada;
+  el tablero sigue viendo clásico hasta que el pack tenga arte (paso 7).
+- **Prueba**: consola muestra EQUIPADO / QUITADO; el perfil persiste al
+  reabrir; el juego sigue con el clasico.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
 
 ### Paso 5 — Compra de packs ⭐⭐
 - **Que**: comprar con `SpendCurrencyAsync` (existe) antes de

@@ -62,6 +62,10 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [Range(0.5f, 1f)] public float pressScale = 0.86f;
     [Tooltip("Suavidad del escalado.")]
     [Range(1f, 30f)] public float smooth = 14f;
+    [Tooltip("Al elegir este color se equipa el pack basico 'clasico' (deja el pack especial). Asi los colores y los packs forman UN solo grupo de seleccion.")]
+    public bool equiparClasicoAlClic = true;
+    [Tooltip("Escala cuando este color esta seleccionado.")]
+    [Range(1f, 1.6f)] public float escalaSeleccion = 1.18f;
 
     public Image liquidImage;
     public Image crystalImage;
@@ -84,7 +88,9 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public void SetSelected(bool selected)
     {
         this.selected = selected;
-        targetScale = baseScale * (selected ? 1.18f : 1f);
+        targetScale = baseScale * (selected ? escalaSeleccion : 1f);
+        var frame = transform.Find("SelectedFrame");
+        if (frame != null) frame.gameObject.SetActive(selected);
     }
 
     private void Awake()
@@ -100,7 +106,7 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private void OnEnable()
     {
         // Al abrirse el panel el liquido se llena animado (una pasada,
-        // como las casillas y como el boton del caldero). Solo si le
+        // como las casillas y como los demas botones de packs). Solo si le
         // asignaron frames: sin frames queda estatico como siempre.
         if (Application.isPlaying && HayFrames()) Llenar();
     }
@@ -112,6 +118,21 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private void Update()
     {
+        // Seleccion como GRUPO (paso 4): este color solo esta seleccionado
+        // si su color coincide con el perfil Y el pack equipado es el
+        // "clasico". Si hay un pack especial equipado, NINGUN color se
+        // agranda — el grupo lo decide el perfil, no el ultimo clic.
+        if (Application.isPlaying && UGSProfileManager.Instance != null)
+        {
+            var perfil = UGSProfileManager.Instance.Profile;
+            Color actual = PlayerColorOptions.Get(perfil.PlayerColorMode, perfil.PlayerCustomColor);
+            var mio = ColorResuelto();
+            bool sel = perfil.EquippedPackId == "clasico" &&
+                       Mathf.Abs(mio.r - actual.r) < 0.02f &&
+                       Mathf.Abs(mio.g - actual.g) < 0.02f &&
+                       Mathf.Abs(mio.b - actual.b) < 0.02f;
+            if (sel != selected) SetSelected(sel);
+        }
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * smooth);
     }
 
@@ -152,10 +173,32 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     static Sprite Ultimo(Sprite[] frames)
         => frames != null && frames.Length > 0 ? frames[frames.Length - 1] : null;
 
-    public void OnPointerEnter(PointerEventData _) => targetScale = baseScale * hoverScale;
-    public void OnPointerExit(PointerEventData _) => targetScale = baseScale * (selected ? 1.18f : 1f);
+    // El hover no encoge un boton seleccionado.
+    public void OnPointerEnter(PointerEventData _)
+        => targetScale = baseScale * Mathf.Max(hoverScale, selected ? escalaSeleccion : 1f);
+    public void OnPointerExit(PointerEventData _)
+        => targetScale = baseScale * (selected ? escalaSeleccion : 1f);
     public void OnPointerDown(PointerEventData _) => targetScale = baseScale * pressScale;
-    public void OnPointerUp(PointerEventData _) => targetScale = baseScale * (selected ? 1.18f : 1f);
+    public void OnPointerUp(PointerEventData _)
+    {
+        targetScale = baseScale * (selected ? escalaSeleccion : 1f);
+        if (equiparClasicoAlClic) EquiparClasico();
+    }
+
+    /// <summary>
+    /// Elegir un color implica volver al pack basico: asi el selector de
+    /// packs y el de colores son UN solo grupo (uno se agranda, el otro
+    /// vuelve a su escala). Guarda el cambio en el perfil (nube + local).
+    /// </summary>
+    async void EquiparClasico()
+    {
+        var perfil = UGSProfileManager.Instance;
+        if (perfil == null || perfil.Profile.EquippedPackId == "clasico") return;
+        await perfil.EquipPackAsync("clasico");
+        Debug.Log($"[Selector] ✅ Elegiste color '{ColorResuelto()}'. " +
+                  "Caja guardada: 'clasico' → LISTO PARA JUGAR CLASICO " +
+                  "(pack especial quitado, sin burbujas, sonido base).", this);
+    }
 
     private void Build()
     {

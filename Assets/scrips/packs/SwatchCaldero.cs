@@ -48,6 +48,15 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Range(1f, 1.5f)] public float hoverScale = 1.14f;
     [Range(0.5f, 1f)] public float pressScale = 0.86f;
     [Range(1f, 30f)] public float smooth = 14f;
+    [Tooltip("Escala cuando este pack esta equipado. Mas alto = resalta mas (pack premium).")]
+    [Range(1f, 1.6f)] public float escalaSeleccion = 1.25f;
+
+    [Header("Seleccion del pack (clic = equipar / quitar)")]
+    [Tooltip("Id del pack que equipa este boton en el perfil del jugador local.")]
+    public string packIdSeleccion = "caldero";
+    [Tooltip("Clic: si no esta equipado lo desbloquea, equipa y guarda (nube + local); si ya esta, vuelve al clasico.")]
+    public bool seleccionarAlClic = true;
+    bool seleccionEnMarcha;
 
     [Header("Objetos del caldero (los armas vos a mano)")]
     [Tooltip("Nivel 1: hongos, de a dos. Hijos DESACTIVADOS del boton.")]
@@ -159,6 +168,14 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void Awake()
     {
+        // Paso 4: el pack se registra como DATOS (sin arte) para que
+        // EquipPackAsync lo acepte y pueda guardarse en el perfil.
+        // La receta visual completa llega en el paso 6b; el juego sigue
+        // usando el clasico hasta el paso 7 (HasArt = false).
+        if (FxPackCatalog.Get(packIdSeleccion) == null)
+            FxPackCatalog.RegisterPack(new FxPack(packIdSeleccion, "Caldero de Bruja",
+                "caldero_1", "caldero_2", "caldero_3", "caldero_boom"));
+
         baseScale = transform.localScale;
         targetScale = baseScale;
         ConstruirHijos();
@@ -192,8 +209,37 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (llenado != null) { StopCoroutine(llenado); llenado = null; }
     }
 
+    private void Start()
+    {
+        // Al abrir el panel se ve en consola que caja tiene guardada este
+        // jugador (util para confirmar que la eleccion persiste).
+        string caja = UGSProfileManager.Instance != null
+            ? UGSProfileManager.Instance.Profile.EquippedPackId : "(sin perfil)";
+        Debug.Log($"[Selector] Caja actual del jugador: '{caja}' — " +
+                  (EquipadoAhora ? "caldero seleccionado." : "pack clasico activo."), this);
+    }
+
+    /// <summary>True mientras SU pack este equipado en el perfil local.</summary>
+    bool EquipadoAhora => Application.isPlaying &&
+        UGSProfileManager.Instance != null &&
+        UGSProfileManager.Instance.Profile.EquippedPackId == packIdSeleccion;
+
+    /// <summary>Escala del estado seleccionado (1 = no seleccionado).</summary>
+    float FactorSeleccion => EquipadoAhora ? escalaSeleccion : 1f;
+
+    bool ultimoEquipado;
+
     private void Update()
     {
+        // Si el estado de seleccion cambio (clic aca o en otro boton),
+        // se recalcula la escala objetivo. Es un GRUPO: solo el pack
+        // equipado se agranda; al cambiar, este vuelve a su tamano.
+        bool equipado = EquipadoAhora;
+        if (equipado != ultimoEquipado)
+        {
+            ultimoEquipado = equipado;
+            targetScale = baseScale * FactorSeleccion;
+        }
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * smooth);
         AplicarOpcionesDeEfectos();
     }
@@ -269,10 +315,53 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         }
     }
 
-    public void OnPointerEnter(PointerEventData _) => targetScale = baseScale * hoverScale;
-    public void OnPointerExit(PointerEventData _) => targetScale = baseScale;
+    // El hover NUNCA encoge un boton seleccionado: se queda en la escala
+    // de seleccion (o mas) para que siga resaltando.
+    public void OnPointerEnter(PointerEventData _)
+        => targetScale = baseScale * Mathf.Max(hoverScale, FactorSeleccion);
+    public void OnPointerExit(PointerEventData _)
+        => targetScale = baseScale * FactorSeleccion;
     public void OnPointerDown(PointerEventData _) => targetScale = baseScale * pressScale;
-    public void OnPointerUp(PointerEventData _) => targetScale = baseScale;
+    public void OnPointerUp(PointerEventData _)
+    {
+        targetScale = baseScale * FactorSeleccion;
+        if (seleccionarAlClic) SeleccionarPack();
+    }
+
+    /// <summary>
+    /// CLIC = EQUIPAR / QUITAR (toggle) en el perfil del jugador LOCAL.
+    /// Si no esta equipado: lo desbloquea (por ahora gratis; la compra
+    /// con monedas/gemas viene en el paso 5), lo equipa y guarda en
+    /// nube + local. Si ya esta equipado: vuelve al "clasico".
+    /// La nube guarda SOLO la eleccion (EquippedPackId); la receta visual
+    /// del pack se arma en el paso 6b.
+    /// </summary>
+    public async void SeleccionarPack()
+    {
+        if (seleccionEnMarcha) return;
+        seleccionEnMarcha = true;
+        try
+        {
+            var perfil = UGSProfileManager.Instance;
+            if (perfil == null) return;
+            if (perfil.Profile.EquippedPackId == packIdSeleccion)
+            {
+                await perfil.EquipPackAsync("clasico"); // quitar el especial
+                Debug.Log($"[Selector] ✅ Pack '{packIdSeleccion}' QUITADO. " +
+                          "Caja guardada: 'clasico' → LISTO PARA JUGAR CLASICO (sin burbujas, sonido base).", this);
+            }
+            else
+            {
+                if (!perfil.OwnsPack(packIdSeleccion))
+                    await perfil.UnlockPackAsync(packIdSeleccion);
+                await perfil.EquipPackAsync(packIdSeleccion);
+                Debug.Log($"[Selector] ✅ Pack '{packIdSeleccion}' EQUIPADO y GUARDADO (nube + local). " +
+                          "Caja guardada: '{packIdSeleccion}' → LISTO PARA JUGAR CON CALDERO " +
+                          "(el look del pack se aplica en el paso 7).", this);
+            }
+        }
+        finally { seleccionEnMarcha = false; }
+    }
 
     /// <summary>Reproduce el llenado completo (una pasada) y queda lleno.</summary>
     public void Llenar()
