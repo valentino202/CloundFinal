@@ -122,7 +122,8 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // si su color coincide con el perfil Y el pack equipado es el
         // "clasico". Si hay un pack especial equipado, NINGUN color se
         // agranda — el grupo lo decide el perfil, no el ultimo clic.
-        if (Application.isPlaying && UGSProfileManager.Instance != null)
+        if (Application.isPlaying && UGSProfileManager.PerfilListo &&
+            UGSProfileManager.Instance != null)
         {
             var perfil = UGSProfileManager.Instance.Profile;
             Color actual = PlayerColorOptions.Get(perfil.PlayerColorMode, perfil.PlayerCustomColor);

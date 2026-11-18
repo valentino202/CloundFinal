@@ -58,6 +58,13 @@ public class UGSProfileManager
 
     public PlayerProfile Profile = new PlayerProfile();
 
+    /// <summary>
+    /// true cuando la carga del perfil (nube/local) termino. La UI usa
+    /// esta marca para NO mostrar una seleccion provisional (ej: el
+    /// color por defecto) antes de que lleguen los datos guardados.
+    /// </summary>
+    public static bool PerfilListo;
+
     // ---- Claves PlayerPrefs (guardado local, POR JUGADOR para no mezclar cuentas) ----
     string LocalProfileKey => "LocalPlayerProfile_v1_" + PlayerIdForLocal();
     string LocalTimestampKey => "LocalPlayerProfileTimestamp_v1_" + PlayerIdForLocal();
@@ -373,6 +380,7 @@ public class UGSProfileManager
     {
         // Limpia el perfil en memoria: cada cuenta empieza desde cero y solo
         // hereda datos de SUS claves (nube por jugador + local por jugador).
+        PerfilListo = false;
         Profile = new PlayerProfile();
 
         bool cloudOk = await LoadProfileFromCloudAsync();
@@ -397,6 +405,8 @@ public class UGSProfileManager
             // Solo hay local, ya se cargó en LoadProfileFromLocal
         }
         // si ninguno existe, Profile queda con valores por defecto
+        PerfilListo = true;
+        OnProfileLoaded?.Invoke(); // avisa a la UI que ya puede mostrar la seleccion
     }
 
     /// <summary>Guarda perfil en nube y local.
@@ -440,6 +450,7 @@ public class UGSProfileManager
     /// <summary>Limpia el perfil en memoria (al cerrar sesion) para que la proxima cuenta empiece desde sus propios datos.</summary>
     public void ResetProfile()
     {
+        PerfilListo = false;
         Profile = new PlayerProfile();
         ApplyColors();
     }

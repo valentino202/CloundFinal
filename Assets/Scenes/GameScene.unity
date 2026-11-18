@@ -183,7 +183,6 @@ MonoBehaviour:
   glassPrefab: {fileID: 3176565274343680119, guid: 653c78b8b3f6a32469aecb72b7860fc2, type: 3}
   glassAlpha: 1
   colorBoost: 1.4
-  bubbles: 0
   bubbleSprites: []
   bubbleRate: 5.31
   bubbleSize: 0.07
@@ -208,9 +207,14 @@ MonoBehaviour:
   numberFontSize: 4
   numberSize: 1
   boomSoundA: {fileID: 8300000, guid: a62231eec917d76488f45f7e5a7509a1, type: 3}
-  boomSoundB: {fileID: 8300000, guid: c1c0edd6f4daae6468d29297203611b6, type: 3}
+  boomSoundB: {fileID: 8300000, guid: bec35f8ecfdcafa4e9683004e131f2a7, type: 3}
   boomSound: 1
   boomVolume: 0.8
+  calderoBoomSoundA: {fileID: 0}
+  calderoBoomSoundB: {fileID: 0}
+  calderoBoomSound: 0
+  volumenBoomClasico: 2
+  volumenBoomCaldero: 1.047
   shakeDuration: 0.22
   shakeStrength: 0.16
   crystalFill: 1

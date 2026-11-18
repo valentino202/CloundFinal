@@ -73,13 +73,25 @@ public class CellVisuals : MonoBehaviour
     [Tooltip("Lado de la caja del numero en celdas.")]
     [Range(0.1f, 1f)] public float numberSize = 0.25f;
 
-    [Header("Sonido de explosion (prueba A/B)")]
+    [Header("Sonido de explosion del CLASICO (arrastra clips para probar)")]
     public AudioClip boomSoundA;
     public AudioClip boomSoundB;
     public enum BoomSoundMode { A = 0, B = 1, Alternar = 2 }
     [Tooltip("A = solo A, B = solo B, Alternar = uno y uno para comparar en partida.")]
     public BoomSoundMode boomSound = BoomSoundMode.Alternar;
     [Range(0f, 1f)] public float boomVolume = 0.8f;
+
+    [Header("Sonido de explosion del CALDERO (prueba futuros sonidos)")]
+    [Tooltip("Arrastra un clip para probar. Si lo dejas VACIO se usa explosion_caldero.mp3 (automatico).")]
+    public AudioClip calderoBoomSoundA;
+    public AudioClip calderoBoomSoundB;
+    [Tooltip("A = solo A, B = solo B, Alternar para comparar dos clips del caldero.")]
+    public BoomSoundMode calderoBoomSound = BoomSoundMode.A;
+    [Header("Volumen del boom por pack (ajusta a oido en Play)")]
+    [Tooltip("Multiplicador sobre 'Boom Volume' para el clasico. Subir si se escucha bajo.")]
+    [Range(0f, 2f)] public float volumenBoomClasico = 1.3f;
+    [Tooltip("Multiplicador sobre 'Boom Volume' para el caldero (su mp3 viene mas alto).")]
+    [Range(0f, 2f)] public float volumenBoomCaldero = 0.6f;
 
     [Header("Feel")]
     public float shakeDuration = 0.22f;
@@ -124,6 +136,7 @@ public class CellVisuals : MonoBehaviour
         public AnimationPlayableOutput output;
         public bool outputValid;
         public Coroutine juice;
+        public string bubblePackId; // pack con el que se armo el sistema de burbujas
     }
 
     private readonly Dictionary<Vector2Int, CellVisual> cells = new Dictionary<Vector2Int, CellVisual>();
@@ -163,6 +176,13 @@ public class CellVisuals : MonoBehaviour
         return cellPack != null && cellPack.HasArt ? cellPack : pack;
     }
 
+    /// <summary>
+    /// Pack para EFECTOS (burbujas/sonido/color): estos NO necesitan clips
+    /// ni prefab, asi que se toman del casillero aunque el pack aun no
+    /// tenga arte (paso 6). Las animaciones siguen usando PackDeCelda.
+    /// </summary>
+    private FxPack PackEfectos(int owner) => BoardFx.PackFor(owner) ?? pack;
+
     private void Update()
     {
         // Si el jugador cambio de pack en el menu, reconstruye con el nuevo
@@ -178,6 +198,10 @@ public class CellVisuals : MonoBehaviour
             pack = current ?? FxPackCatalog.Get("clasico");
             Rebuild();
         }
+
+        // Permite probar clips/volumenes arrastrando en el Inspector DURANTE
+        // el Play: se vuelcan al pack y la proxima explosion usa el nuevo.
+        MigrarEfectosAlPack();
     }
 
     /// <summary>
@@ -242,7 +266,30 @@ graph = PlayableGraph.Create("CellVisuals");
         pack.sonidoBoom = boomSoundA;
         pack.sonidoBoomB = boomSoundB;
         pack.modoSonidoBoom = (int)boomSound;
-        pack.boomVolume = boomVolume;
+        pack.boomVolume = Mathf.Max(0f, boomVolume * volumenBoomClasico);
+
+        // El caldero ya tiene su mp3 propio (paso 6). Si no, le prestamos
+        // el del clasico para que no quede mudo. El volumen se ajusta por
+        // SEPARADO para que ambos se escuchen igual de fuerte.
+        var caldero = FxPackCatalog.Get("caldero");
+        if (caldero != null)
+        {
+            if (calderoBoomSoundA != null)
+            {
+                // El usuario arrastro un clip: manda su eleccion (se puede
+                // cambiar en Play y se aplica al reiniciar la escena).
+                caldero.sonidoBoom = calderoBoomSoundA;
+                caldero.sonidoBoomB = calderoBoomSoundB;
+                caldero.modoSonidoBoom = (int)calderoBoomSound;
+            }
+            else if (caldero.sonidoBoom == null)
+            {
+                caldero.sonidoBoom = boomSoundA;
+                caldero.sonidoBoomB = boomSoundB;
+                caldero.modoSonidoBoom = (int)boomSound;
+            }
+            caldero.boomVolume = Mathf.Max(0f, boomVolume * volumenBoomCaldero);
+        }
     }
 
     private void OnDestroy()
@@ -425,20 +472,15 @@ graph = PlayableGraph.Create("CellVisuals");
         cv.anim = liqGO.AddComponent<Animator>();
         cv.anim.applyRootMotion = false;
 
-        // --- Burbujas: SOLO si el pack del DUEÑO las trae (paso 3b) ---
-        // No hay switch global: el casillero del jugador decide. El clasico
-        // no tiene; un pack especial (caldero) trae las suyas.
-        int owner = match != null && x < match.game.gridSize && y < match.game.gridSize
-            ? match.game.owner[x, y] : 0;
-        var bPack = PackDeCelda(owner);
-        if (bPack != null && bPack.burbujasOn)
-        {
-            var bubGO = new GameObject($"Bubbles_{x}_{y}");
-            bubGO.transform.SetParent(cellsRoot, false);
-            bubGO.transform.localPosition = pos;
-            cv.foam = bubGO.AddComponent<ParticleSystem>();
-            SetupBubbles(cv.foam, bPack);
-        }
+        // --- Burbujas del pack del DUEÑO (paso 6) ---
+        // El tablero arranca NEUTRAL (owner = 0): el pack dueño se decide
+        // en vivo en ApplyState. Por eso el emisor se crea SIEMPRE y se
+        // calla si el pack actual no trae burbujas (clasico).
+        var bubGO = new GameObject($"Bubbles_{x}_{y}");
+        bubGO.transform.SetParent(cellsRoot, false);
+        bubGO.transform.localPosition = pos;
+        cv.foam = bubGO.AddComponent<ParticleSystem>();
+        SetupBubbles(cv.foam, PackEfectos(0));
 
         // --- Numero de nivel: centrado sobre el cristal, blanco -> rojo ---
         var labelGO = new GameObject($"Label_{x}_{y}");
@@ -494,6 +536,10 @@ graph = PlayableGraph.Create("CellVisuals");
     {
         // Efectos del pack del DUEÑO (paso 3b): el tablero no tiene
         // valores propios de burbujas, los toma del casillero del jugador.
+        // Unity NO permite cambiar 'duration' mientras el sistema corre:
+        // se detiene y se limpia ANTES de tocar cualquier modulo (esto
+        // ocurria al cambiar de dueno en una explosion).
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         var main = ps.main;
         main.loop = true;
         main.duration = 3f;
@@ -504,7 +550,10 @@ graph = PlayableGraph.Create("CellVisuals");
         // (La velocidad inicial sale en +Z local = hacia la camara, no sirve en 2D.)
         main.startSpeed = 0f;
         main.startSize = new ParticleSystem.MinMaxCurve(bPack.bubbleSize * 0.85f, bPack.bubbleSize * 1.15f);
-        main.startColor = new Color(1f, 1f, 1f, bPack.bubbleAlpha);
+        // Variacion como en el menu: unas casi invisibles, otras marcadas.
+        main.startColor = new ParticleSystem.MinMaxGradient(
+            new Color(1f, 1f, 1f, bPack.bubbleAlpha * 0.35f),
+            new Color(1f, 1f, 1f, bPack.bubbleAlpha));
         main.simulationSpace = ParticleSystemSimulationSpace.Local;
         main.playOnAwake = false;
 
@@ -584,7 +633,7 @@ graph = PlayableGraph.Create("CellVisuals");
         float spawnY = -BoardFx.CellSize * 0.32f;
         float surfaceY = -BoardFx.CellSize * 0.5f + surface * BoardFx.CellSize;
         float dist = Mathf.Max(0.05f, surfaceY - spawnY);
-        float life = dist / Mathf.Max(0.05f, PackDeCelda(cv.owner).bubbleRise);
+        float life = dist / Mathf.Max(0.05f, PackEfectos(cv.owner).bubbleRise);
         var main = cv.foam.main;
         // Atricion: la mitad muere en el camino (vida corta), unas cuantas
         // llegan a la superficie. Asi no se satura en niveles altos.
@@ -595,7 +644,9 @@ graph = PlayableGraph.Create("CellVisuals");
     {
         if (cv.foam == null) return;
         var em = cv.foam.emission;
-        if (level <= 0)
+        var fx = PackEfectos(cv.owner);
+        bool conBurbujas = fx != null && fx.burbujasOn;
+        if (level <= 0 || !conBurbujas)
         {
             // Celda vacia (exploto): no basta con tasa 0, hay que matar las
             // vivas o se quedan flotando en el vaso vacio.
@@ -606,7 +657,7 @@ graph = PlayableGraph.Create("CellVisuals");
         }
         UpdateBubbleZone(cv, level);
         // Sin liquido no hay burbujas; mas nivel = mas burbujeo.
-        em.rateOverTime = PackDeCelda(cv.owner).bubbleRate * level / 3f;
+        em.rateOverTime = PackEfectos(cv.owner).bubbleRate * level / 3f;
         if (!cv.foam.isPlaying) cv.foam.Play();
     }
 
@@ -683,8 +734,16 @@ graph = PlayableGraph.Create("CellVisuals");
             }
         }
 
-        // Burbujas solo con liquido, tintadas igual que el liquido (mismo
-        // pack: si el pack trae color propio, lo heredan).
+        // Burbujas segun el pack del DUEÑO ACTUAL. Si la celda cambio de
+        // manos (o se equipa otro pack), se reconfigura el emisor con la
+        // receta del nuevo pack — por eso aparecen aunque la celda
+        // naciera neutral.
+        var fxPack = PackEfectos(owner);
+        if (cv.foam != null && fxPack != null && cv.bubblePackId != fxPack.id)
+        {
+            cv.bubblePackId = fxPack.id;
+            SetupBubbles(cv.foam, fxPack);
+        }
         SetBubbleRate(cv, level);
         if (cv.foam != null && level > 0)
         {
@@ -879,7 +938,7 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
     {
         // Sonido del casillero de QUIEN exploto (paso 3b): el tablero no
         // tiene clips propios, los toma del pack del jugador.
-        var sPack = PackDeCelda(owner);
+        var sPack = PackEfectos(owner);
         AudioClip clip = sPack.modoSonidoBoom switch
         {
             0 => sPack.sonidoBoom,

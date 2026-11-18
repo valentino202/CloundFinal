@@ -124,9 +124,54 @@ public static class FxPackCatalog
     private static readonly List<FxPack> packs = new List<FxPack>
     {
         new FxPack("clasico", "Clasico", "clasico_1", "clasico_2", "clasico_3", "clasico_boom"),
+        // Paso 6: el caldero entra como DATOS (aun sin arte). El juego
+        // lo ve aunque abras GameScene directo, porque el catalogo se
+        // arma aqui, no depende de que el boton del menu este en escena.
+        new FxPack("caldero", "Caldero de Bruja", "caldero_1", "caldero_2", "caldero_3", "caldero_boom"),
         // Ejemplo para cuando hagas tus animaciones:
         // new FxPack("acuario", "Acuario", "acuario_1", "acuario_2", "acuario_3", "acuario_boom"),
     };
+
+    // Receta del pack caldero (paso 6): color de bruja y burbujas propias.
+    // Sin clips ni prefab todavia (HasArt = false): el tablero sigue
+    // dibujando el cristal/clips del clasico hasta el paso 7.
+    static FxPackCatalog()
+    {
+        var caldero = Get("caldero");
+        if (caldero == null) return;
+        caldero.usaColorPropio = true;
+        caldero.colorLiquidoPropio = new Color(0.15f, 0.65f, 0.25f, 1f); // verde
+        caldero.burbujasOn = true;
+        caldero.bubbleRate = 5f;    // mas densas que el clasico (el usuario las vio poquitas)
+        caldero.bubbleSize = 0.09f;
+        caldero.bubbleRise = 0.5f;
+        caldero.bubbleDrift = 0.01f;
+        caldero.bubbleAlpha = 0.55f;
+
+        // Sonido NUEVO del usuario: explosion_caldero.mp3 (en Assets/musica
+        // y sonidos). Se busca por nombre para no arrastrar nada a mano.
+        // El clasico conserva su sonido A/B del Inspector.
+#if UNITY_EDITOR
+        var guids = UnityEditor.AssetDatabase.FindAssets("explosion_caldero t:AudioClip");
+        foreach (var g in guids)
+        {
+            string ruta = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+            var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(ruta);
+            if (clip == null || clip.name != "explosion_caldero") continue;
+            caldero.sonidoBoom = clip;      // ranura A del pack
+            caldero.sonidoBoomB = null;     // no alternar: solo el nuevo
+            caldero.modoSonidoBoom = 0;     // 0 = solo A
+            // El mp3 viene masterizado mas alto que el del clasico: se
+            // baja el volumen para que se perciban IGUAL de fuertes.
+            caldero.boomVolume = 0.5f;      // clasico = 0.8
+            Debug.Log($"[FxPacks] Sonido de explosion del caldero cargado: {ruta} (volumen {caldero.boomVolume})");
+            break;
+        }
+#endif
+        // NOTA para build: si el mp3 no esta en Resources, cuando hagas
+        // build habria que arrastrarlo al Inspector del pack o moverlo a
+        // Assets/Resources y usar Resources.Load. En el editor ya funciona.
+    }
 
     public static void RegisterPack(FxPack pack)
     {

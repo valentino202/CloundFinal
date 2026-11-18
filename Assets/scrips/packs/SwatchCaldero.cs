@@ -200,13 +200,27 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void OnEnable()
     {
+        UGSProfileManager.OnProfileLoaded += AlCargarPerfil;
         // Cada vez que se abre el panel, el caldero se llena de nuevo:
         // una pasada y queda lleno (nada de loop).
         if (Application.isPlaying) Llenar();
     }
 
-    private void OnDisable()    {
+    private void OnDisable()
+    {
+        UGSProfileManager.OnProfileLoaded -= AlCargarPerfil;
         if (llenado != null) { StopCoroutine(llenado); llenado = null; }
+    }
+
+    /// <summary>Cuando llega el perfil de la nube se refresca el estado
+    /// seleccionado (antes no se mostraba nada para no mostrar un color
+    /// provisional).</summary>
+    void AlCargarPerfil()
+    {
+        ultimoEquipado = EquipadoAhora;
+        targetScale = baseScale * FactorSeleccion;
+        Debug.Log($"[Selector] Perfil cargado — caja: " +
+                  $"'{UGSProfileManager.Instance?.Profile.EquippedPackId}'.", this);
     }
 
     private void Start()
@@ -220,7 +234,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     /// <summary>True mientras SU pack este equipado en el perfil local.</summary>
-    bool EquipadoAhora => Application.isPlaying &&
+    bool EquipadoAhora => Application.isPlaying && UGSProfileManager.PerfilListo &&
         UGSProfileManager.Instance != null &&
         UGSProfileManager.Instance.Profile.EquippedPackId == packIdSeleccion;
 

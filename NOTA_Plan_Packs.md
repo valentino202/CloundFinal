@@ -211,15 +211,57 @@ pena y se reintenta con celdas de prueba.
   persiste en nube.
 - [ ] Aprobado
 
-### Paso 6 — Registrar "caldero" (solo datos) ⭐⭐
-- **Que**: `FxPackCatalog.RegisterPack(new FxPack("caldero", ...))` con
-  su `liquidColor` VERDE y las burbujas (sprites). **Sin render nuevo**:
-  equipar caldero todavia se ve clasico (el render por casilla viene
-  en el paso 7).
+### Paso 6 — Registrar "caldero" (solo datos) ⭐⭐ (IMPLEMENTADO)
+- **Que hecho**: el caldero ya vive en el catalogo de `FxPacks.cs` (no
+  depende del boton del menu, asi funciona abriendo GameScene directo).
+  Receta: `usaColorPropio = true` + verde `0.15/0.65/0.25` +
+  `burbujasOn = true`. **Sin clips/prefab** (`HasArt = false`): el
+  cristal y las animaciones siguen siendo los del clasico (paso 7).
+- **Sonido propio nuevo** (lo agrego el usuario): `Assets/musica y
+  sonidos/explosion_caldero.mp3`. Se carga por nombre desde el catalogo
+  (editor) y se pone en la ranura A del pack caldero con modo "solo A";
+  el clasico conserva su sonido A/B del Inspector. Si queda para build,
+  mover el mp3 a `Assets/Resources` o asignarlo en el Inspector.
+- `CellVisuals` separo `PackEfectos(owner)` (burbujas/sonido/color, que
+  NO necesitan arte) de `PackDeCelda(owner)` (clips, que si lo necesitan).
+  El caldero hereda el sonido del clasico mientras no tenga el suyo.
+- **Resultado visible ya**: si la caja guardada es "caldero", las
+  casillas del jugador 1 salen **VERDES con burbujas**; las del jugador
+  2 siguen clasico (rosa/naranja). Sin errores en consola.
+- **CORRECCION tras la prueba del usuario** (veia el color pero no las
+  burbujas): el tablero nace neutral (`owner = 0`), asi que al crear la
+  celda se consultaba el pack del tablero (clasico, sin burbujas) y el
+  emisor ni se creaba. Ahora el emisor se crea SIEMPRE (callado) y
+  `ApplyState` lo reconfigura en vivo cuando cambia el pack del dueno
+  (`CellVisual.bubblePackId`); `SetBubbleRate` calla las del pack que no
+  trae burbujas. **El vapor todavia no existe en el juego** (es el paso
+  11: era solo del menu).
+- **Correcciones tras la prueba del usuario** (2026-11-18):
+  1. Error `Setting the duration while system is still playing`: al
+     cambiar de dueno (una explosion del enemigo) se reconfiguraba el
+     emisor con particulas vivas. `SetupBubbles` ahora llama
+     `ps.Stop(true, StopEmittingAndClear)` ANTES de tocar `duration`.
+  2. Burbujas "poquitas": densidad 5/s, tamano 0.09 y `startColor` con
+     `MinMaxGradient` (unas tenues, otras marcadas, como el menu).
+  3. "Primero aparecio otro color": `UGSProfileManager.PerfilListo`
+     (true al terminar `LoadProfileAsync`) evita seleccion provisional
+     antes de cargar la nube; `OnProfileLoaded` refresca el boton.
+  4. Volumen del boom: despues de bajar el caldero, el usuario escucho
+     BAJO el clasico. Ahora ambos son ajustables en el Inspector de
+     `CellVisuals`: `volumenBoomClasico = 1.3` (0.8 → 1.0) y
+     `volumenBoomCaldero = 0.6` (0.8 → 0.48). Campos NUEVOS: toman el
+     default del codigo aunque la escena tenga valores viejos; se pueden
+     mover en Play hasta que suenen igual.
+  5. Prueba MANUAL de sonidos (pidio el usuario): `CellVisuals` gana
+    `calderoBoomSoundA/B` + `calderoBoomSound` (A/B/Alternar). Si se
+    arrastra un clip ahi, MANDA sobre el mp3 automatico; si se deja
+    vacio, se usa `explosion_caldero.mp3`. El clasico se cambia con
+    `boomSoundA/B` de siempre. `MigrarEfectosAlPack()` corre tambien en
+    Update: los cambios en Play se aplican en la proxima explosion.
 - **Archivos**: un loader chico en `Assets/scrips/packs/`.
-- **Prueba**: equipar caldero NO rompe nada; se ve clasico; consola
-  lista el pack registrado.
-- [ ] Aprobado
+- **Prueba**: equipar caldero en el menu → GameScene → casillas verdes
+  con burbujas solo en P1; sin errores en consola.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
 
 ### Paso 6b — Exportar la config VISUAL del botón al pack ⭐⭐⭐ (NUEVO)
 - **Idea del usuario**: el boton del caldero ya guarda (en la escena del
