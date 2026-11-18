@@ -29,10 +29,25 @@ public class UGSProfileManager
         public string PlayerName = "";
         public List<string> SkinsOwned = new List<string>();
         public string EquippedSkin = "default";
+        // --- Casillero del JUGADOR 1 (campos de siempre) ---
         public List<string> OwnedPackIds = new List<string> { "clasico" };
         public string EquippedPackId = "clasico";
         public int PlayerColorMode = 0;
         public Color PlayerCustomColor = new Color(1f, 0.15f, 0.6f);
+
+        // --- Casillero del JUGADOR 2 (independiente del 1) ---
+        // El pack guarda su propio sonido y burbujas (FxPack), asi que aca
+        // solo vive QUÉ pack y QUÉ color eligio este jugador.
+        public List<string> OwnedPackIds2 = new List<string> { "clasico" };
+        public string EquippedPackId2 = "clasico";
+        // -1 = AUTOMATICO: mientras el jugador 2 no elija su color, se
+        // diferencia solo del jugador 1 (la regla de siempre). Al elegir
+        // uno explicitamente, queda fijo e independiente.
+        public int PlayerColorMode2 = -1;
+        public Color PlayerCustomColor2 = PlayerColorOptions.Naranja;
+        // Marca: false = color de P2 automatico (aunque haya un valor
+        // viejo guardado en la nube). true = el jugador 2 eligio color.
+        public bool ColorJugador2Elegido = false;
 
         // --- Progreso básico del juego ---
         public int TotalWins = 0;
@@ -110,7 +125,10 @@ public class UGSProfileManager
                 "saveVersion", "cloudTimestamp",
                 "PlayerName", "SkinsOwned", "EquippedSkin", "TotalWins", "TotalMatches",
                 "OwnedPacks", "EquippedPack", "Coins", "Gems",
-                "PlayerColor", "PlayerCustomColor"
+                "PlayerColor", "PlayerCustomColor",
+                // Casillero del jugador 2
+                "OwnedPacks2", "EquippedPack2", "PlayerColor2", "PlayerCustomColor2",
+                "Color2Elegido"
             };
 
             var data = await CloudSaveService.Instance.Data.Player.LoadAsync(keys);
@@ -140,6 +158,20 @@ public class UGSProfileManager
                         Profile.PlayerCustomColor = new Color(rr / 255f, gg / 255f, bb / 255f);
                 }
             }
+            // --- Casillero del jugador 2 ---
+            if (data.TryGetValue("PlayerColor2", out var pc2)) Profile.PlayerColorMode2 = pc2.Value.GetAs<int>();
+            if (data.TryGetValue("Color2Elegido", out var c2e)) Profile.ColorJugador2Elegido = c2e.Value.GetAs<bool>();
+            if (data.TryGetValue("PlayerCustomColor2", out var pcc2))
+            {
+                string csv = pcc2.Value.GetAs<string>();
+                if (!string.IsNullOrEmpty(csv))
+                {
+                    var parts = csv.Split(',');
+                    if (parts.Length == 3 &&
+                        int.TryParse(parts[0], out int rr) && int.TryParse(parts[1], out int gg) && int.TryParse(parts[2], out int bb))
+                        Profile.PlayerCustomColor2 = new Color(rr / 255f, gg / 255f, bb / 255f);
+                }
+            }
             if (data.TryGetValue("SkinsOwned", out var sk))
             {
                 string skinsJson = sk.Value.GetAs<string>();
@@ -155,6 +187,16 @@ public class UGSProfileManager
             if (Profile.OwnedPackIds.Count == 0) Profile.OwnedPackIds = new List<string> { "clasico" };
             if (data.TryGetValue("EquippedPack", out var ep) && !string.IsNullOrEmpty(ep.Value.GetAs<string>()))
                 Profile.EquippedPackId = ep.Value.GetAs<string>();
+            // Casillero del jugador 2
+            if (data.TryGetValue("OwnedPacks2", out var op2))
+            {
+                string packs2Json = op2.Value.GetAs<string>();
+                if (!string.IsNullOrEmpty(packs2Json))
+                    Profile.OwnedPackIds2 = JsonUtility.FromJson<SkinList>(packs2Json)?.skins ?? new List<string>();
+            }
+            if (Profile.OwnedPackIds2.Count == 0) Profile.OwnedPackIds2 = new List<string> { "clasico" };
+            if (data.TryGetValue("EquippedPack2", out var ep2) && !string.IsNullOrEmpty(ep2.Value.GetAs<string>()))
+                Profile.EquippedPackId2 = ep2.Value.GetAs<string>();
 
             ApplyColors();
 
@@ -196,7 +238,13 @@ public class UGSProfileManager
                 { "PlayerColor", Profile.PlayerColorMode },
                 { "PlayerCustomColor", $"{Mathf.RoundToInt(Profile.PlayerCustomColor.r * 255)},{Mathf.RoundToInt(Profile.PlayerCustomColor.g * 255)},{Mathf.RoundToInt(Profile.PlayerCustomColor.b * 255)}" },
                 { "SkinsOwned", JsonUtility.ToJson(new SkinList { skins = Profile.SkinsOwned }) },
-                { "OwnedPacks", JsonUtility.ToJson(new SkinList { skins = Profile.OwnedPackIds }) }
+                { "OwnedPacks", JsonUtility.ToJson(new SkinList { skins = Profile.OwnedPackIds }) },
+                // Casillero del jugador 2
+                { "OwnedPacks2", JsonUtility.ToJson(new SkinList { skins = Profile.OwnedPackIds2 }) },
+                { "EquippedPack2", Profile.EquippedPackId2 },
+                { "PlayerColor2", Profile.PlayerColorMode2 },
+                { "Color2Elegido", Profile.ColorJugador2Elegido },
+                { "PlayerCustomColor2", $"{Mathf.RoundToInt(Profile.PlayerCustomColor2.r * 255)},{Mathf.RoundToInt(Profile.PlayerCustomColor2.g * 255)},{Mathf.RoundToInt(Profile.PlayerCustomColor2.b * 255)}" }
             };
 
             await CloudSaveService.Instance.Data.Player.SaveAsync(data);
@@ -396,20 +444,27 @@ public class UGSProfileManager
         ApplyColors();
     }
 
-    public bool OwnsPack(string packId) => Profile.OwnedPackIds.Contains(packId);
+    // --- API por jugador: 1 = casillero del humano, 2 = casillero del rival ---
+    // Los defaults (jugador = 1) conservan TODAS las llamadas viejas del menu.
+    List<string> PacksDelJugador(int jugador)
+        => jugador == 2 ? Profile.OwnedPackIds2 : Profile.OwnedPackIds;
 
-    public async Task<bool> UnlockPackAsync(string packId)
+    public bool OwnsPack(string packId, int jugador = 1) => PacksDelJugador(jugador).Contains(packId);
+
+    public async Task<bool> UnlockPackAsync(string packId, int jugador = 1)
     {
-        if (FxPackCatalog.Get(packId) == null || OwnsPack(packId)) return false;
-        Profile.OwnedPackIds.Add(packId);
+        var lista = PacksDelJugador(jugador);
+        if (FxPackCatalog.Get(packId) == null || lista.Contains(packId)) return false;
+        lista.Add(packId);
         await SaveProfileAsync();
         return true;
     }
 
-    public async Task<bool> EquipPackAsync(string packId)
+    public async Task<bool> EquipPackAsync(string packId, int jugador = 1)
     {
-        if (FxPackCatalog.Get(packId) == null || !OwnsPack(packId)) return false;
-        Profile.EquippedPackId = packId;
+        if (FxPackCatalog.Get(packId) == null || !OwnsPack(packId, jugador)) return false;
+        if (jugador == 2) Profile.EquippedPackId2 = packId;
+        else Profile.EquippedPackId = packId;
         await SaveProfileAsync();
         return true;
     }
@@ -431,19 +486,36 @@ public class UGSProfileManager
     }
 
     public void ApplyColors()
-        => BoardFx.ApplyColors(Profile.PlayerColorMode, Profile.PlayerCustomColor);
+        => BoardFx.ApplyColors(Profile.PlayerColorMode, Profile.PlayerCustomColor,
+                               Profile.ColorJugador2Elegido ? Profile.PlayerColorMode2 : -1,
+                               Profile.PlayerCustomColor2);
 
-    public async Task SetPlayerColorModeAsync(int mode)
+    public async Task SetPlayerColorModeAsync(int mode, int jugador = 1)
     {
-        Profile.PlayerColorMode = Mathf.Clamp(mode, 0, PlayerColorOptions.CustomIndex);
+        mode = Mathf.Clamp(mode, 0, PlayerColorOptions.CustomIndex);
+        if (jugador == 2)
+        {
+            Profile.PlayerColorMode2 = mode;
+            Profile.ColorJugador2Elegido = true; // deja de ser automatico
+        }
+        else Profile.PlayerColorMode = mode;
         ApplyColors();
         await SaveProfileAsync();
     }
 
-    public async Task SetCustomColorAsync(Color c)
+    public async Task SetCustomColorAsync(Color c, int jugador = 1)
     {
-        Profile.PlayerCustomColor = c;
-        Profile.PlayerColorMode = PlayerColorOptions.CustomIndex;
+        if (jugador == 2)
+        {
+            Profile.PlayerCustomColor2 = c;
+            Profile.PlayerColorMode2 = PlayerColorOptions.CustomIndex;
+            Profile.ColorJugador2Elegido = true; // deja de ser automatico
+        }
+        else
+        {
+            Profile.PlayerCustomColor = c;
+            Profile.PlayerColorMode = PlayerColorOptions.CustomIndex;
+        }
         ApplyColors();
         await SaveProfileAsync();
     }

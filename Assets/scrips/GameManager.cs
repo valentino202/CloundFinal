@@ -322,7 +322,10 @@ public class GameManager : MonoBehaviour
         {
             if (BoardFx.LevelFx == null) return;
             int lvl = game.level[x, y];
-            BoardFx.LevelFx.Invoke(cells[x, y].transform, lvl, BoardFx.Current.KeyForLevel(lvl));
+            // La llave de animacion la decide el pack del DUEÑO de la celda
+            // (paso 2). Con ambos en "clasico" es identico a siempre.
+            var p = BoardFx.PackFor(game.owner[x, y]) ?? BoardFx.Current;
+            BoardFx.LevelFx.Invoke(cells[x, y].transform, lvl, p.KeyForLevel(lvl));
         }
         catch (System.Exception ex) { Debug.LogWarning($"[Game] LevelFx fallo: {ex.Message}"); }
     }
@@ -339,7 +342,12 @@ public class GameManager : MonoBehaviour
             // Cada explosion de la cadena dispara su propio boom, con el ritmo
             // natural de la secuencia. Asi una gota que cae en un 3 y lo lleva
             // a 4 tambien hace su animacion de explosion.
-            try { BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int> { c }, BoardFx.Current.animBoom); }
+            // El boom lo decide el pack de QUIEN exploto (paso 2).
+            try
+            {
+                var p = BoardFx.PackFor(BoardFx.LastAttacker) ?? BoardFx.Current;
+                BoardFx.ExplosionFx?.Invoke(new System.Collections.Generic.List<Vector2Int> { c }, p.animBoom);
+            }
             catch (System.Exception ex) { Debug.LogWarning($"[Game] ExplosionFx fallo: {ex.Message}"); }
 
             if (!BoardFx.SuppressFallback)

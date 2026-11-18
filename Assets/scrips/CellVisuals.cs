@@ -153,6 +153,17 @@ public class CellVisuals : MonoBehaviour
 
     private string activePackId = "";
 
+    /// <summary>
+    /// Pack de una casilla segun su DUEÑO (paso 2). Si por cualquier motivo
+    /// el pack no trae arte, se usa el pack cargado del Inspector para que
+    /// las animaciones nunca queden sin clips.
+    /// </summary>
+    private FxPack PackDeCelda(int owner)
+    {
+        var cellPack = BoardFx.PackFor(owner);
+        return cellPack != null && cellPack.HasArt ? cellPack : pack;
+    }
+
     private void Update()
     {
         // Si el jugador cambio de pack en el menu, reconstruye con el nuevo arte.
@@ -187,7 +198,7 @@ public class CellVisuals : MonoBehaviour
 
     private void Awake()
     {
-        FxPackCatalog.AttachArt(packId, glassPrefab, clip1, clip2, clip3, clipBoom, speed1, speed2, speed3, speedBoom, bubbleSprites);
+        FxPackCatalog.AttachArt(packId, glassPrefab, clip1, clip2, clip3, clipBoom, speed1, speed2, speed3, speedBoom, bubbleSprites, boomSoundA);
         BoardFx.ColorBoost = colorBoost;
         pack = FxPackCatalog.Get(packId) ?? FxPackCatalog.Get("clasico");
         activePackId = pack != null ? pack.id : "clasico";
@@ -619,9 +630,11 @@ graph = PlayableGraph.Create("CellVisuals");
         cv.level = level;
 
         // Tint SOLO del liquido. El cristal nunca se toca. El color lo
-        // decide el pack de la celda (paso 1: con "clasico" es el de siempre).
+        // decide el pack del DUEÑO (paso 2), aunque ese pack aun no tenga
+        // arte: el color NO depende de los clips.
+        var colorPack = BoardFx.PackFor(owner) ?? pack;
         if (cv.liquid != null)
-            cv.liquid.color = level <= 0 ? Color.clear : BoardFx.Boost(BoardFx.LiquidColorFor(owner, pack));
+            cv.liquid.color = level <= 0 ? Color.clear : BoardFx.Boost(BoardFx.LiquidColorFor(owner, colorPack));
 
         // Numero centrado: vacio en 0, blanco->rojo segun el nivel.
         if (cv.label != null)
@@ -641,7 +654,7 @@ graph = PlayableGraph.Create("CellVisuals");
         if (cv.foam != null && level > 0)
         {
             var main = cv.foam.main;
-            var c = BoardFx.LiquidColorFor(owner, pack);
+            var c = BoardFx.LiquidColorFor(owner, colorPack);
             c.a = bubbleAlpha;
             main.startColor = c;
         }
@@ -707,11 +720,14 @@ graph = PlayableGraph.Create("CellVisuals");
 
 private void PlayLevel(CellVisual cv, int level)
     {
-        var clip = pack.ClipForLevel(level);
+        // Animacion del pack del DUEÑO de la celda (paso 2). PackDeCelda ya
+        // garantiza que tenga arte: si no, cae al del Inspector.
+        var cellPack = PackDeCelda(cv.owner);
+        var clip = cellPack.ClipForLevel(level);
         if (clip == null) { Stop(cv); return; }
 
         // Una sola pasada: al acabar queda en el ultimo frame (estado lleno).
-        StartClip(cv, clip, pack.SpeedForLevel(level));
+        StartClip(cv, clip, cellPack.SpeedForLevel(level));
     }
 
     // AnimationClipPlayable no expone loop en la API publica (SetLoopTime y
@@ -794,10 +810,10 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
 
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sortingOrder = explosionOrder;
-        // El boom se tinta del color de QUIEN exploto (rosado jugador,
-        // naranja bot) o del color del pack si trae uno propio, con el
-        // boost de brillo igual que el liquido.
-        sr.color = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker, pack));
+        // El boom se tinta del color del pack de QUIEN exploto (paso 2),
+        // con el boost de brillo igual que el liquido.
+        sr.color = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker,
+            BoardFx.PackFor(BoardFx.LastAttacker) ?? pack));
 
         // El boom es mas grande que el tablero: se dimensiona en celdas para
         // que desborde hacia las 4 vecinas.
@@ -807,10 +823,12 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         var anim = go.AddComponent<Animator>();
         anim.applyRootMotion = false;
 
-        var playable = AnimationClipPlayable.Create(graph, pack.clipBoom);
+        // Clip del pack de QUIEN exploto (paso 2). PackDeCelda garantiza arte.
+        var boomPack = PackDeCelda(BoardFx.LastAttacker);
+        var playable = AnimationClipPlayable.Create(graph, boomPack.clipBoom);
         playable.SetApplyFootIK(false);
-        playable.SetSpeed(Mathf.Max(0.05f, pack.SpeedForLevel(4)));
-        SetWrap(pack.clipBoom, false); // boom es de una pasada
+        playable.SetSpeed(Mathf.Max(0.05f, boomPack.SpeedForLevel(4)));
+        SetWrap(boomPack.clipBoom, false); // boom es de una pasada
 
         var output = AnimationPlayableOutput.Create(graph, "boom", anim);
         output.SetSourcePlayable(playable);
@@ -818,7 +836,7 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         liveOutputs++;
         RefreshGraphState();
 
-        float life = pack.clipBoom.length / Mathf.Max(0.05f, pack.SpeedForLevel(4)) + 0.15f;
+        float life = boomPack.clipBoom.length / Mathf.Max(0.05f, boomPack.SpeedForLevel(4)) + 0.15f;
         StartCoroutine(ReleaseBoom(go, output, playable, life));
     }
 

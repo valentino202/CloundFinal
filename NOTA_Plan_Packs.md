@@ -1,5 +1,16 @@
 # NOTA — PLAN: PACKS INDIVIDUALISTAS POR JUGADOR
 
+> ⚠️ **CORRECCION DEL USUARIO (2026-11-18) — DOS CASILLEROS, NO UNO:**
+> El perfil es como un **casillero propio por jugador**: cada jugador
+> guarda SU pack y SU color elegidos. El tablero es **neutral** (la
+> cancha): ninguna casilla "pertenece" a un pack; cada casilla muestra
+> el look del jugador que la tiene en ese momento (y cambia al ser
+> conquistada). El juego debe tener **DOS casilleros** (P1 y P2), no
+> uno solo: hay que probar las 4 combinaciones — P1 pack + P2 clasico,
+> ambos clasico, P1 clasico + P2 pack, y cada uno con su pack.
+> Esto CAMBIA el paso 3 (el pack del bot ya no es una constante: es el
+> casillero del jugador 2) y el paso 4 (menu con DOS paneles).
+>
 > **CHECKPOINT (Paso 0): commit `ac0cf39`** — "BASE SEGURA: menu caldero
 > aprobado + juego original (pre-plan packs)". Antes de este commit, el
 > ultimo era `3313402` ("ramking terminado"). Si algo se rompe:
@@ -80,30 +91,63 @@ pena y se reintenta con celdas de prueba.
 - **Prueba en Play**: con "clasico" se ve IDENTICO a hoy (rosa/naranja).
 - [ ] Aprobado por el usuario (falla si algo cambio de vista o hay error)
 
-### Paso 2 — Pack por dueño (ruteo) ⭐
-- **Que**: `BoardFx.Current` (global) se reemplaza por
-  `BoardFx.PackFor(int owner)`. P1 = pack del perfil; P2 = pack del bot.
-  `CellVisuals` pregunta el pack POR CASILLA (ya conoce `owner`).
-- **Archivos**: `BoardFx.cs`, `CellVisuals.cs`, `GameManager.cs` (los
-  hooks `LevelFx/ExplosionFx` pasan el owner o el pack).
+### Paso 2 — Pack por dueño (ruteo) ⭐ (IMPLEMENTADO)
+- **Que**: `BoardFx.PackFor(owner)`: 1 = pack del perfil (nube), 2 =
+  `BotPackId`, resto = clasico. `Current` queda como alias de `PackFor(1)`
+  (compatibilidad). `CellVisuals` pregunta el pack POR CASILLA (ya conoce
+  `owner`): color de liquido/foam/boom y clips de nivel/boom.
+- **Archivos tocados**: `BoardFx.cs`, `CellVisuals.cs`, `GameManager.cs`.
+- **Seguridad**: `PackDeCelda` cae al pack del Inspector si el pack del
+  dueño no trae arte (asi un pack de solo color no rompe animaciones); el
+  COLOR usa el pack del dueño aunque no tenga arte (para el paso 6).
 - **Prueba en Play**: ambos jugadores = "clasico" → IDENTICO a hoy.
-- [ ] Aprobado
+- [ ] Aprobado por el usuario (falla si algo cambio de vista o hay error)
 
-### Paso 3 — Pack del BOT ⭐
-- **Que**: decidir como se elige el pack del bot. Opcion simple: una
-  constante `BotPackId = "clasico"` (luego puede venir de Remote Config
-  o de la dificultad). Queda anotado, no bloquea nada.
-- [ ] Decidido y anotado
+### Paso 3 — Segundo CASILLERO (datos del jugador 2) ⭐⭐ (IMPLEMENTADO)
+- ~~Antes: `BotPackId = "clasico"` constante.~~ **Correccion del usuario**:
+  el jugador 2 tiene SU PROPIO casillero, con pack y color elegidos.
+- **Que hecho**: `PlayerProfile` gana `EquippedPackId2`, `PlayerColorMode2`
+  (default naranja = look actual), `PlayerCustomColor2`, `OwnedPackIds2`.
+  Cloud Save gana las claves `EquippedPack2/PlayerColor2/PlayerCustomColor2/
+  OwnedPacks2`. `BoardFx.PackFor(2)` lee ese pack (constante `BotPackId`
+  queda SOLO como fallback). `ApplyColors` ahora recibe los DOS colores y
+  son INDEPENDIENTES (ya no se deriva P2 desde P1). La API de perfil
+  (`EquipPack`, `UnlockPack`, `SetColorMode`, `SetCustomColor`,
+  `OwnsPack`) acepta `jugador = 1|2` con default 1 → las llamadas viejas
+  del menu siguen funcionando. `FxPack` gana `sonidoBoom` (las burbujas
+  ya estaban en `bubbleSprites`).
+- **Archivos**: `UGSProfileManager.cs`, `BoardFx.cs`, `FxPacks.cs`,
+  `CellVisuals.cs` (AttachArt pasa el sonido inicial al pack).
+- **CORRECCION tras la prueba del usuario**: al elegir "Naranja" para P1,
+  P2 tambien quedaba naranja (ambos iguales). El casillero 2 ahora nace
+  en modo AUTOMATICO (`PlayerColorMode2 = -1`): hasta que se le elija un
+  color explicitamente, se diferencia solo del P1 (rosa <-> naranja, o
+  HSV opuesto con la rueda). Al elegir color en el paso 4, queda fijo.
+  Se agrega `ColorJugador2Elegido` (clave `Color2Elegido`) para que un
+  valor `PlayerColor2=1` guardado por la prueba anterior NO cuente como
+  eleccion: mientras la marca sea false, el modo automatico manda.
+- **Prueba**: ambos casilleros en clasico = identico a hoy; cambiar el
+  pack/color de P2 affecta SOLO a sus casillas.
+- [ ] Aprobado (PENDIENTE de prueba en Play; el paso 2 tambien sigue sin
+      approbar — probar juntos y commitear)
 
-### Paso 4 — Seleccion de packs en el MENU ⭐⭐
-- **Que**: panel de packs con los botones (el caldero del menu ya existe
-  como vista). Toggle: clic equipa / clic quita; los botones basicos
-  quitan el especial. Todo via `UGSProfileManager` (Unlock/Equip — ya
-  existen y ya guardan en nube + local con debounce).
-- **Archivos**: SOLO scripts de `Assets/scrips/packs/` y UI del menu.
-  El juego NO se toca aca.
-- **Prueba**: consola muestra equipar/quitar; perfil persiste al
-  reabrir. El juego sigue mostrando clasico (aun no consume el pack).
+### Paso 3b — Migrar SONIDO y BURBUJAS al pack ⭐⭐⭐ (NUEVO, pidio el usuario)
+- **Que**: el pack ya tiene `sonidoBoom` y `bubbleSprites` (campos creados
+  en el paso 3). Ahora `CellVisuals` debe DEJAR de usar sus campos fijos
+  (`boomSoundA/B`, `bubbleSprites` del Inspector) y tomar ambos del pack
+  del dueño de cada casilla. **Se eliminan** los valores fijos del juego.
+- **Archivos**: `CellVisuals.cs`, `FxPacks.cs` (ya tiene los campos).
+- **Prueba**: con "clasico" se mantiene el sonido y las burbujas actuales
+  (los campos del Inspector se pasan al pack clasico como puente); con
+  un pack especial, suenan/ven lo del pack.
+- [ ] Pendiente (hacer DESPUES de aprobar 2 y 3)
+- **Que**: el panel de personalizacion muestra dos bloques ("Jugador 1"
+  y "Jugador 2"), cada uno con su selector de pack y su color. Todo via
+  `UGSProfileManager` (Unlock/Equip/SetColor ya existen; se generalizan
+  a "por jugador"). El juego NO se toca aca.
+- **Prueba**: los 4 casos — P1 pack + P2 clasico, ambos clasico,
+  P1 clasico + P2 pack, y cada uno con su pack propio. Colores
+  independientes (P1 morado, P2 naranja, etc.).
 - [ ] Aprobado
 
 ### Paso 5 — Compra de packs ⭐⭐
@@ -131,6 +175,20 @@ pena y se reintenta con celdas de prueba.
 - **Prueba**: P1 = caldero, bot = clasico → tus casillas verdes, las
   del bot rosa/naranja como siempre. Con ambos clasico = IDENTICO.
 - [ ] Aprobado
+
+### Paso 7b — Marcador de dueño (para colores/packs identicos) ⭐⭐ (NUEVO)
+- **Problema**: si P1 y P2 eligen el MISMO color y el MISMO pack, las
+  casillas quedan visualmente identicas y no se puede saber de quien es
+  cada una. El usuario lo pregunto (2026-11-18).
+- **Solucion elegida**: un **marcador de dueño fijo** en cada casilla,
+  que NO depende del pack ni del color elegido: un simbolo pequeño en la
+  esquina (P1 = punto lleno ●, P2 = aro ○) o un borde sutil, en un color
+  fijo contrastante (blanco/negro). Al ser parte de la CANCHA (no del
+  pack), siempre distingue a los jugadores aunque compartan look.
+- **Archivos**: `CellVisuals.cs` (una capa mas por celda).
+- **Prueba**: forzar ambos con naranja + clasico → se siguen
+  distinguiendo por el marcador.
+- [ ] Pendiente (hacer junto con el paso 7)
 
 ### Pasos 8-11 — Objetos y vapor del caldero en el juego ⭐⭐⭐/⭐⭐⭐⭐
 - **Que**: portar la receta del menu a world-space, UN objeto por paso,
@@ -162,6 +220,15 @@ pena y se reintenta con celdas de prueba.
 ### Paso 14 — PvP real (futuro, online) ⭐⭐⭐⭐⭐
 - Cada cuenta con su pack; al emparejar, cada cliente renderiza las
   casillas con el pack del dueño (los perfiles ya viajan en la nube).
+- **Espejo por cliente (analogia Clash Royale del usuario)**: el servidor
+  asigna P1/P2, pero CADA pantalla muestra al jugador LOCAL como "yo"
+  (abajo) y al rival como "enemigo" (arriba), aunque en el servidor el
+  local sea P2. Se implementa con un `viewerId`:
+  `SlotLocal(owner) = owner == viewerId ? 1 : 2`, y TODAS las consultas
+  de pack/color y la UI usan ese slot mapeado. Asi cada celular ve lo
+  mismo ("yo abajo, enemigo arriba") sin cambiar los datos reales.
+  El tablero es simetrico: NO hace falta girar las casillas, solo la
+  lectura de quien es "local" en la vista.
 - Requiere el modo multiplayer (otro proyecto entero). NO empezar hasta
   cerrar 0-13 en el modo vs bot.
 - [ ] Pendiente (futuro)

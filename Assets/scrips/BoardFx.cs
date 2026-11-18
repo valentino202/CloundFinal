@@ -32,21 +32,38 @@ public static class BoardFx
     public static readonly Color ColBoom = new Color(1f, 0.85f, 0.3f);  // destello explosion
 
     /// <summary>
-    /// Aplica el color del jugador. Modos clasicos: 0=Rosa, 1=Naranja y se
-    /// respetan mutuamente (P1 Rosa -> P2 Naranja, P1 Naranja -> P2 Rosa).
-    /// Solo el modo Personalizado (rueda) calcula al enemigo como opuesto HSV.
+    /// Aplica los colores de los DOS casilleros, INDEPENDIENTES (paso 3):
+    /// cada jugador elige su color (rosa, naranja, morado, rueda...).
+    /// </summary>
+    public static void ApplyColors(int mode1, Color custom1, int mode2, Color custom2)
+    {
+        ColP1 = PlayerColorOptions.Get(mode1, custom1);
+
+        if (mode2 < 0)
+        {
+            // Casillero 2 sin color elegido: se diferencia solo del P1
+            // (comportamiento original: rosa <-> naranja, o HSV opuesto
+            // si P1 uso la rueda). Asi nunca quedan dos jugadores iguales.
+            if (mode1 == PlayerColorOptions.RosaIndex)
+                ColP2 = PlayerColorOptions.Naranja;
+            else if (mode1 == PlayerColorOptions.NaranjaIndex)
+                ColP2 = PlayerColorOptions.Rosa;
+            else
+                ColP2 = PlayerColorOptions.OppositeOf(ColP1);
+        }
+        else
+        {
+            // Color elegido explicitamente en el casillero 2: manda el.
+            ColP2 = PlayerColorOptions.Get(mode2, custom2);
+        }
+    }
+
+    /// <summary>
+    /// Compatibilidad con llamadas viejas de un solo jugador: el rival
+    /// queda naranja (el look de siempre).
     /// </summary>
     public static void ApplyColors(int playerMode, Color custom)
-    {
-        ColP1 = PlayerColorOptions.Get(playerMode, custom);
-
-        if (playerMode == PlayerColorOptions.RosaIndex)
-            ColP2 = PlayerColorOptions.Naranja;
-        else if (playerMode == PlayerColorOptions.NaranjaIndex)
-            ColP2 = PlayerColorOptions.Rosa;
-        else
-            ColP2 = PlayerColorOptions.OppositeOf(ColP1);
-    }
+        => ApplyColors(playerMode, custom, PlayerColorOptions.NaranjaIndex, PlayerColorOptions.Naranja);
 
     // --- Layout del tablero en unidades de mundo (camara ortografica) ---
     /// <summary>Lado de una celda. Las animaciones son cuadradas, asi que 1x1.</summary>
@@ -95,14 +112,25 @@ public static class BoardFx
         return new Vector3((x - half) * Pitch, (y - half) * Pitch, 0f);
     }
 
-    public static FxPack Current
+    // Pack de respaldo si el casillero tiene un id que ya no existe.
+    public const string BotPackId = "clasico";
+
+    /// <summary>
+    /// Pack que le corresponde a un DUEÑO de casilla (paso 2). Cada jugador
+    /// tiene SU casillero en el perfil (nube): 1 = EquippedPackId,
+    /// 2 = EquippedPackId2. Si el id no existe en el catalogo, cae al
+    /// "clasico" (asi el valor viejo "caldero" no rompe nada).
+    /// </summary>
+    public static FxPack PackFor(int owner)
     {
-        get
-        {
-            var id = UGSProfileManager.Instance?.Profile.EquippedPackId;
-            return FxPackCatalog.Get(id) ?? FxPackCatalog.Get("clasico");
-        }
+        string id = owner == 2
+            ? UGSProfileManager.Instance?.Profile.EquippedPackId2
+            : owner == 1 ? UGSProfileManager.Instance?.Profile.EquippedPackId : null;
+        return FxPackCatalog.Get(id) ?? FxPackCatalog.Get(BotPackId);
     }
+
+    /// <summary>Pack del jugador humano (compatibilidad con llamadas viejas).</summary>
+    public static FxPack Current => PackFor(1);
 }
 
 /// <summary>

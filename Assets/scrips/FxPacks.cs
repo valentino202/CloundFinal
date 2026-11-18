@@ -45,6 +45,12 @@ public class FxPack
     /// <summary>Burbujas propias del pack (los especiales las traen, el clasico no).</summary>
     public Sprite[] bubbleSprites;
 
+    /// <summary>
+    /// Sonido del boom del pack (los especiales lo traen; el clasico usa
+    /// el sonido fijo de CellVisuals hasta que se migre en el proximo paso).
+    /// </summary>
+    public AudioClip sonidoBoom;
+
     // --- Color del liquido del pack (paso 1 del plan de packs individualistas) ---
     /// <summary>
     /// false = el liquido se tiñe con el color del DUEÑO de la celda
@@ -121,10 +127,11 @@ public static class FxPackCatalog
     /// Adjunta el arte real a un pack existente sin pisar id/nombre/llaves.
     /// Lo llama CellVisuals en Awake con lo que hay en su Inspector.
     /// </summary>
-    public static void AttachArt(string packId, GameObject glass, AnimationClip c1, AnimationClip c2, AnimationClip c3, AnimationClip cBoom, float s1, float s2, float s3, float sBoom, Sprite[] bubbles = null)
+    public static void AttachArt(string packId, GameObject glass, AnimationClip c1, AnimationClip c2, AnimationClip c3, AnimationClip cBoom, float s1, float s2, float s3, float sBoom, Sprite[] bubbles = null, AudioClip sonido = null)
     {
         var pack = Get(packId);
         if (pack == null) return;
+        if (sonido != null) pack.sonidoBoom = sonido;
         if (glass != null) pack.glassPrefab = glass;
         if (c1 != null) pack.clip1 = c1;
         if (c2 != null) pack.clip2 = c2;
