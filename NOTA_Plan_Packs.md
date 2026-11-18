@@ -53,18 +53,22 @@
 | 0 | Checkpoint git + base verificada | — | No |
 | 1 | `FxPack` gana color de liquido propio | ⭐ facil | Poco |
 | 2 | `BoardFx.PackFor(owner)` (pack por dueño) | ⭐ facil | Poco |
-| 3 | Decidir el pack del BOT (constante "clasico") | ⭐ facil | No |
-| 4 | UI de seleccion de packs en el menu (equipar/quitar, por cuenta) | ⭐⭐ medio | No (solo menu) |
+| 3 | Dos casilleros (P1/P2) en el perfil + colores independientes | ⭐⭐ medio | Poco |
+| 3b | Sonido y burbujas: sacar los fijos del juego y tomarlos del pack | ⭐⭐⭐ dificil | SI |
+| 4 | UI de seleccion de packs en el menu con DOS paneles | ⭐⭐ medio | No (solo menu) |
 | 5 | Compra de packs con monedas/gemas | ⭐⭐ medio | No (solo menu) |
 | 6 | Registrar el pack "caldero" en el catalogo (datos, sin render) | ⭐⭐ medio | Poco |
 | 7 | Render por casilla segun dueño (cristal + liquido + burbujas) | ⭐⭐⭐ dificil | SI |
+| 7b | Marcador de dueño (● P1 / ○ P2) si color y pack coinciden | ⭐⭐ medio | SI |
 | 8 | Objetos nivel 1 (hongos) en world-space, calibrados en celda de prueba | ⭐⭐⭐ dificil | SI |
 | 9 | Objetos nivel 2 (ojo vivo + hongo grande) | ⭐⭐⭐⭐ dificil | SI |
 | 10 | Objetos nivel 3 (hueso + segundo ojo) | ⭐⭐⭐⭐ dificil | SI |
 | 11 | Vapor en world-space | ⭐⭐⭐⭐ dificil | SI |
 | 12 | Boom con voladores (nivel 4) | ⭐⭐⭐⭐⭐ muy dificil | SI |
 | 13 | Sobrescritura del pack al conquistar | ⭐⭐⭐ dificil | SI |
-| 14 | PvP real: cada cuenta con su pack (futuro, online) | ⭐⭐⭐⭐⭐ muy dificil | SI |
+| 14 | PvP real + espejo por cliente (`viewerId`) | ⭐⭐⭐⭐⭐ muy dificil | SI |
+| 15 | Marco personalizado por pack (hoy solo la tapa) | ⭐⭐⭐⭐ dificil | SI |
+| 16 | OST por pack: cambia segun quien toma el control | ⭐⭐⭐⭐⭐ muy dificil | SI |
 
 Regla de la casa: los pasos 1-6 son "seguros" (el juego queda jugable
 aunque se corte ahi). Desde el 7 en adelante se entra en render real —
@@ -252,3 +256,45 @@ pena y se reintenta con celdas de prueba.
 - El diseño v1 del port (CalderoCelda, ordenes de capa, knobs) queda
   guardado en `NOTA_Caldero.md` 8b-bis/8b-ter como referencia, pero el
   plan de aca (por dueño, con celda de prueba) lo REEMPLAZA.
+
+---
+
+## 4. ANATOMIA DEL CASILLERO (la pieza MAS IMPORTANTE del juego)
+
+> Decision del usuario (2026-11-18). El **casillero** es la identidad de
+> un jugador: es lo que elige y lo que se guarda. Hoy hay 2 (P1 y P2),
+> pero la estructura debe pensarse para **N jugadores** (3vs, 4vs en el
+> futuro): NO hardcodear la logica de render a "1 y 2" — los slots son
+> indices, y las consultas pasan por `PackFor(slot)` / colores por slot.
+
+### Que contiene un casillero
+
+| # | Contenido | Estado hoy | Futuro |
+|---|-----------|-----------|--------|
+| 1 | **Nombre/id del pack** (`clasico`, `caldero`, ...) | ✅ `EquippedPackId` / `EquippedPackId2` | Catalogo crece con `RegisterPack` |
+| 2 | **Color** del jugador (propio o automatico) | ✅ `PlayerColorMode`/`CustomColor` por slot + marca `Color2Elegido` | Colores nuevos, rueda por slot |
+| 3 | **Efectos**: burbujas, vapor, llamas, etc. | 🟡 burbujas en `FxPack.bubbleSprites`; steam del caldero es solo del menu | Cada pack trae sus efectos (pasos 3b/11) |
+| 4 | **Objetos**: hongos, ojos, hueso, etc. | 🟡 en el menu; el juego los portara por pasos (8-10) | Objetos propios por pack |
+| 5 | **Marco** personalizado por pack | ❌ hoy solo la **tapa** (0tapa) | **Anotado**: el usuario implementara un marco distincto por pack (paso 15) |
+| 6 | **Sonido de explosion propio** | 🟡 `FxPack.sonidoBoom` ya creado (aun no se usa) | Se migran los clips del Inspector al pack (paso 3b) |
+| 7 | **Animaciones** (nivel 1-3 + boom) | 🟡 4 clips **compartidos** por todos los packs hoy | Cada pack podra traer las suyas: el diseno NO asume que siempre son las mismas (pasos 6-12) |
+| 8 | **Musica / OST del pack** | ❌ no existe | Tema propio por pack: caldero = metal de Halloween, acuario = jazz calma, etc. Suena **durante la partida cuando vas ganando** y **al terminar**, y **cambia segun quien toma el control** (paso 16) |
+
+### Como se conecta con el tablero
+
+- El tablero es **neutral** (la cancha): no guarda packs, guarda solo
+  `owner` por casilla.
+- Cada casilla resuelve en vivo: `PackFor(owner)` → Pack →
+  color / efectos / objetos / marco / sonido / animaciones / OST.
+- Al conquer una casilla cambia el `owner` → la casilla se redibuja con
+  el casillero del nuevo dueño (paso 13).
+- En PvP (paso 14) se agrega `viewerId`: cada pantalla mapea
+  `owner == viewerId ? 1 : 2` para ver siempre al local como "yo"
+  (espejo tipo Clash Royale), sin tocar los datos reales.
+
+### Regla de oro para el diseno del casillero
+
+> Un casillero **nunca** debe depender de que haya exactamente 2
+> jugadores. Los campos se guardan por slot (hoy 1 y 2), y el
+> render/audio consultan por slot. Asi agregar un 3er o 4to jugador
+> es agregar datos, no reescribir el juego.
