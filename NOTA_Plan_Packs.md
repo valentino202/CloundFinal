@@ -58,6 +58,7 @@
 | 4 | UI de seleccion de packs en el menu con DOS paneles | ⭐⭐ medio | No (solo menu) |
 | 5 | Compra de packs con monedas/gemas | ⭐⭐ medio | No (solo menu) |
 | 6 | Registrar el pack "caldero" en el catalogo (datos, sin render) | ⭐⭐ medio | Poco |
+| 6b | Exportar la config visual del boton al pack (con conversion de escala) | ⭐⭐⭐ dificil | Poco |
 | 7 | Render por casilla segun dueño (cristal + liquido + burbujas) | ⭐⭐⭐ dificil | SI |
 | 7b | Marcador de dueño (● P1 / ○ P2) si color y pack coinciden | ⭐⭐ medio | SI |
 | 8 | Objetos nivel 1 (hongos) en world-space, calibrados en celda de prueba | ⭐⭐⭐ dificil | SI |
@@ -185,6 +186,24 @@ pena y se reintenta con celdas de prueba.
 - **Prueba**: equipar caldero NO rompe nada; se ve clasico; consola
   lista el pack registrado.
 - [ ] Aprobado
+
+### Paso 6b — Exportar la config VISUAL del botón al pack ⭐⭐⭐ (NUEVO)
+- **Idea del usuario**: el boton del caldero ya guarda (en la escena del
+  menu) tamanos, colores, posiciones, burbujas, vapor y animaciones de
+  liquidos — es un "guardado visual". ¿Por que no subirlo a la nube?
+- **Respuesta/disefio**: los datos se LEEN del boton (`ExportarConfigCaldero()`
+  leyendo `SwatchCaldero` + `ObjetoEnLiquidoUI`/`OjoFlotanteUI`/
+  `BurbujasCalderoUI`/`VaporCalderoUI`) pero se guardan como **RECETA del
+  pack** (en `FxPack`/asset), NO en la nube:
+  - la nube guarda solo la **eleccion** (`EquippedPackId`) → liviana y
+    a prueba de desactualizaciones;
+  - hace falta **conversion canvas → mundo** (el boton es UI, la celda
+    mide 1.2u) para que no salgan deformes;
+  - los clips de animacion del juego viven en `CellVisuals` (los frames
+    del boton son solo del liquido UI); cada pack traera los suyos.
+- **Resultado**: lo calibrado a ojo en el menu se convierte en la config
+  del pack sin copiar valores a mano.
+- [ ] Pendiente (despues del paso 6, antes del render del paso 7)
 
 ### Paso 7 — Render por casilla ⭐⭐⭐
 - **Que**: `CellVisuals` arma cada casilla con el pack de SU dueño:
