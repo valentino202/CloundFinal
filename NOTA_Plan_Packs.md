@@ -135,16 +135,29 @@ pena y se reintenta con celdas de prueba.
 - [ ] Aprobado (PENDIENTE de prueba en Play; el paso 2 tambien sigue sin
       approbar — probar juntos y commitear)
 
-### Paso 3b — Migrar SONIDO y BURBUJAS al pack ⭐⭐⭐ (NUEVO, pidio el usuario)
-- **Que**: el pack ya tiene `sonidoBoom` y `bubbleSprites` (campos creados
-  en el paso 3). Ahora `CellVisuals` debe DEJAR de usar sus campos fijos
-  (`boomSoundA/B`, `bubbleSprites` del Inspector) y tomar ambos del pack
-  del dueño de cada casilla. **Se eliminan** los valores fijos del juego.
-- **Archivos**: `CellVisuals.cs`, `FxPacks.cs` (ya tiene los campos).
-- **Prueba**: con "clasico" se mantiene el sonido y las burbujas actuales
-  (los campos del Inspector se pasan al pack clasico como puente); con
-  un pack especial, suenan/ven lo del pack.
-- [ ] Pendiente (hacer DESPUES de aprobar 2 y 3)
+### Paso 3b — Migrar SONIDO y BURBUJAS al pack ⭐⭐⭐ (IMPLEMENTADO)
+- **Que**: `FxPack` gana todos los valores de burbujas (`burbujasOn`,
+  `bubbleRate`, `bubbleSize`, `bubbleRise`, `bubbleDrift`, `bubbleAlpha`,
+  `bubbleOrder` + `bubbleSprites` ya existia) y de sonido (`sonidoBoom`,
+  `sonidoBoomB`, `modoSonidoBoom`, `boomVolume`). `CellVisuals` YA NO lee
+  sus campos viejos en tiempo de juego: `SetupBubbles`, `UpdateBubbleZone`,
+  `SetBubbleRate`, el tinte de foam y `PlayBoomSound` consultan
+  `PackDeCelda(owner)` / `colorPack` / `sPack`.
+- **NO hay switch global** (correccion final del usuario): se elimino el
+  bool `bubbles` del Inspector. Cada pack decide: `burbujasOn = false` en
+  el **clasico** (no se ven); `true` en un pack especial (el **caldero**
+  traera las suyas, generadas por codigo como en el menu, en el paso 7).
+  Con P1=caldero y P2=clasico, las burbujas SOLO se ven en las casillas
+  de P1. Lo que uno ponga en su casillero es lo que se ve.
+- **PUENTE**: los campos viejos del Inspector siguen existiendo SOLO como
+  fuente de migracion del pack "clasico" (sonido, sprites y ajustes);
+  `MigrarEfectosAlPack()` los copia una vez en Awake. Los datos
+  UNIVERSALES de la cancha (superficie por nivel, layout, ordenes de
+  capa del tablero) quedan fuera del pack.
+- **Archivos**: `FxPacks.cs`, `CellVisuals.cs`.
+- **Prueba en Play**: burbujas y sonido del boom IGUALES a hoy; sin
+  errores en consola.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
 - **Que**: el panel de personalizacion muestra dos bloques ("Jugador 1"
   y "Jugador 2"), cada uno con su selector de pack y su color. Todo via
   `UGSProfileManager` (Unlock/Equip/SetColor ya existen; se generalizan
@@ -273,10 +286,10 @@ pena y se reintenta con celdas de prueba.
 |---|-----------|-----------|--------|
 | 1 | **Nombre/id del pack** (`clasico`, `caldero`, ...) | ✅ `EquippedPackId` / `EquippedPackId2` | Catalogo crece con `RegisterPack` |
 | 2 | **Color** del jugador (propio o automatico) | ✅ `PlayerColorMode`/`CustomColor` por slot + marca `Color2Elegido` | Colores nuevos, rueda por slot |
-| 3 | **Efectos**: burbujas, vapor, llamas, etc. | 🟡 burbujas en `FxPack.bubbleSprites`; steam del caldero es solo del menu | Cada pack trae sus efectos (pasos 3b/11) |
+| 3 | **Efectos**: burbujas, vapor, llamas, etc. | ✅ `FxPack.burbujasOn` por pack: clasico NO, especiales SI (paso 3b) | Caldero trae sus burbujas/vapor propios por codigo (paso 7+) |
 | 4 | **Objetos**: hongos, ojos, hueso, etc. | 🟡 en el menu; el juego los portara por pasos (8-10) | Objetos propios por pack |
 | 5 | **Marco** personalizado por pack | ❌ hoy solo la **tapa** (0tapa) | **Anotado**: el usuario implementara un marco distincto por pack (paso 15) |
-| 6 | **Sonido de explosion propio** | 🟡 `FxPack.sonidoBoom` ya creado (aun no se usa) | Se migran los clips del Inspector al pack (paso 3b) |
+| 6 | **Sonido de explosion propio** | ✅ `FxPack` lee A/B + modo + volumen (paso 3b) | Clips propios por pack |
 | 7 | **Animaciones** (nivel 1-3 + boom) | 🟡 4 clips **compartidos** por todos los packs hoy | Cada pack podra traer las suyas: el diseno NO asume que siempre son las mismas (pasos 6-12) |
 | 8 | **Musica / OST del pack** | ❌ no existe | Tema propio por pack: caldero = metal de Halloween, acuario = jazz calma, etc. Suena **durante la partida cuando vas ganando** y **al terminar**, y **cambia segun quien toma el control** (paso 16) |
 
@@ -291,6 +304,22 @@ pena y se reintenta con celdas de prueba.
 - En PvP (paso 14) se agrega `viewerId`: cada pantalla mapea
   `owner == viewerId ? 1 : 2` para ver siempre al local como "yo"
   (espejo tipo Clash Royale), sin tocar los datos reales.
+
+### Filosofia CLASICOS vs PACKS PREMIUM (decision del usuario)
+- Los **clasicos** son la LINEA BASE y la comparten TODOS:
+  nombre/classic, **color plano** (rosa/naranja/rueda), **sin burbujas**,
+  **mismo sonido de explosion** y (en el futuro) **misma musica**.
+  No es un castigo: es la identidad "clasica". El usuario eligio el
+  sonido de la **ranura B** (`boomSound: 1` en GameScene) como el de los
+  clasicos; hay dos ranuras A/B y un modo (0=solo A, 1=solo B,
+  2=alternar, que era solo de prueba). El pack clasico hereda el modo 1.
+- Los packs **especiales** (caldero de bruja, acuario, futuros) se
+  **compran aparte** y son PREMIUM: traen burbujas/vapor propios,
+  objetos (hongos/ojos/hueso), sonido de explosion propio, animaciones
+  propias y OST propia. Se pueden **presumir** frente a los demas.
+- Proposito: dar **valor a las monedas y diamantes** y a la **tienda**.
+  El pack especial debe sentirse importante e incentivar a ganar para
+  comprarlo y ponerlo. El clasico siempre queda disponible y gratis.
 
 ### Regla de oro para el diseno del casillero
 

@@ -35,9 +35,8 @@ public class CellVisuals : MonoBehaviour
     [Tooltip("Los sprites estan desaturados (brillo max ~0.74). 1.4 devuelve el brillo pleno. Mas alto = mas vivo.")]
     [Range(0.5f, 2.5f)] public float colorBoost = 1.4f;
 
-[Header("Burbujas (prueba, apagado por ahora)")]
-    public bool bubbles = false;
-    [Tooltip("Arrastra 5-8 burbujas favoritas de particulas/brubujas (despliega la flecha, multi-selecciona, arrastra). Cada particula usa una al azar.")]
+[Header("Burbujas genericas (puente al pack 'clasico'; NO se usan globalmente)")]
+    [Tooltip("Esto NO es un switch del tablero: el pack de cada jugador decide si trae burbujas (FxPack.burbujasOn). Estos valores solo pueblan el pack clasico.")]
     public Sprite[] bubbleSprites;
     [Tooltip("Burbujas por segundo en nivel 3. Menos = mas espaciadas.")]
     public float bubbleRate = 2.5f;
@@ -203,6 +202,11 @@ public class CellVisuals : MonoBehaviour
         pack = FxPackCatalog.Get(packId) ?? FxPackCatalog.Get("clasico");
         activePackId = pack != null ? pack.id : "clasico";
 
+        // Paso 3b: los efectos y el sonido VIVEN EN EL PACK (casillero del
+        // jugador). Los campos viejos del Inspector solo sirven de PUENTE
+        // para poblar el pack "clasico" una vez: el tablero ya no los lee.
+        MigrarEfectosAlPack();
+
         if (pack == null || !pack.HasArt)
         {
             Debug.LogError("[CellVisuals] Faltan referencias: arrastra el prefab del cristal y los 4 clips en el Inspector. Sigo con el fallback por codigo.");
@@ -215,6 +219,26 @@ graph = PlayableGraph.Create("CellVisuals");
             // (eso era el aviso "no outputs"). RefreshGraphState lo enciende
             // solo cuando hay una salida conectada.
             graphReady = true;
+    }
+
+    /// <summary>
+    /// Copia los valores del Inspector al pack (puente de migracion).
+    /// Despues de esto, burbujas y sonido se leen SOLO del pack del dueno.
+    /// </summary>
+    void MigrarEfectosAlPack()
+    {
+        if (pack == null) return;
+        pack.bubbleSprites = bubbleSprites;
+        pack.bubbleRate = bubbleRate;
+        pack.bubbleSize = bubbleSize;
+        pack.bubbleRise = bubbleRise;
+        pack.bubbleDrift = bubbleDrift;
+        pack.bubbleAlpha = bubbleAlpha;
+        pack.bubbleOrder = bubbleOrder;
+        pack.sonidoBoom = boomSoundA;
+        pack.sonidoBoomB = boomSoundB;
+        pack.modoSonidoBoom = (int)boomSound;
+        pack.boomVolume = boomVolume;
     }
 
     private void OnDestroy()
@@ -397,14 +421,19 @@ graph = PlayableGraph.Create("CellVisuals");
         cv.anim = liqGO.AddComponent<Animator>();
         cv.anim.applyRootMotion = false;
 
-        // --- Burbujas de prueba: suben dentro del liquido ---
-        if (bubbles)
+        // --- Burbujas: SOLO si el pack del DUEÑO las trae (paso 3b) ---
+        // No hay switch global: el casillero del jugador decide. El clasico
+        // no tiene; un pack especial (caldero) trae las suyas.
+        int owner = match != null && x < match.game.gridSize && y < match.game.gridSize
+            ? match.game.owner[x, y] : 0;
+        var bPack = PackDeCelda(owner);
+        if (bPack != null && bPack.burbujasOn)
         {
             var bubGO = new GameObject($"Bubbles_{x}_{y}");
             bubGO.transform.SetParent(cellsRoot, false);
             bubGO.transform.localPosition = pos;
             cv.foam = bubGO.AddComponent<ParticleSystem>();
-            SetupBubbles(cv.foam);
+            SetupBubbles(cv.foam, bPack);
         }
 
         // --- Numero de nivel: centrado sobre el cristal, blanco -> rojo ---
@@ -457,8 +486,10 @@ graph = PlayableGraph.Create("CellVisuals");
         return bubbleTex;
     }
 
-    private void SetupBubbles(ParticleSystem ps)
+    private void SetupBubbles(ParticleSystem ps, FxPack bPack)
     {
+        // Efectos del pack del DUEÑO (paso 3b): el tablero no tiene
+        // valores propios de burbujas, los toma del casillero del jugador.
         var main = ps.main;
         main.loop = true;
         main.duration = 3f;
@@ -468,8 +499,8 @@ graph = PlayableGraph.Create("CellVisuals");
         // Velocidad inicial 0: la direccion la manda velocityOverLifetime en +Y.
         // (La velocidad inicial sale en +Z local = hacia la camara, no sirve en 2D.)
         main.startSpeed = 0f;
-        main.startSize = new ParticleSystem.MinMaxCurve(bubbleSize * 0.85f, bubbleSize * 1.15f);
-        main.startColor = new Color(1f, 1f, 1f, bubbleAlpha);
+        main.startSize = new ParticleSystem.MinMaxCurve(bPack.bubbleSize * 0.85f, bPack.bubbleSize * 1.15f);
+        main.startColor = new Color(1f, 1f, 1f, bPack.bubbleAlpha);
         main.simulationSpace = ParticleSystemSimulationSpace.Local;
         main.playOnAwake = false;
 
@@ -488,8 +519,8 @@ graph = PlayableGraph.Create("CellVisuals");
         var vel = ps.velocityOverLifetime;
         vel.enabled = true;
         vel.space = ParticleSystemSimulationSpace.Local;
-        vel.x = new ParticleSystem.MinMaxCurve(-bubbleDrift, bubbleDrift);
-        vel.y = new ParticleSystem.MinMaxCurve(bubbleRise * 0.9f, bubbleRise * 1.1f);
+        vel.x = new ParticleSystem.MinMaxCurve(-bPack.bubbleDrift, bPack.bubbleDrift);
+        vel.y = new ParticleSystem.MinMaxCurve(bPack.bubbleRise * 0.9f, bPack.bubbleRise * 1.1f);
         vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
         // Crecen un poco al subir (menos presion) y revientan al final:
@@ -508,13 +539,13 @@ graph = PlayableGraph.Create("CellVisuals");
         col.color = g;
 
         var rend = ps.GetComponent<ParticleSystemRenderer>();
-        rend.sortingOrder = bubbleOrder;
+        rend.sortingOrder = bPack.bubbleOrder;
 
         // Si hay sprites reales en el PACK, cada particula usa uno al azar.
-// Si no, cae al anillo generado por codigo.
+        // Si no, cae al anillo generado por codigo.
         var mat = new Material(Shader.Find("Sprites/Default"));
         int spriteCount = 0;
-        var packSprites = pack != null ? pack.bubbleSprites : null;
+        var packSprites = bPack.bubbleSprites;
         if (packSprites != null)
         {
             var tsa = ps.textureSheetAnimation;
@@ -549,7 +580,7 @@ graph = PlayableGraph.Create("CellVisuals");
         float spawnY = -BoardFx.CellSize * 0.32f;
         float surfaceY = -BoardFx.CellSize * 0.5f + surface * BoardFx.CellSize;
         float dist = Mathf.Max(0.05f, surfaceY - spawnY);
-        float life = dist / Mathf.Max(0.05f, bubbleRise);
+        float life = dist / Mathf.Max(0.05f, PackDeCelda(cv.owner).bubbleRise);
         var main = cv.foam.main;
         // Atricion: la mitad muere en el camino (vida corta), unas cuantas
         // llegan a la superficie. Asi no se satura en niveles altos.
@@ -571,7 +602,7 @@ graph = PlayableGraph.Create("CellVisuals");
         }
         UpdateBubbleZone(cv, level);
         // Sin liquido no hay burbujas; mas nivel = mas burbujeo.
-        em.rateOverTime = bubbleRate * level / 3f;
+        em.rateOverTime = PackDeCelda(cv.owner).bubbleRate * level / 3f;
         if (!cv.foam.isPlaying) cv.foam.Play();
     }
 
@@ -655,7 +686,7 @@ graph = PlayableGraph.Create("CellVisuals");
         {
             var main = cv.foam.main;
             var c = BoardFx.LiquidColorFor(owner, colorPack);
-            c.a = bubbleAlpha;
+            c.a = colorPack.bubbleAlpha; // transparencia del pack del dueno
             main.startColor = c;
         }
 
@@ -801,7 +832,7 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         int n = match.game.gridSize;
         var pos = BoardFx.CellWorldPosition(coord.x, coord.y, n);
 
-        PlayBoomSound();
+        PlayBoomSound(BoardFx.LastAttacker);
 
         var go = new GameObject($"Boom_{coord.x}_{coord.y}");
         // Sin colgar de "Game" (esta fuera del encuadre de la camara).
@@ -840,15 +871,18 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         StartCoroutine(ReleaseBoom(go, output, playable, life));
     }
 
-    private void PlayBoomSound()
+    private void PlayBoomSound(int owner)
     {
-        AudioClip clip = boomSound switch
+        // Sonido del casillero de QUIEN exploto (paso 3b): el tablero no
+        // tiene clips propios, los toma del pack del jugador.
+        var sPack = PackDeCelda(owner);
+        AudioClip clip = sPack.modoSonidoBoom switch
         {
-            BoomSoundMode.A => boomSoundA,
-            BoomSoundMode.B => boomSoundB,
-            _ => (useA ? boomSoundA : boomSoundB),
+            0 => sPack.sonidoBoom,
+            1 => sPack.sonidoBoomB,
+            _ => (useA ? sPack.sonidoBoom : sPack.sonidoBoomB),
         };
-        if (boomSound == BoomSoundMode.Alternar) useA = !useA;
+        if (sPack.modoSonidoBoom == 2) useA = !useA;
         if (clip == null) return;
 
         if (sharedSfx == null)
@@ -867,7 +901,7 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         // Sin apilar: corta el anterior para que todas las explosiones suenen
         // al mismo nivel, aunque vengan en cadena seguida.
         sharedSfx.Stop();
-        sharedSfx.PlayOneShot(clip, boomVolume);
+        sharedSfx.PlayOneShot(clip, sPack.boomVolume);
     }
 
     private IEnumerator ReleaseBoom(GameObject go, AnimationPlayableOutput output, AnimationClipPlayable playable, float life)

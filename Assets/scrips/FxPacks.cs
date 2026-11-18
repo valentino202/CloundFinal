@@ -45,11 +45,26 @@ public class FxPack
     /// <summary>Burbujas propias del pack (los especiales las traen, el clasico no).</summary>
     public Sprite[] bubbleSprites;
 
-    /// <summary>
-    /// Sonido del boom del pack (los especiales lo traen; el clasico usa
-    /// el sonido fijo de CellVisuals hasta que se migre en el proximo paso).
-    /// </summary>
+    // --- Efectos del pack (paso 3b): viven en el CASILLERO del jugador ---
+    /// <summary>Sonido del boom del pack (A, B o los dos alternando).</summary>
     public AudioClip sonidoBoom;
+    public AudioClip sonidoBoomB;
+    [Tooltip("0 = solo A, 1 = solo B, 2 = alternar A/B (comparar en partida).")]
+    public int modoSonidoBoom = 2;
+    [Range(0f, 1f)] public float boomVolume = 0.8f;
+
+    [Tooltip("El pack TRAE burbujas: false = clasico (sin burbujas); true = pack especial (ej: caldero). No hay switch global: lo decide el casillero del jugador.")]
+    public bool burbujasOn = false;
+    [Tooltip("Burbujas por segundo en nivel 3 (escala con el nivel).")]
+    public float bubbleRate = 2.5f;
+    [Tooltip("Tamano de la burbuja, en celdas.")]
+    public float bubbleSize = 0.07f;
+    [Tooltip("Velocidad de subida, en celdas por segundo.")]
+    public float bubbleRise = 0.5f;
+    [Tooltip("Deriva lateral, en celdas.")]
+    public float bubbleDrift = 0.01f;
+    [Range(0f, 1f)] public float bubbleAlpha = 0.55f;
+    public int bubbleOrder = 1;
 
     // --- Color del liquido del pack (paso 1 del plan de packs individualistas) ---
     /// <summary>
