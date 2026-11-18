@@ -618,9 +618,10 @@ graph = PlayableGraph.Create("CellVisuals");
         cv.owner = owner;
         cv.level = level;
 
-        // Tint SOLO del liquido. El cristal nunca se toca.
+        // Tint SOLO del liquido. El cristal nunca se toca. El color lo
+        // decide el pack de la celda (paso 1: con "clasico" es el de siempre).
         if (cv.liquid != null)
-            cv.liquid.color = level <= 0 ? Color.clear : BoardFx.Boost(BoardFx.LiquidColorFor(owner));
+            cv.liquid.color = level <= 0 ? Color.clear : BoardFx.Boost(BoardFx.LiquidColorFor(owner, pack));
 
         // Numero centrado: vacio en 0, blanco->rojo segun el nivel.
         if (cv.label != null)
@@ -634,12 +635,13 @@ graph = PlayableGraph.Create("CellVisuals");
             }
         }
 
-        // Burbujas solo con liquido, tintadas del color del dueño como el liquido.
+        // Burbujas solo con liquido, tintadas igual que el liquido (mismo
+        // pack: si el pack trae color propio, lo heredan).
         SetBubbleRate(cv, level);
         if (cv.foam != null && level > 0)
         {
             var main = cv.foam.main;
-            var c = BoardFx.LiquidColorFor(owner);
+            var c = BoardFx.LiquidColorFor(owner, pack);
             c.a = bubbleAlpha;
             main.startColor = c;
         }
@@ -793,8 +795,9 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sortingOrder = explosionOrder;
         // El boom se tinta del color de QUIEN exploto (rosado jugador,
-        // naranja bot), con el boost de brillo igual que el liquido.
-        sr.color = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker));
+        // naranja bot) o del color del pack si trae uno propio, con el
+        // boost de brillo igual que el liquido.
+        sr.color = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker, pack));
 
         // El boom es mas grande que el tablero: se dimensiona en celdas para
         // que desborde hacia las 4 vecinas.

@@ -45,6 +45,17 @@ public class FxPack
     /// <summary>Burbujas propias del pack (los especiales las traen, el clasico no).</summary>
     public Sprite[] bubbleSprites;
 
+    // --- Color del liquido del pack (paso 1 del plan de packs individualistas) ---
+    /// <summary>
+    /// false = el liquido se tiñe con el color del DUEÑO de la celda
+    /// (rosa/naranja, como siempre). true = el pack trae su propio color
+    /// (ej: verde del caldero). El "clasico" lo deja en false, asi que
+    /// NO cambia nada de su aspecto.
+    /// </summary>
+    public bool usaColorPropio = false;
+    [Tooltip("Color del liquido cuando 'Usa Color Propio' esta prendido.")]
+    public Color colorLiquidoPropio = new Color(0.15f, 0.65f, 0.25f, 1f); // verde bruja
+
     /// <summary>Clip real para un nivel (1-3). 4 = boom. Null si el pack no lo trae.</summary>
     public AnimationClip ClipForLevel(int level) => level switch
     {

@@ -1,5 +1,10 @@
 # NOTA — PLAN: PACKS INDIVIDUALISTAS POR JUGADOR
 
+> **CHECKPOINT (Paso 0): commit `ac0cf39`** — "BASE SEGURA: menu caldero
+> aprobado + juego original (pre-plan packs)". Antes de este commit, el
+> ultimo era `3313402` ("ramking terminado"). Si algo se rompe:
+> `git reset --hard ac0cf39` (con confirmacion del usuario).
+>
 > **Fecha: 2026-11-17.** Plan ordenado de FACIL → DIFICIL para el rediseño
 > "individualista": cada jugador elige SU color y SU pack, y las casillas
 > se renderizan segun el DUEÑO (sobrescritura al ser conquistadas).
@@ -60,18 +65,20 @@ pena y se reintenta con celdas de prueba.
 ## 2. DETALLE DE CADA PASO
 
 ### Paso 0 — Checkpoint (el usuario)
-- [ ] Commit git del proyecto entero con el juego funcionando como hoy
-      (BASE SEGURA post-emergencia).
+- [x] Commit git del proyecto entero con el juego funcionando como hoy
+      (BASE SEGURA post-emergencia) → **`ac0cf39`**.
 - [ ] Verificado: Play en GameScene = casillas de cristal con liquido
-      animado, sin errores en consola.
+      animado, sin errores en consola (lo confirma el usuario).
 
-### Paso 1 — Color de liquido propio del pack ⭐
-- **Que**: `FxPack` gana `liquidColor` (y `liquidColorP2` para el rival,
-  o la regla de opuestos que ya usa BoardFx). `CellVisuals` tintea el
-  liquido con el color del PACK en vez del color global por dueño.
-- **Archivos**: `FxPacks.cs`, `CellVisuals.cs`, `BoardFx.cs` (leve).
+### Paso 1 — Color de liquido propio del pack ⭐ (IMPLEMENTADO)
+- **Que**: `FxPack` gana `usaColorPropio` (bool) + `colorLiquidoPropio`
+  (Color). `BoardFx.LiquidColorFor(owner, pack)` nuevo; `CellVisuals`
+  tintea con el color del PACK en vez del global por dueño.
+- **Archivos tocados**: `FxPacks.cs` (+2 campos), `BoardFx.cs`
+  (+1 sobrecarga), `CellVisuals.cs` (3 puntos: liquido ~624, foam ~644,
+  boom ~800). `GameManager` NO se toco (sigue con la sobrecarga vieja).
 - **Prueba en Play**: con "clasico" se ve IDENTICO a hoy (rosa/naranja).
-- [ ] Aprobado
+- [ ] Aprobado por el usuario (falla si algo cambio de vista o hay error)
 
 ### Paso 2 — Pack por dueño (ruteo) ⭐
 - **Que**: `BoardFx.Current` (global) se reemplaza por

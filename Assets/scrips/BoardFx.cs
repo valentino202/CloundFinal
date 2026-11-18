@@ -65,6 +65,17 @@ public static class BoardFx
     };
 
     /// <summary>
+    /// Color de liquido teniendo en cuenta el PACK (paso 1 del plan de
+    /// packs individualistas). Si el pack trae su propio color, manda el;
+    /// si no, cae al color por dueño de siempre. Con "clasico" (usaColorPropio
+    /// = false) devuelve EXACTAMENTE lo mismo que la sobrecarga de arriba.
+    /// </summary>
+    public static Color LiquidColorFor(int owner, FxPack pack)
+        => pack != null && pack.usaColorPropio
+            ? pack.colorLiquidoPropio
+            : LiquidColorFor(owner);
+
+    /// <summary>
     /// Multiplicador de brillo. Los sprites del atlas estan desaturados y su
     /// brillo maximo es ~0.74, asi que el tint normal queda lavado. Con boost
     /// el pixel mas brillante llega a 1.0 y el color se ve vivo.
