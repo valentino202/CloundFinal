@@ -157,7 +157,9 @@ pena y se reintenta con celdas de prueba.
 - **Archivos**: `FxPacks.cs`, `CellVisuals.cs`.
 - **Prueba en Play**: burbujas y sonido del boom IGUALES a hoy; sin
   errores en consola.
-- [ ] Aprobado por el usuario (PENDIENTE de probar)
+- [x] Aprobado por el usuario (commit `1913546`)
+
+### Paso 4 — Menu con DOS casilleros (P1 y P2) ⭐⭐
 - **Que**: el panel de personalizacion muestra dos bloques ("Jugador 1"
   y "Jugador 2"), cada uno con su selector de pack y su color. Todo via
   `UGSProfileManager` (Unlock/Equip/SetColor ya existen; se generalizan
