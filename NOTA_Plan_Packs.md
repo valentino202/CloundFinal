@@ -440,6 +440,16 @@ pena y se reintenta con celdas de prueba.
   recorre 0.2u (~0.6s), necesita ~3x de tasa para igualar la DENSIDAD
   visual. Interpolamos hasta 1x en nivel 3. Perilla `velocidadEfectos`
   (default 1) multiplica la subida si aun se ven lentos.
+- **CORRECCION de burbujas en TODOS los niveles** (usuario: "estan mal
+  en todos"): comparando `Nacer()` del menu contra mi codigo:
+  1. **Fondo**: el menu nace en `-h*0.5` (fondo real del liquido) y usa
+     `fondo = -h*0.5` para el crecimiento; yo usaba `-celda*0.42` fijo →
+     recorrido y `prog` malos en todos los niveles. Ahora `FondoLiquido()`
+     = `-celda*0.5`, identico.
+  2. **Escala del sprite**: el menu pone `sizeDelta = sx` (pixeles del
+     boton de 100); yo ponia `localScale = sx` sobre un sprite de 64px
+     (0.64u) → burbujas/puffs 64% mas grandes. Agregue `EscalaSprite()`
+     para normalizar por `sprite.bounds` (1/nativo), igual que los objetos.
 - **CORRECCION del humo congelado** (captura de celdas nivel 1/2):
   `EfectosCalderoCelda.Update` hacia `return` cuando `nivel <= 0`, dejando
   los puffs/burbujas VISIBLES en su ultimo estado (congelados). El menu no
