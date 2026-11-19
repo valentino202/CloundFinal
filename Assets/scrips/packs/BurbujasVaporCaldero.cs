@@ -39,7 +39,10 @@ public class BurbujasVaporCaldero : MonoBehaviour
     // Z: el liquido esta en 0. Camara en z=-10 (mas negativo = mas cerca).
     // Atras (-0.005) detras de los objetos; delante (-0.018) por encima
     // del ojo pero detras del vidrio (que tiene mayor sortingOrder).
-    const float ZAtras = -0.005f;
+    // ATRAS: por encima del liquido (mismo order 0, Z -0.007) pero DETRAS
+    // de los objetos (Z -0.011..-0.017). Antes estaba en order -1 = detras
+    // del sprite del liquido, que es opaco y las ocultaba por completo.
+    const float ZAtras = -0.007f;
     const float ZVapor = -0.006f;
     // Delante de los OBJETOS (Z -0.011..-0.017) para que las burbujas
     // crucen por encima de hongos/ojo. El aspecto "dentro del liquido" NO
@@ -258,10 +261,11 @@ public class BurbujasVaporCaldero : MonoBehaviour
 
         bool delante = Random.value < pack.burbujaPorcentajeDelante;
         b.sr.transform.SetParent(delante ? capaDelante : capaAtras, false);
-        // Orden segun capa: ATRAS detras del liquido (order-1); DELANTE en
-        // el mismo order del liquido. El cristal (glassOrder=1) queda encima
-        // de ambas, asi ninguna burbuja tapa el vidrio.
-        b.sr.sortingOrder = (liquid != null ? liquid.sortingOrder : 0) - (delante ? 0 : 1);
+        // AMBAS capas en el MISMO order del liquido (0), para que el sprite
+        // opaco del liquido NO las oculte. La diferencia delante/atras la
+        // da el Z: atras -0.007 (detras de objetos), delante -0.019 (bagos
+        // de objetos). El cristal (glassOrder=1) queda encima de ambas.
+        b.sr.sortingOrder = liquid != null ? liquid.sortingOrder : 0;
         // Las de DELANTE se ven mas grandes al estar mas cerca: las achico
         // un poco para que no se noten desmedidas sobre los objetos.
         if (delante) { b.sx *= TamanoCapaDelante; b.sy *= TamanoCapaDelante; }
