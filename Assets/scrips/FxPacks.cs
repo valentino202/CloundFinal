@@ -55,16 +55,20 @@ public class FxPack
 
     [Tooltip("El pack TRAE burbujas: false = clasico (sin burbujas); true = pack especial (ej: caldero). No hay switch global: lo decide el casillero del jugador.")]
     public bool burbujasOn = false;
-    [Tooltip("Burbujas por segundo en nivel 3 (escala con el nivel).")]
-    public float bubbleRate = 2.5f;
-    [Tooltip("Tamano de la burbuja, en celdas.")]
-    public float bubbleSize = 0.07f;
-    [Tooltip("Velocidad de subida, en celdas por segundo.")]
-    public float bubbleRise = 0.5f;
-    [Tooltip("Deriva lateral, en celdas.")]
-    public float bubbleDrift = 0.01f;
-    [Range(0f, 1f)] public float bubbleAlpha = 0.55f;
+    [Tooltip("Burbujas por segundo en nivel 3 (menu: 15).")]
+    public float bubbleRate = 15f;
+    [Tooltip("Tamano de la burbuja, en celdas (menu: 0.0538).")]
+    public float bubbleSize = 0.0538f;
+    [Tooltip("Velocidad de subida, en celdas por segundo (menu: 0.276).")]
+    public float bubbleRise = 0.276f;
+    [Tooltip("Deriva lateral, en celdas (menu: 0.005).")]
+    public float bubbleDrift = 0.005f;
+    [Range(0f, 1f)] public float bubbleAlpha = 0.231f;
     public int bubbleOrder = 1;
+    [Tooltip("Franjas del verde por nivel del MENU (0.25 / 0.5 / 0.85).")]
+    public float franjaNivel1 = 0.25f;
+    public float franjaNivel2 = 0.5f;
+    public float franjaNivel3 = 0.85f;
 
     // --- Objetos del pack (paso 8): receta tomada del menu (boton 100px) ---
     [Tooltip("Hongo pequeno del nivel 1 (14/100 del boton = 0.14 de celda).")]
@@ -133,6 +137,46 @@ public class FxPack
     [Range(0f, 1f)] public float huesoCopiaFuerza = 1f;
     [Range(0.3f, 1f)] public float huesoCopiaOpacidad = 1f;
     public float huesoCopiaVelRespiro = 0.8f;
+
+    // --- Efectos del menu portados (burbujas de 2 capas + vapor en lineas) ---
+    // Multiplicadores generales del Inspector del menu (todos en 1).
+    [Tooltip("Densidad: cuantas nacen por segundo.")]
+    [Range(0f, 4f)] public float densidadEfectos = 1f;
+    [Tooltip("Tamano de burbujas y puffs.")]
+    [Range(0.2f, 3f)] public float tamanoEfectos = 1f;
+    [Tooltip("Velocidad de subida.")]
+    [Range(0.2f, 3f)] public float velocidadEfectos = 1f;
+    [Tooltip("Opacidad de burbujas y vapor.")]
+    [Range(0f, 3f)] public float opacidadEfectos = 1f;
+    [Header("Burbujas: variacion y planos (menu)")]
+    [Range(0f, 2f)] public float burbujaVariacionAlpha = 2f;      // menu: 2
+    [Range(0f, 1f)] public float burbujaVariacionMezcla = 0.299f; // menu: 0.299
+    [Range(0f, 1f)] public float burbujaVariacionRespiro = 0.72f; // menu: 0.72
+    [Range(0f, 1f)] public float burbujaMezclaLiquido = 1f;       // menu: 1
+    public float burbujaVelocidadRespiro = 0.61f;                 // menu: 0.61
+    [Tooltip("Porcentaje de burbujas DELANTE de los objetos (menu: 0.875).")]
+    [Range(0f, 1f)] public float burbujaPorcentajeDelante = 0.875f;
+    [Tooltip("Las de delante marcadas, las de atras tenues (menu: 0.206).")]
+    [Range(0f, 1f)] public float burbujaSesgoProfundidad = 0.206f;
+
+    [Header("Vapor en lineas (menu)")]
+    [Tooltip("El pack TRAE vapor. false = clasico (sin vapor), true = caldero.")]
+    public bool vaporOn = false;
+    [Tooltip("Lineas por segundo al nivel 3 (menu: 1.94).")]
+    [Range(0.1f, 3f)] public float vaporLineas = 1.94f;        // menu: 1.94
+    [Range(2, 8)] public int vaporPuffsPorLinea = 6;           // menu: 6
+    [Range(0.2f, 1f)] public float vaporAnchoLinea = 0.606f;   // menu: 0.606
+    [Range(0f, 1f)] public float vaporIrregularidad = 0.1f;
+    [Range(0.05f, 0.5f)] public float vaporTamano = 0.145f;    // menu: 0.145
+    [Range(0.05f, 1f)] public float vaporSubida = 0.2f;        // menu: 0.2
+    [Range(0f, 2f)] public float vaporCrecimiento = 1.022f;    // menu: 1.022
+    [Range(0.05f, 1f)] public float vaporAlpha = 0.213f;       // menu: 0.213
+    [Range(0f, 1f)] public float vaporMezclaLiquido = 0.729f;  // menu: 0.729
+    public float vaporVelocidadRespiro = 0.7f;                 // menu: 0.7
+    [Tooltip("0 = nace en la superficie, 0.5 = mitad del verde (menu).")]
+    [Range(0f, 1f)] public float vaporNacerAbajo = 0.5f;
+    [Tooltip("Cuanto sube por encima de la superficie del nivel (0.25 del menu).")]
+    [Range(0.05f, 1f)] public float vaporTecho = 0.08f;        // menu: 0.08
 
     [Tooltip("Segundo ojo del nivel 3 (11px => mas chico que el primero).")]
     [Range(0.05f, 1f)] public float ojo2Tamano = 0.11f; // menu: 11px / 100
@@ -233,6 +277,8 @@ public static class FxPackCatalog
         if (caldero == null) return;
         caldero.usaColorPropio = true;
         caldero.colorLiquidoPropio = new Color(0.15f, 0.65f, 0.25f, 1f); // verde
+        caldero.burbujasOn = true;
+        caldero.vaporOn = true;
 
         // Tamaños EXACTOS del menu convertidos por dimension lineal
         // (px del boton de 100 / 100 = fraccion de celda).

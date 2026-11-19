@@ -405,7 +405,88 @@ pena y se reintenta con celdas de prueba.
      que el liquido; el vidrio sigue en `glassOrder` encima de todo).
 - [ ] Aprobado por el usuario (PENDIENTE de probar)
 
-### Paso 11 — Vapor en world-space ⭐⭐⭐⭐
+### Paso 11 — Burbujas del menu + vapor en world-space ⭐⭐⭐⭐ (IMPLEMENTADO)
+- **Que hecho**: nuevo `EfectosCalderoCelda.cs` que porta
+  `BurbujasCalderoUI` y `VaporCalderoUI` completos:
+  - **Burbujas 2 planos**: capa atras (`z=-0.005`, detras de los objetos)
+    y capa delante (`z=-0.018`, por encima del ojo pero detras del vidrio),
+    con `porcentajeDelante=0.3` y `sesgoProfundidad=0.7` → las de delante
+    marcadas, las de atras tenues. Variacion de tamano/alpha/mezcla/ritmo
+    por burbuja, fade in, crecen al subir y **pop** al llegar a la superficie.
+  - **Vapor en LINEAS**: bloques de 4 puffs nacen juntos dentro del verde
+    (`nacerAbajo=0.5`), suben como columna, crecen, respiran el color real,
+    se congelan al tocar el techo (`topeVapor=0.25`) y se desvanecen.
+  - Sprites de anillos/puffs generados por codigo (4 y 3 variantes) con
+    pool de objetos — igual que el menu, sin assets nuevos.
+- `FxPack` gana todos los knobs de variacion/planos/vapor del menu.
+  `CellVisuals` crea el componente cuando el pack trae efectos y apaga
+  el emisor simple (`SetBubbleRate` early-return).
+- **CORRECCION de velocidad/intensidad**: el usuario comparo con el menu
+  y los defaults estaban lejos. Se copiaron los valores REALES del
+  `SwatchCaldero` de SampleScene (lineas 1793-1816) al pack:
+  burbujas 15/s, tamaño 0.0538, subida 0.276, deriva 0.005, alpha 0.231,
+  mezcla 1, respiro 0.61, variacion alpha 2 / mezcla 0.299 / respiro 0.72,
+  87.5% delante, sesgo 0.206; vapor 1.94 lineas/s, 6 puffs, ancho 0.606,
+  tamaño 0.145, crecimiento 1.022, alpha 0.213, mezcla 0.729, techo 0.08.
+  Ademas las franjas por nivel del menu (0.25/0.5/0.85) se guardan en el
+  pack y se usan para efectos (antes se usaban los `surface` del Inspector
+  del juego, que son distintos: 0.32/0.59/0.89).
+- **CORRECCION "tortuga"**: no era FPS (no hay `timeScale` ni
+  `targetFrameRate` en el codigo, y todo usa `unscaledDeltaTime`). Era la
+  TASA: el menu siempre esta lleno (nivel 3 = 15/s) pero las casillas del
+  juego viven en nivel 1, y `nivel/3` las dejaba en 5/s. Ahora
+  `efectosTasaNivel1 = 5` compensa la diferencia de recorrido: en el menu
+  (nivel 3) una burbuja vive ~3s → ~46 vivas; en el juego nivel 1 solo
+  recorre 0.2u (~0.6s), necesita ~3x de tasa para igualar la DENSIDAD
+  visual. Interpolamos hasta 1x en nivel 3. Perilla `velocidadEfectos`
+  (default 1) multiplica la subida si aun se ven lentos.
+- **CORRECCION del humo congelado** (captura de celdas nivel 1/2):
+  `EfectosCalderoCelda.Update` hacia `return` cuando `nivel <= 0`, dejando
+  los puffs/burbujas VISIBLES en su ultimo estado (congelados). El menu no
+  tenia este problema porque siempre esta lleno. Ahora, cuando no hay
+  nivel, se LIBERAN todos los puffs/burbujas al pool antes de volver.
+- **CORRECCION DEFINITIVA del usuario** (mostro el Inspector de
+  "OPCIONES DE EFECTOS": valores identicos en los 3 niveles, solo cambia
+  la franja del liquido; multiplicadores generales en 1):
+  - TASA CONSTANTE: `bubbleRate * densidadEfectos` (15/s) y
+    `vaporLineas * densidadEfectos` (1.94/s) FIJOS en cualquier nivel.
+    Se elimino el escalado `nivel/3` (estaba mal: el menu no baja la tasa
+    en nivel 1). Lo que cambia es SOLO la superficie (0.25/0.5/0.85),
+    por eso en nivel 1 se ven menos burbujas: recorren menos distancia,
+    no porque nazcan mas lento.
+  - Los 4 multiplicadores del Inspector (`densidadEfectos`,
+    `tamanoEfectos`, `velocidadEfectos`, `opacidadEfectos`, todos en 1)
+    ahora estan en `FxPack` y se aplican en nacimiento/tamano/subida/alpha.
+  - Vapor CONSTANTE con sitio LIMITADO junto a la superficie:
+    `tope = Min(superficie + celda * vaporTecho, celda * 0.5)` =
+    VaporCalderoUI.Update linea 211.
+- **AUDITORIA final (todos los valores coinciden con el menu)**: 15
+  burbujas/s, tamaño 0.0538, subida 0.276, deriva 0.005, alpha 0.231,
+  mezcla 1, respiro 0.61, variaciones 2/0.299/0.72, 87.5% delante,
+  sesgo 0.206; vapor 1.94 lineas/s, 6 puffs, ancho 0.606, tamaño 0.145,
+  crecimiento 1.022, alpha 0.213, mezcla 0.729, techo 0.08, franjas
+  0.25/0.5/0.85. Lo que faltaba no eran numeros sino GEOMETRIA: el menu
+  siempre esta en nivel 3 (superficie al 85%, mucho aire arriba); en el
+  juego las casillas son nivel 1 (superficie al 25%), y con `techo=0.08`
+  el vapor quedaba en una rendija de 0.1u. El techo ahora usa el aire
+  real de la celda (`Max(superficie + techo*celda, 0.42*celda)`), que en
+  nivel 3 coincide exactamente con el menu.
+- **CORRECCION del vapor "verguenza"**: mis puffs usaban un relleno tenue
+  con ruido; el menu (`VaporCalderoUI.Puffs`, linea 452) usa una
+  **gaussiana `exp(-d·k)`** con durezas 2.6/4.2/6.5 y textura 96px, sin
+  ruido → nube densa al centro. Se copio EXACTO, mas `factorT 0.7-1.4` y
+  giro ±12 del menu. Burbujas: tasa de nivel 1 subida a 5x para llenar
+  la franja corta.
+- **CORRECCION de la captura**: el vapor aparecia en TODAS las casillas
+  (incluso clasicas) porque `vaporLineas = 1.94` es default de `FxPack`,
+  asi que el clasico tambien cumplia `vaporLineas > 0`. Se agrego el flag
+  explicito **`vaporOn`** (false en clasico, true en caldero) y la
+  condicion ahora es `burbujasOn || vaporOn`. Ademas, si una casilla
+  caldero es conquistada por el bot, `SetNivel(0)` apaga los efectos
+  colgados.
+- **Prueba**: casilla de caldero → burbujas delante y detras de los objetos
+  + columnas de vapor subiendo, MISMA velocidad/intensidad que el menu.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
 - **Que**: portar la receta del menu a world-space, UN objeto por paso,
   calibrando tamaños en UNA CELDA DE PRUEBA de GameScene (no en el menu):
   - **8**: hongos nivel 1. **9**: ojo vivo + hongo grande nivel 2.
