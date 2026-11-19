@@ -41,10 +41,11 @@ public class BurbujasVaporCaldero : MonoBehaviour
     // del ojo pero detras del vidrio (que tiene mayor sortingOrder).
     const float ZAtras = -0.005f;
     const float ZVapor = -0.006f;
-    // Antes -0.018: tan cerca de la camara que, si el prefab del cristal
-    // no ponia bien su sortingOrder, la burbuja se dibujaba SOBRE el vidrio.
-    // -0.008 la deja por delante de los objetos pero lejos del cristal.
-    const float ZDelante = -0.008f;
+    // Las burbujas de DELANTE deben pasar POR ENCIMA de los objetos
+    // (Z -0.011..-0.017). Con orden empatado (0) manda el Z: mas negativo
+    // = mas cerca de la camara. -0.019 las pone delante del ojo/hongos,
+    // pero el CRISTAL (glassOrder=1) sigue encima de todas por sortingOrder.
+    const float ZDelante = -0.019f;
     // Multiplicador de tamano SOLO de la capa DELANTE (las veia grandes).
     const float TamanoCapaDelante = 0.7f;
 
