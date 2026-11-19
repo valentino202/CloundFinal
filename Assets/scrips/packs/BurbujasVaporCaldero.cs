@@ -41,11 +41,11 @@ public class BurbujasVaporCaldero : MonoBehaviour
     // del ojo pero detras del vidrio (que tiene mayor sortingOrder).
     const float ZAtras = -0.005f;
     const float ZVapor = -0.006f;
-    // Las burbujas de DELANTE van un poco por delante del liquido, pero NO
-    // tan al frente como antes (-0.019): asi se ven DENTRO del brebaje, no
-    // pegadas al cristal. -0.010 las deja delante del liquido (Z 0) y de
-    // la capa atras (-0.005), y cerca de los objetos sin separarse.
-    const float ZDelante = -0.010f;
+    // Delante de los OBJETOS (Z -0.011..-0.017) para que las burbujas
+    // crucen por encima de hongos/ojo. El aspecto "dentro del liquido" NO
+    // se logra bajando el Z (asi las tapan los objetos), sino con el VELO
+    // sumergido (burbujaVeloSumergido) que las tiñe del color del brebaje.
+    const float ZDelante = -0.019f;
     // Multiplicador de tamano SOLO de la capa DELANTE (las veia grandes).
     const float TamanoCapaDelante = 0.7f;
 

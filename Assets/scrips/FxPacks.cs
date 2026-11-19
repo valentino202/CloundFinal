@@ -156,12 +156,12 @@ public class FxPack
     [Tooltip("Velo extra del color del liquido para que las burbujas se vean SUMERGIDAS, no flotando.")]
     [Range(0f, 1f)] public float burbujaVeloSumergido = 0.35f;
     public float burbujaVelocidadRespiro = 0.61f;                 // menu: 0.61
-    [Tooltip("Porcentaje de burbujas DELANTE de los objetos. El menu tenia 0.875 (casi todas encima); bajalo para mezclar delante/atras.")]
-    [Range(0f, 1f)] public float burbujaPorcentajeDelante = 0.35f;
+    [Tooltip("Porcentaje de burbujas DELANTE de los objetos. 0.5 = mitad delante, mitad atras (mezcla de capas).")]
+    [Range(0f, 1f)] public float burbujaPorcentajeDelante = 0.5f;
     [Tooltip("Las de delante marcadas, las de atras tenues (menu: 0.206).")]
     [Range(0f, 1f)] public float burbujaSesgoProfundidad = 0.206f;
     [Tooltip("CANTIDAD extra de burbujas: compensa que las celdas nivel 1 recorren menos que el menu siempre-lleno. 1 = valores del menu.")]
-    [Range(1f, 5f)] public float burbujaCantidad = 3f;
+    [Range(1f, 6f)] public float burbujaCantidad = 4f;
     [Tooltip("Contraste entre la capa DELANTE (marcada) y la de ATRAS (tenue). 0 = como el menu; subir para notar mas las dos capas.")]
     [Range(0f, 1f)] public float burbujaContrasteCapas = 0.45f;
 
