@@ -405,7 +405,15 @@ pena y se reintenta con celdas de prueba.
      que el liquido; el vidrio sigue en `glassOrder` encima de todo).
 - [ ] Aprobado por el usuario (PENDIENTE de probar)
 
-### Paso 11 — Burbujas del menu + vapor en world-space ⭐⭐⭐⭐ (IMPLEMENTADO)
+### Paso 11 — ⛔ REVERTIDO (emergencia)
+> El usuario pidio volver atras: el port de `BurbujasCalderoUI` +
+> `VaporCalderoUI` (`EfectosCalderoCelda.cs`) salia mal (burbujas fuera
+> del cristal, vapor congelado, burbujas mal en todos los niveles).
+> Se BORRO `EfectosCalderoCelda.cs` y `CellVisuals` volvio al emisor
+> simple de burbujas (`SetupBubbles` / `SetBubbleRate`), sin vapor.
+> El juego queda como antes de este paso. NO reintroducir de golpe.
+
+### Paso 11 (historial) — Burbujas del menu + vapor en world-space ⭐⭐⭐⭐
 - **Que hecho**: nuevo `EfectosCalderoCelda.cs` que porta
   `BurbujasCalderoUI` y `VaporCalderoUI` completos:
   - **Burbujas 2 planos**: capa atras (`z=-0.005`, detras de los objetos)
