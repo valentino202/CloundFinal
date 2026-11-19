@@ -189,6 +189,14 @@ public class FxPack
     [Tooltip("Azul de la iris del SEGUNDO ojo (menu).")]
     public Color irisColor2 = new Color(0f, 0.192f, 1f, 1f);
 
+    // --- BOOM con voladores (paso 12, solo en el juego) ---
+    [Tooltip("Cuantos objetos salen volando al explotar.")]
+    [Range(1, 12)] public int boomObjetos = 6;
+    [Tooltip("Rapidez de los voladores, en celdas por segundo.")]
+    [Range(0.5f, 8f)] public float boomVelocidad = 3.5f;
+    [Tooltip("Cuanto viven los voladores antes de desaparecer, en segundos.")]
+    [Range(0.3f, 2f)] public float boomVida = 0.8f;
+
     [Tooltip("Unica perilla para escalar TODOS los objetos juntos (1 = medidas convertidas del menu).")]
     [Range(0.4f, 2f)] public float objetosEscalaGlobal = 1f;
     [Tooltip("Factor extra SOLO en nivel 1 (1 = mismo tamano del menu; bajalo si la franja fina se ve cargada).")]

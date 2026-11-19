@@ -979,6 +979,17 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
 
         // Clip del pack de QUIEN exploto (paso 2). PackDeCelda garantiza arte.
         var boomPack = PackDeCelda(BoardFx.LastAttacker);
+        // BOOM del caldero: objetos volando en diagonales que desaparecen.
+        // Solo si el pack trae objetos (el premio visual del pack especial).
+        if (boomPack.TieneObjetos)
+        {
+            var volGO = new GameObject($"BoomVoladores_{coord.x}_{coord.y}");
+            volGO.transform.SetParent(cellsRoot != null ? cellsRoot : transform, false);
+            volGO.transform.localPosition = pos;
+            var vol = volGO.AddComponent<BoomVoladores>();
+            Color tinte = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker, boomPack));
+            vol.Configurar(boomPack, Vector3.zero, tinte);
+        }
         var playable = AnimationClipPlayable.Create(graph, boomPack.clipBoom);
         playable.SetApplyFootIK(false);
         playable.SetSpeed(Mathf.Max(0.05f, boomPack.SpeedForLevel(4)));
