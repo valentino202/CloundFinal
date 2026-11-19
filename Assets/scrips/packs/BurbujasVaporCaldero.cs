@@ -254,6 +254,10 @@ public class BurbujasVaporCaldero : MonoBehaviour
 
         bool delante = Random.value < pack.burbujaPorcentajeDelante;
         b.sr.transform.SetParent(delante ? capaDelante : capaAtras, false);
+        // Orden segun capa: ATRAS detras del liquido (order-1); DELANTE en
+        // el mismo order del liquido. El cristal (glassOrder=1) queda encima
+        // de ambas, asi ninguna burbuja tapa el vidrio.
+        b.sr.sortingOrder = (liquid != null ? liquid.sortingOrder : 0) - (delante ? 0 : 1);
         // Las de DELANTE se ven mas grandes al estar mas cerca: las achico
         // un poco para que no se noten desmedidas sobre los objetos.
         if (delante) { b.sx *= TamanoCapaDelante; b.sy *= TamanoCapaDelante; }
@@ -321,9 +325,7 @@ public class BurbujasVaporCaldero : MonoBehaviour
         var go = new GameObject("Burbuja");
         go.transform.SetParent(capaAtras, false);
         var sr = go.AddComponent<SpriteRenderer>();
-        // Un orden por debajo del liquido garantiza que NINGUNA burbuja
-        // (ni la de delante) se dibuje sobre el cristal (glassOrder = 1).
-        sr.sortingOrder = liquid != null ? liquid.sortingOrder - 1 : -1;
+        sr.sortingOrder = liquid != null ? liquid.sortingOrder : 0;
         return new Burbuja { sr = sr };
     }
 
