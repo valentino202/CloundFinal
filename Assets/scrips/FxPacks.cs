@@ -57,8 +57,8 @@ public class FxPack
     public bool burbujasOn = false;
     [Tooltip("Burbujas por segundo en nivel 3 (menu: 15).")]
     public float bubbleRate = 15f;
-    [Tooltip("Tamano de la burbuja, en celdas (menu: 0.0538).")]
-    public float bubbleSize = 0.0538f;
+    [Tooltip("Tamano de la burbuja, en celdas (menu: 0.0538; reducido a pedido).")]
+    public float bubbleSize = 0.035f;
     [Tooltip("Velocidad de subida, en celdas por segundo (menu: 0.276).")]
     public float bubbleRise = 0.276f;
     [Tooltip("Deriva lateral, en celdas (menu: 0.005).")]

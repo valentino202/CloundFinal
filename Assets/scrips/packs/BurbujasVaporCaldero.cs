@@ -255,7 +255,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
         float margen = w * pack.bubbleSize * 0.5f + w * 0.04f;
         b.x0 = Random.Range(-w * 0.5f + margen, w * 0.5f - margen);
         b.y = fondo + Random.Range(0.02f, 0.08f) * h;
-        float tam = w * pack.bubbleSize * pack.tamanoEfectos * Random.Range(0.6f, 1.5f);
+        // Variacion de tamano mas acotada (antes hasta 1.5x = burbujas grandes).
+        float tam = w * pack.bubbleSize * pack.tamanoEfectos * Random.Range(0.6f, 1.15f);
         b.sx = tam * Random.Range(0.85f, 1.2f);
         b.sy = tam * Random.Range(0.85f, 1.2f);
 
