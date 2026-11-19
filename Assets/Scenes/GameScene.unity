@@ -203,7 +203,7 @@ MonoBehaviour:
   explosionOrder: 3
   numberLow: {r: 1, g: 1, b: 1, a: 1}
   numberHigh: {r: 1, g: 0, b: 0, a: 1}
-  numberAlpha: 0.7
+  numberAlpha: 1
   numberFontSize: 4
   numberSize: 1
   boomSoundA: {fileID: 8300000, guid: a62231eec917d76488f45f7e5a7509a1, type: 3}

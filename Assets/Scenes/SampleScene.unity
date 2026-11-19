@@ -866,6 +866,8 @@ MonoBehaviour:
   hoverScale: 1.14
   pressScale: 0.86
   smooth: 14
+  equiparClasicoAlClic: 1
+  escalaSeleccion: 1.18
   liquidImage: {fileID: 0}
   crystalImage: {fileID: 0}
 --- !u!114 &161362149
@@ -1776,6 +1778,9 @@ MonoBehaviour:
   hoverScale: 1.14
   pressScale: 0.86
   smooth: 14
+  escalaSeleccion: 1.25
+  packIdSeleccion: caldero
+  seleccionarAlClic: 1
   hongo1: {fileID: 1191021459}
   hongo2: {fileID: 1021673678}
   ojo: {fileID: 1698934435}
@@ -1787,7 +1792,7 @@ MonoBehaviour:
   alturaFranjaNivel3: 0.85
   detenerEnNivel1: 0
   detenerEnNivel2: 0
-  detenerEnNivel3: 0
+  detenerEnNivel3: 1
   burbujasOn: 1
   vaporOn: 1
   burbujaPorSegundo: 15
@@ -13633,6 +13638,8 @@ MonoBehaviour:
   hoverScale: 1.14
   pressScale: 0.86
   smooth: 14
+  equiparClasicoAlClic: 1
+  escalaSeleccion: 1.18
   liquidImage: {fileID: 0}
   crystalImage: {fileID: 0}
 --- !u!114 &1526528312

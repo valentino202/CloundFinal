@@ -363,6 +363,13 @@ public class BurbujasVaporCaldero : MonoBehaviour
 
     Sprite Elegir(List<Sprite> lista, int variantes)
     {
+        // Los sprites se generan por codigo: al salir del Play Unity destruye
+        // sus texturas, pero la lista static sobrevive apuntando a sprites
+        // muertos (null). Detectarlos y reconstruir (igual que el menu en
+        // Anillos()/Puffs()) evita que las burbujas nazcan sin sprite.
+        if (lista.Count > 0)
+            for (int i = 0; i < lista.Count; i++)
+                if (lista[i] == null) { lista.Clear(); break; }
         if (lista.Count == 0) Generar(lista, variantes);
         return lista[Random.Range(0, lista.Count)];
     }
