@@ -137,6 +137,8 @@ public class CellVisuals : MonoBehaviour
         public bool outputValid;
         public Coroutine juice;
         public string bubblePackId; // pack con el que se armo el sistema de burbujas
+        public CalderoCelda caldero;    // objetos flotando del pack (paso 8)
+        public string objetosPackId;    // pack con el que se crearon los objetos
     }
 
     private readonly Dictionary<Vector2Int, CellVisual> cells = new Dictionary<Vector2Int, CellVisual>();
@@ -682,6 +684,7 @@ graph = PlayableGraph.Create("CellVisuals");
         KillOutput(cv);
         if (cv.playable.IsValid()) cv.playable.Destroy();
         if (cv.label != null) Destroy(cv.label.gameObject);
+        if (cv.caldero != null) Destroy(cv.caldero.gameObject);
         if (cv.root != null) Destroy(cv.root.gameObject);
     }
 
@@ -745,6 +748,32 @@ graph = PlayableGraph.Create("CellVisuals");
             SetupBubbles(cv.foam, fxPack);
         }
         SetBubbleRate(cv, level);
+
+        // Objetos del pack caldero (paso 8): se crean cuando la celda
+        // pasa a ser de un pack que trae objetos; si el dueño cambia a
+        // uno que no trae, se ocultan. El tablero nace neutral.
+        var objPack = PackEfectos(owner);
+        if (objPack != null && objPack.TieneObjetos && cv.caldero == null)
+        {
+            var objGO = new GameObject($"Caldero_{cv.coord.x}_{cv.coord.y}");
+            objGO.transform.SetParent(cellsRoot, false);
+            cv.caldero = objGO.AddComponent<CalderoCelda>();
+            cv.caldero.Configurar(objPack, cv.liquid, cv.liquid.transform.localPosition,
+                surface1, surface2, surface3);
+            cv.objetosPackId = objPack.id;
+        }
+        if (cv.caldero != null)
+        {
+            // Solo avisamos al caldero cuando el nivel o el pack CAMBIAN.
+            // SyncAll llama ApplyState en TODAS las celdas por cada jugada:
+            // sin este freno, todos los hongos se teletransportaban y su
+            // paseo parecia reiniciarse al unisono.
+            string idObjetos = objPack != null ? objPack.id : null;
+            bool cambioPackObjetos = cv.objetosPackId != idObjetos;
+            if (changed || cambioPackObjetos)
+                cv.caldero.SetNivel(objPack != null && objPack.TieneObjetos ? level : 0);
+            cv.objetosPackId = idObjetos;
+        }
         if (cv.foam != null && level > 0)
         {
             var main = cv.foam.main;

@@ -304,7 +304,108 @@ pena y se reintenta con celdas de prueba.
   distinguiendo por el marcador.
 - [ ] Pendiente (hacer junto con el paso 7)
 
-### Pasos 8-11 — Objetos y vapor del caldero en el juego ⭐⭐⭐/⭐⭐⭐⭐
+### Paso 8 — Objetos nivel 1: los DOS HONGOS ⭐⭐⭐ (IMPLEMENTADO)
+- **Fuente de los valores**: la jerarquia del menu (usuario: "los datos
+  de menu en la jerarquia son los correctas"). Boton `Selector_Caldero`
+  = 100x100 px → sizes: Hongo1 14px (0.14 celda), Hongo2 7px (0.07),
+  hongo grande 17px, ojo 23px, hueso 65px. Datos de movimiento leidos:
+  Hongo1 franja 0.239, paseo 10px/s (0.1 celda/s), giro 22, respiro
+  tamano 0.467; Hongo2 franja 0.35, giro -22, respiro 0.161.
+- **Que hecho**: `FxPack` gana los sprites (cargados por nombre desde
+  `Assets/imagenes`) y la receta de hongos. Nuevo `CalderoCelda.cs`
+  (en `Assets/scrips/packs/`): por celda del pack crea los dos hongos,
+  paseo libre dentro de la franja, giro, respiro y tinte sumergido leido
+  del liquido en vivo. `CellVisuals` lo crea cuando la celda pasa a ser
+  de un pack con objetos (tablero nace neutral) y le pasa el nivel.
+- **CORRECCION tras la prueba**: los hongos aparecian DETRAS del liquido
+  (mismo `sortingOrder`, mismo Z). Camara 2D en `z = -10` mirando a +Z,
+  asi que "mas cerca" es z MENOR: ahora `localPosition.z = -0.01` con la
+  misma capa del liquido → se ven DENTRO del brebaje; el vidrio
+  (`glassOrder = 1`) sigue encima. Tambien se agrego el RESPIRO del
+  tinte sumergido del menu (fuerza 75%..100% de 0.25, vel 0.8).
+  Luego el usuario pidio pasar TODO lo del boton: se agrego ARCOIRIS
+  (`hongosArcoiris = true`, vel 0.5, HSV sat 0.8 / val 0.9±0.1),
+  fuerza sumergida 1.0 y opacidad 0.82 — valores leidos del menu.
+- **CORRECCION final tras la captura del usuario** (hongos diminutos y
+  abajo): el PNG no mide 1 unidad → ahora se NORMALIZA por
+  `sprite.bounds` para que el tamano sea fraccion REAL de la celda, y
+  se agranda un poco (0.2 / 0.12 de celda). El rango de paseo usa las
+  SUPERFICIES REALES del liquido (`surface1/2/3` del Inspector, con
+  margen de 0.03) en vez de la franja vieja, y en `SetNivel` el objeto
+  arranca YA dentro del liquido (no en el centro).
+- **Ajuste final del usuario**: en nivel 1 los hongos se ven grandes y
+  salen de abajo, y no suben. Ahora el tamano es POR NIVEL: factor 0.65
+  en nivel 1 (≈0.13/0.08 de celda, como el menu) y 1.0 en niveles 2-3
+  (0.2/0.12). El rango de paseo usa el fondo real de la celda y el techo
+  con margen minimo (0.01) para que recorran mas hacia arriba.
+- **CORRECCION de la captura**: el hongo asomaba por DEBAJO del verde
+  (el borde del cristal y el `liquidLift` comen abajo). El fondo del
+  paseo ahora es `-celda * 0.42` (fondo real del verde), no el borde de
+  la celda `-0.5`.
+- **CORRECCION del usuario** (noto que todos los respiros se reiniciaban
+  al crear una celda o subir otra a nivel 2): `SyncAll` llama
+  `ApplyState` en TODAS las celdas por cada jugada. Ahora `CellVisuals`
+  solo llama `SetNivel` si `changed` (owner/nivel) o si cambio el pack
+  de objetos. `CalderoCelda.SetNivel` ya NO teletransporta a los hongos
+  vivos: conservan destino, fase y ritmo; solo ajusta su tamano al nivel
+  y los recorta contra los nuevos limites. Los objetos NUEVOS del nivel
+  2 arrancan con su propia fase, sin sincronizarse con los viejos.
+- **Prueba**: P1=caldero → al poner un punto (nivel 1) aparecen los dos
+  hongos DENTRO del liquido en sus casillas; P2 no tiene nada.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
+
+### Paso 9 — Nivel 2: ojo vivo + hongo grande ⭐⭐⭐ (IMPLEMENTADO)
+- **Valores del menu**: Ojo 23px (0.33 celda), `bobVertical 14.8`,
+  giro 22, tinte sumergido 1, `tenirHijos=0` (la iris queda viva),
+  arcoiris 0. Hongo grande 17px (0.24 celda), giro -30, respiro
+  tamano 0.482. Iris: rojo `(1, 0.13, 0.13)`, desplazamiento 0.22,
+  extraLateral 1.4, suavidad 0.15, cambios 0.7-2.2s, 5 miradas
+  (central + laterales/verticales espejadas con el mismo sprite).
+- **Que hecho**: `FxPack` gana los sprites (cargados por nombre) y todos
+  esos knobs. `CalderoCelda` crea el ojo con su **iris hija** y las 5
+  miradas (cambio aleatorio, espejo por scale negativo, barrido lateral
+  mas largo, Lerp suave). Objetos del nivel 2 arrancan inactivos y se
+  activan al subir, **sin reiniciar** los hongos del nivel 1.
+- **CORRECCION de la captura**: la iris salia diminuta (~27%) porque es
+  hija del ojo y su `localScale` se multiplica por la escala del padre.
+  Ahora se divide por `o.escala` para que su tamano MUNDIAL sea el 68%
+  real de la esclerotica, como en el menu. El usuario la prefirio un
+  La iris vuelve a 0.68 (proporcion original, la correcta). El ajuste
+  era solo del OJO COMPLETO: `ojoTamano = 0.28` de celda (era 0.33).
+  Ambos valores son ajustables en `FxPack`.
+- **Prueba**: nivel 2 → aparecen el ojo con la iris bien proporcionada
+  mirando a todas partes y el hongo grande; nivel 1 sigue igual.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
+
+### Paso 10 — Nivel 3: hueso + segundo ojo azul ⭐⭐⭐ (IMPLEMENTADO)
+- **Valores del menu**: hueso 65px (finalmente `huesoTamano = 0.45` de
+  celda — el usuario lo vio grande; ajustable en el Inspector), antes 0.6
+  desborde), paseo 14px/s por los BORDES, NO gira (se meca 44.7°, 0.366
+  Hz), `sumergido=0` (parte de arriba normal) + copia `Hueso_Agua` con
+  fuerza 1 y opacidad 1 teñida del liquido con respiro. Segundo ojo 11px
+  (0.14 de celda) con iris AZUL `(0, 0.192, 1)`.
+- **Que hecho**: `FxPack` gana los sprites (Huesito cargado por nombre),
+  tamaños y knobs. `CalderoCelda` crea ambos objetos con `nivelMinimo=3`,
+  el hueso con paseo por bordes/vaiven y su copia sumergida como hija que
+  sigue su transform y respira el verde. El ojo 2 reutiliza la logica de
+  iris del ojo 1 con color azul.
+- **CORRECCION tras la prueba del usuario** (hueso todo verde y capas
+  desordenadas):
+  1. La copia sumergida usa un **`SpriteMask` con las medidas reales de
+     `ZonaAgua` del menu** (100 × 78.77 px de boton 100, centrada en
+     y=-11.3 → en juego: `celda × 1 × 0.7877`, y `-celda × 0.113`), así
+     solo se ve **bajo el agua** como el `RectMask2D` — el hueso de
+     arriba queda con su color normal. La iris azul sigue siendo HIJA de
+     base_ojo2, con Z local `-0.0005` para no adelantarse al hueso
+     (antes parecia flotar separada). Correccion de Z: la copia va
+     local `-0.002` (delante del hueso `-0.014`, detras del ojo `-0.017`).
+  2. Se respeta el **orden de hermanos de la jerarquia** del menu
+     (`Liquid → Hongo3 → Hongo2 → ojo2 → hueso → Hongo1 → copia → ojo →
+     Crystal`) mediante profundidades Z distintas (misma capa de orden
+     que el liquido; el vidrio sigue en `glassOrder` encima de todo).
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
+
+### Paso 11 — Vapor en world-space ⭐⭐⭐⭐
 - **Que**: portar la receta del menu a world-space, UN objeto por paso,
   calibrando tamaños en UNA CELDA DE PRUEBA de GameScene (no en el menu):
   - **8**: hongos nivel 1. **9**: ojo vivo + hongo grande nivel 2.
@@ -366,6 +467,46 @@ pena y se reintenta con celdas de prueba.
 - El diseño v1 del port (CalderoCelda, ordenes de capa, knobs) queda
   guardado en `NOTA_Caldero.md` 8b-bis/8b-ter como referencia, pero el
   plan de aca (por dueño, con celda de prueba) lo REEMPLAZA.
+
+---
+
+## 3b. CONVERSION DE MEDIDAS MENU → JUEGO (lineal)
+
+> Pedido del usuario: medir los objetos en el menu y hacer la operacion
+> de dimensiones lineales, en vez de adivinar tamaños.
+>
+> Boton `Selector_Caldero` = **100 px**; celda del juego = **1.2 unidades**.
+> `1 px = 0.012 unidades`; `fraccion de celda = px / 100`.
+> Helper: `FxPackCatalog.FraccionDeCeldaDesdePx(px)`.
+
+| Objeto | Rect en menu | Fraccion de celda (px/100) |
+|---|---|---|
+| Hongo 1 | 14×14 px | **0.14** |
+| Hongo 2 | 7×7 px | **0.07** |
+| Hongo grande | 17×17 px | **0.17** |
+| base_ojo (ojo 1) | 23×23 px | **0.23** |
+| base_ojo2 (ojo 2) | 11×11 px | **0.11** |
+| Hueso | 65×65 px | **0.65** |
+
+El usuario-confirmo estos valores y pidio usarlos EXACTOS (antes habia
+ajustes a ojo que dejaban el hueso demasiado chico). Se asignan en el
+constructor del catalogo con `FraccionDeCeldaDesdePx(px)` y se normaliza
+por `sprite.bounds` para que el arte dibujado ocupe esa fraccion real.
+
+**HOMOTECIA (escalado uniforme, pedido del usuario)**: el factor
+`k = objetosEscalaGlobal` se aplica a TAMAÑOS **y** POSICIONES relativas
+desde el origen (centro de la celda): `x_nuevo = 0 + k·(x_original - 0)`.
+En `CalderoCelda` eso significa que `K` escala: diámetro, márgenes de
+paseo (`±0.45·celda·K`), fondo del verde (`-0.42·celda·K`), techo
+(`topeY·K`), bob y velocidad. El área cambia como `k²` y el volumen como
+`k³` (nota del usuario). La mascara `ZonaAgua` NO se escala: es el
+"recipiente" (la cancha), no parte del conjunto de objetos.
+
+**Perillas** (para ajustar sin romper las proporciones):
+- `objetosEscalaGlobal` = 1 → escala TODOS los objetos juntos (k).
+- `factorTamanoNivel1` = 1 → factor extra solo para la franja fina del
+  nivel 1 (el usuario lo habia pedido mas chico antes; ahora queda 1 =
+  identico al menu y se puede bajar si se ve cargado).
 
 ---
 
