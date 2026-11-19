@@ -139,7 +139,6 @@ public class CellVisuals : MonoBehaviour
         public string bubblePackId; // pack con el que se armo el sistema de burbujas
         public CalderoCelda caldero;    // objetos flotando del pack (paso 8)
         public string objetosPackId;    // pack con el que se crearon los objetos
-        public EfectosCalderoCelda efectos; // burbujas de 2 capas + vapor del menu
     }
 
     private readonly Dictionary<Vector2Int, CellVisual> cells = new Dictionary<Vector2Int, CellVisual>();
@@ -645,7 +644,7 @@ graph = PlayableGraph.Create("CellVisuals");
 
     private void SetBubbleRate(CellVisual cv, int level)
     {
-        if (cv.foam == null || cv.efectos != null) return; // los efectos del menu mandan
+        if (cv.foam == null) return;
         var em = cv.foam.emission;
         var fx = PackEfectos(cv.owner);
         bool conBurbujas = fx != null && fx.burbujasOn;
@@ -686,7 +685,6 @@ graph = PlayableGraph.Create("CellVisuals");
         if (cv.playable.IsValid()) cv.playable.Destroy();
         if (cv.label != null) Destroy(cv.label.gameObject);
         if (cv.caldero != null) Destroy(cv.caldero.gameObject);
-        if (cv.efectos != null) Destroy(cv.efectos.gameObject);
         if (cv.root != null) Destroy(cv.root.gameObject);
     }
 
@@ -749,29 +747,10 @@ graph = PlayableGraph.Create("CellVisuals");
             cv.bubblePackId = fxPack.id;
             SetupBubbles(cv.foam, fxPack);
         }
-        // Efectos COMPLETOS del menu (burbujas de 2 planos + vapor en
-        // lineas). Cuando el pack los trae, reemplazan al emisor simple.
-        bool efectosMenu = fxPack != null &&
-            (fxPack.burbujasOn || fxPack.vaporOn);
-        if (efectosMenu && cv.efectos == null)
-        {
-            var fxGO = new GameObject($"Efectos_{cv.coord.x}_{cv.coord.y}");
-            fxGO.transform.SetParent(cellsRoot, false);
-            cv.efectos = fxGO.AddComponent<EfectosCalderoCelda>();
-            // Las franjas vienen del MENU (guardadas en el pack), no de los
-            // surface del Inspector: asi burbujas/vapor nacen y mueren
-            // exactamente igual que en el boton.
-            cv.efectos.Configurar(fxPack, cv.liquid, cv.liquid.transform.localPosition,
-                fxPack.franjaNivel1, fxPack.franjaNivel2, fxPack.franjaNivel3);
-        }
-        if (cv.efectos != null)
-        {
-            // Si el dueño actual no trae efectos (ej: el bot conquisto una
-            // casilla caldero), APAGARlos: antes quedaban burbujas/vapor
-            // flotando en casillas clasicas para siempre.
-            cv.efectos.SetNivel(efectosMenu && level > 0 ? level : 0);
-        }
-
+        // Revertido: se volvio al emisor de burbujas simple de CellVisuals.
+        // El componente de efectos completo del menu (2 capas + vapor) se
+        // desactivo porque se veia mal: burbujas saliendo del cristal y
+        // vapor congelado. Solo las burbujas simples, como antes.
         SetBubbleRate(cv, level);
 
         // Objetos del pack caldero (paso 8): se crean cuando la celda
