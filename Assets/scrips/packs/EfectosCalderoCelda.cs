@@ -145,8 +145,8 @@ public class EfectosCalderoCelda : MonoBehaviour
                 b.popT += dt;
                 float k = Mathf.Clamp01(b.popT / 0.15f);
                 float esc = 1.15f + 0.45f * k;
-                float eb = EscalaSprite(b.sr.sprite);
-                b.sr.transform.localScale = new Vector3(b.sx * esc * eb, b.sy * esc * eb, 1f);
+                float ebPop = EscalaSprite(b.sr.sprite);
+                b.sr.transform.localScale = new Vector3(b.sx * esc * ebPop, b.sy * esc * ebPop, 1f);
                 var cp = b.sr.color;
                 cp.a = b.alphaPropia * (1f - k);
                 b.sr.color = cp;
