@@ -41,7 +41,12 @@ public class BurbujasVaporCaldero : MonoBehaviour
     // del ojo pero detras del vidrio (que tiene mayor sortingOrder).
     const float ZAtras = -0.005f;
     const float ZVapor = -0.006f;
-    const float ZDelante = -0.018f;
+    // Antes -0.018: tan cerca de la camara que, si el prefab del cristal
+    // no ponia bien su sortingOrder, la burbuja se dibujaba SOBRE el vidrio.
+    // -0.008 la deja por delante de los objetos pero lejos del cristal.
+    const float ZDelante = -0.008f;
+    // Multiplicador de tamano SOLO de la capa DELANTE (las veia grandes).
+    const float TamanoCapaDelante = 0.7f;
 
     readonly List<Burbuja> burbujas = new List<Burbuja>();
     readonly List<Burbuja> burbujasLibres = new List<Burbuja>();
@@ -249,6 +254,9 @@ public class BurbujasVaporCaldero : MonoBehaviour
 
         bool delante = Random.value < pack.burbujaPorcentajeDelante;
         b.sr.transform.SetParent(delante ? capaDelante : capaAtras, false);
+        // Las de DELANTE se ven mas grandes al estar mas cerca: las achico
+        // un poco para que no se noten desmedidas sobre los objetos.
+        if (delante) { b.sx *= TamanoCapaDelante; b.sy *= TamanoCapaDelante; }
         float dado = Random.value;
         dado = delante
             ? Mathf.Lerp(dado, 1f, pack.burbujaSesgoProfundidad)
@@ -313,7 +321,9 @@ public class BurbujasVaporCaldero : MonoBehaviour
         var go = new GameObject("Burbuja");
         go.transform.SetParent(capaAtras, false);
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sortingOrder = liquid != null ? liquid.sortingOrder : 0;
+        // Un orden por debajo del liquido garantiza que NINGUNA burbuja
+        // (ni la de delante) se dibuje sobre el cristal (glassOrder = 1).
+        sr.sortingOrder = liquid != null ? liquid.sortingOrder - 1 : -1;
         return new Burbuja { sr = sr };
     }
 
