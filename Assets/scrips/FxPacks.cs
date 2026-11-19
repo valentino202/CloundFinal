@@ -153,6 +153,8 @@ public class FxPack
     [Range(0f, 1f)] public float burbujaVariacionMezcla = 0.299f; // menu: 0.299
     [Range(0f, 1f)] public float burbujaVariacionRespiro = 0.72f; // menu: 0.72
     [Range(0f, 1f)] public float burbujaMezclaLiquido = 1f;       // menu: 1
+    [Tooltip("Velo extra del color del liquido para que las burbujas se vean SUMERGIDAS, no flotando.")]
+    [Range(0f, 1f)] public float burbujaVeloSumergido = 0.35f;
     public float burbujaVelocidadRespiro = 0.61f;                 // menu: 0.61
     [Tooltip("Porcentaje de burbujas DELANTE de los objetos. El menu tenia 0.875 (casi todas encima); bajalo para mezclar delante/atras.")]
     [Range(0f, 1f)] public float burbujaPorcentajeDelante = 0.35f;

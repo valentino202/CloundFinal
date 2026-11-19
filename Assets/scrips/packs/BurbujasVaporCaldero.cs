@@ -41,11 +41,11 @@ public class BurbujasVaporCaldero : MonoBehaviour
     // del ojo pero detras del vidrio (que tiene mayor sortingOrder).
     const float ZAtras = -0.005f;
     const float ZVapor = -0.006f;
-    // Las burbujas de DELANTE deben pasar POR ENCIMA de los objetos
-    // (Z -0.011..-0.017). Con orden empatado (0) manda el Z: mas negativo
-    // = mas cerca de la camara. -0.019 las pone delante del ojo/hongos,
-    // pero el CRISTAL (glassOrder=1) sigue encima de todas por sortingOrder.
-    const float ZDelante = -0.019f;
+    // Las burbujas de DELANTE van un poco por delante del liquido, pero NO
+    // tan al frente como antes (-0.019): asi se ven DENTRO del brebaje, no
+    // pegadas al cristal. -0.010 las deja delante del liquido (Z 0) y de
+    // la capa atras (-0.005), y cerca de los objetos sin separarse.
+    const float ZDelante = -0.010f;
     // Multiplicador de tamano SOLO de la capa DELANTE (las veia grandes).
     const float TamanoCapaDelante = 0.7f;
 
@@ -168,7 +168,10 @@ public class BurbujasVaporCaldero : MonoBehaviour
             if (b.sr.sprite == null) b.sr.sprite = Elegir(anillos, 4);
 
             float resp = 0.75f + 0.25f * Mathf.Sin(t * b.respVel + b.fase);
-            var baseC = Color.Lerp(Color.white, liq, b.mezclaPropia);
+            // Velo sumergido: mezcla extra del color real para que la
+            // burbuja se vea DENTRO del brebaje, no flotando en el frente.
+            float mezclaSum = Mathf.Clamp01(b.mezclaPropia + pack.burbujaVeloSumergido);
+            var baseC = Color.Lerp(Color.white, liq, mezclaSum);
 
             if (b.pop)
             {
