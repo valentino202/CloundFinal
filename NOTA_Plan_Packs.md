@@ -405,7 +405,27 @@ pena y se reintenta con celdas de prueba.
      que el liquido; el vidrio sigue en `glassOrder` encima de todo).
 - [ ] Aprobado por el usuario (PENDIENTE de probar)
 
-### Paso 11 — ⛔ REVERTIDO (emergencia)
+### Paso 11v2 — Efectos world-space con bounds reales ✅ (REINTENTO)
+> Tras el revert del primer intento, se rehizo con `BurbujasVaporCaldero.cs`:
+> - **Causa raiz de los bugs anteriores**: en el menu todo son PIXELES del
+>   RectTransform del Liquido (100px); en el juego no hay RectTransform,
+>   asi que copiar numeros hacia que las burbujas salieran del cristal.
+>   Ahora el "rect" del liquido se mide con `sprite.bounds * localScale`
+>   del SpriteRenderer real (ancho/alto en unidades de mundo), y el fondo
+>   es `-alto*0.5` (pivote centrado, igual que el menu).
+> - Logica COPIADA del menu: tasa fija `* densidadEfectos`, fade in 0.12s,
+>   crecimiento 0.85→1.15, pop al llegar a superficie, dos capas con
+>   `porcentajeDelante=0.875` y `sesgoProfundidad=0.206`, variacion por
+>   burbuja, respiracion del color real. Vapor: lineas de 6 puffs nacen
+>   juntas dentro del verde (`nacerAbajo=0.5`), suben, crecen, se congelan
+>   al tope y mueren. Sprites generados por codigo (4 anillos, 3 puffs).
+> - **Limpieza**: `SetNivel(0)` o cambio de dueno libera TODO al pool →
+>   nunca queda humo/burbujas congeladas. El emisor simple (`foam`) del
+>   clasico se detiene con StopEmittingAndClear cuando el pack trae efectos.
+> - Requiere `TieneObjetos` (el pack caldero tiene sprites) para crear el
+>   componente.
+
+### Paso 11 — ⛔ REVERTIDO (primer intento, historical)
 > El usuario pidio volver atras: el port de `BurbujasCalderoUI` +
 > `VaporCalderoUI` (`EfectosCalderoCelda.cs`) salia mal (burbujas fuera
 > del cristal, vapor congelado, burbujas mal en todos los niveles).
