@@ -169,8 +169,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
                 b.popT += dt;
                 float k = Mathf.Clamp01(b.popT / 0.15f);
                 float esc = 1.15f + 0.45f * k;
-                float ea = EscalaAnillo(b.sr.sprite);
-                b.sr.transform.localScale = new Vector3(b.sx * esc * ea, b.sy * esc * ea, 1f);
+                float eaPop = EscalaAnillo(b.sr.sprite);
+                b.sr.transform.localScale = new Vector3(b.sx * esc * eaPop, b.sy * esc * eaPop, 1f);
                 baseC.a = b.alphaPropia * pack.opacidadEfectos * (1f - k);
                 b.sr.color = baseC;
                 if (k >= 1f) LiberarBurbuja(i);
