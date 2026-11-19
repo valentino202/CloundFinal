@@ -111,6 +111,37 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 
 ---
 
+## 2b. PROCEDIMIENTO PARA EFECTOS FUTUROS (burbujas/vapor — lecciones finales)
+
+> Como hacer que un efecto UI del menu se vea IGUAL en el juego, paso a
+> paso (aplica a cualquier efecto futuro: llamas, chispas, destellos...).
+
+1. **NO copiar numeros UI a world-space**: el menu trabaja en PIXELES del
+   RectTransform del Liquido (boton 100px); el juego en UNIDADES (celda
+   1.2u). El "rect" equivalente se mide con
+   `sprite.bounds.size * abs(localScale)` del SpriteRenderer del liquido.
+2. **Fondo del liquido = `-alto*0.5`** (pivote centrado, igual que el menu).
+   Nunca usar un numero fijo de celda: hacia que las burbujas salieran
+   del cristal.
+3. **Misma logica del menu, sin inventar**: tasa `* densidad` (no escalar
+   por nivel), fade in 0.12s, crecimiento 0.85→1.15, pop al llegar a la
+   superficie, variacion por particula (alpha/mezcla/ritmo).
+4. **Doble capa por Z, NO por sortingOrder**: liquidOrder=0 y
+   glassOrder=1 son consecutivos (no hay entero entre ellos). Ambas capas
+   van en order 0; la de atras en Z~-0.007 (detras de los objetos), la de
+   delante en Z~-0.019 (delante de los objetos). El cristal (order 1)
+   queda encima siempre.
+5. **Tinte sumergido para no verse "pegado al frente"**: el velo del color
+   REAL del liquido (leido cada frame) es lo que da la sensacion de estar
+   DENTRO, no el Z. Subir el velo en vez de acercar/alejar la capa.
+6. **Normalizar sprites generados por codigo**: `localScale = tamano /
+   sprite.bounds` (sino el sprite de 64px/PPU100 sale 1.6x grande).
+7. **Sprites static mueren al salir del Play**: las listas estaticas de
+   sprites generados sobreviven con referencias null. `Elegir()` debe
+   detectar nulls, limpiar y regenerar (como `Anillos()`/`Puffs()` del menu).
+8. **Limpieza al quedar sin nivel / cambiar de dueno**: liberar TODO al
+   pool; nunca hacer `return` dejando particulas visibles (humo congelado).
+
 ## 3. CAMPO DE APLICACIÓN
 
 Este manual aplica a **cualquier pack futuro**: el esqueleto (catálogo,
