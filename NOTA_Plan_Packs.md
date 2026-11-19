@@ -533,13 +533,16 @@ pena y se reintenta con celdas de prueba.
   el espacio del liquido y la franja del nivel; las del bot intactas.
 - [ ] 8 aprobado  [ ] 9 aprobado  [ ] 10 aprobado  [ ] 11 aprobado
 
-### Paso 12 — Boom con voladores ⭐⭐⭐⭐⭐
-- **Que**: al explotar una casilla de caldero, objetos salen volando en
-  diagonales y desaparecen (solo el juego lo muestra: es el premio del
-  pack).
-- **Prueba**: jugar hasta nivel 4 en una casilla de P1. NO se puede
-  probar en celda de prueba — es el ultimo gran paso.
-- [ ] Aprobado
+### Paso 12 — Boom con voladores ⭐⭐⭐⭐⭐ (IMPLEMENTADO)
+- Nuevo `BoomVoladores.cs`: al explotar una casilla del caldero salen
+  `boomObjetos` (6) sprites de objetos (hongos/ojo/hueso) en diagonales
+  laterales al azar, con giro, gravedad leve y desvanecimiento. Se
+  auto-destruye al terminar. Solo si `pack.TieneObjetos`.
+- `FxPack` gana `boomObjetos`, `boomVelocidad`, `boomVida`. Clip/sonido/
+  destello los maneja `CellVisuals.PlayBoom` como siempre.
+- **Prueba**: jugar hasta nivel 4 en una casilla de P1 → objetos volando
+  desde la explosion. No se puede probar en celda de prueba.
+- [ ] Aprobado por el usuario (PENDIENTE de probar)
 
 ### Paso 13 — Sobrescritura por conquista ⭐⭐⭐
 - **Que**: cuando el bot conquista una casilla tuya, la casilla se
