@@ -131,7 +131,8 @@ public class CellVisuals : MonoBehaviour
         /// <summary>Escala normalizada a 1 celda. Nunca se pierde: el juice multiplica sobre ella.</summary>
         public float baseScale = 1f;
         public TextMeshPro label;
-        public ParticleSystem foam;
+        public ParticleSystem foam; // emisor simple del clasico (sin efectos de pack)
+        public BurbujasVaporCaldero efectos; // burbujas 2 capas + vapor del menu (pack especial)
         public AnimationClipPlayable playable;
         public AnimationPlayableOutput output;
         public bool outputValid;
@@ -483,6 +484,8 @@ graph = PlayableGraph.Create("CellVisuals");
         bubGO.transform.localPosition = pos;
         cv.foam = bubGO.AddComponent<ParticleSystem>();
         SetupBubbles(cv.foam, PackEfectos(0));
+        // El componente de efectos del menu se crea en ApplyState, cuando
+        // se sabe el dueno real (el tablero nace neutral).
 
         // --- Numero de nivel: centrado sobre el cristal, blanco -> rojo ---
         var labelGO = new GameObject($"Label_{x}_{y}");
@@ -685,6 +688,7 @@ graph = PlayableGraph.Create("CellVisuals");
         if (cv.playable.IsValid()) cv.playable.Destroy();
         if (cv.label != null) Destroy(cv.label.gameObject);
         if (cv.caldero != null) Destroy(cv.caldero.gameObject);
+        if (cv.efectos != null) Destroy(cv.efectos.gameObject);
         if (cv.root != null) Destroy(cv.root.gameObject);
     }
 
@@ -742,16 +746,39 @@ graph = PlayableGraph.Create("CellVisuals");
         // receta del nuevo pack — por eso aparecen aunque la celda
         // naciera neutral.
         var fxPack = PackEfectos(owner);
+
+        // Pack con efectos del menu (caldero): usar el componente nuevo que
+        // mide los bounds REALES del liquido (no numeros fijos de celda).
+        bool packConEfectos = fxPack != null &&
+            (fxPack.burbujasOn || fxPack.vaporOn) && fxPack.TieneObjetos;
+        if (packConEfectos)
+        {
+            if (cv.efectos == null)
+            {
+                var fxGO = new GameObject($"Efectos_{cv.coord.x}_{cv.coord.y}");
+                fxGO.transform.SetParent(cellsRoot, false);
+                cv.efectos = fxGO.AddComponent<BurbujasVaporCaldero>();
+                cv.efectos.Configurar(fxPack, cv.liquid, cv.liquid.transform.localPosition,
+                    fxPack.franjaNivel1, fxPack.franjaNivel2, fxPack.franjaNivel3);
+            }
+            cv.efectos.SetNivel(level);
+        }
+        else if (cv.efectos != null)
+        {
+            // El dueno cambio a un pack sin efectos: apagar y limpiar.
+            cv.efectos.SetNivel(0);
+        }
+
+        // El emisor simple (ParticleSystem) solo para packs sin efecto
+        // propio del menu. Con el pack caldero se calla.
         if (cv.foam != null && fxPack != null && cv.bubblePackId != fxPack.id)
         {
             cv.bubblePackId = fxPack.id;
             SetupBubbles(cv.foam, fxPack);
         }
-        // Revertido: se volvio al emisor de burbujas simple de CellVisuals.
-        // El componente de efectos completo del menu (2 capas + vapor) se
-        // desactivo porque se veia mal: burbujas saliendo del cristal y
-        // vapor congelado. Solo las burbujas simples, como antes.
-        SetBubbleRate(cv, level);
+        if (cv.efectos == null) SetBubbleRate(cv, level);
+        else if (cv.foam != null && cv.foam.isPlaying)
+            cv.foam.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         // Objetos del pack caldero (paso 8): se crean cuando la celda
         // pasa a ser de un pack que trae objetos; si el dueño cambia a
@@ -778,7 +805,7 @@ graph = PlayableGraph.Create("CellVisuals");
                 cv.caldero.SetNivel(objPack != null && objPack.TieneObjetos ? level : 0);
             cv.objetosPackId = idObjetos;
         }
-        if (cv.foam != null && level > 0)
+        if (cv.foam != null && cv.efectos == null && level > 0)
         {
             var main = cv.foam.main;
             var c = BoardFx.LiquidColorFor(owner, colorPack);
