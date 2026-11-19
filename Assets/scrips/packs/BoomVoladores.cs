@@ -62,13 +62,14 @@ public class BoomVoladores : MonoBehaviour
         sr.color = Color.white;
         sr.sortingOrder = explosionOrderBoom;
 
-        // Diagonal LATERAL marcada: salen hacia los costados y arriba,
-        // bien separados del centro de la explosion (no se mezclan con el
-        // destello). Van mas rapido que el clip para que se vean volar.
+        // Salen de la CASILLA hacia una diagonal cercana: recorren ~1 celda
+        // en toda su vida, NO toda la escena. Velocidad baja y controlada.
         float lado = Random.value < 0.5f ? -1f : 1f;
-        float vx = lado * Random.Range(pack.boomVelocidad * 0.8f, pack.boomVelocidad * 1.4f);
-        float vy = Random.Range(pack.boomVelocidad * 0.6f, pack.boomVelocidad * 1.2f);
-        float escala = celda * Random.Range(0.08f, 0.16f);
+        float vel = celda * Random.Range(0.7f, 1.2f); // ~0.9-1.4 u/s
+        float vx = lado * vel;
+        float vy = vel * Random.Range(0.8f, 1.2f);
+        // Tamano cercano al de los objetos reales (0.14-0.24 de celda).
+        float escala = celda * Random.Range(0.18f, 0.28f);
         // Normalizar el sprite (PNG no mide 1 unidad), igual que los objetos.
         if (sp != null)
         {
@@ -76,9 +77,10 @@ public class BoomVoladores : MonoBehaviour
             if (nativo > 0.01f) escala /= nativo;
         }
         go.transform.localScale = Vector3.one * escala;
-        // Nacen un poco DESPLAZADOS hacia su diagonal (no en el centro
-        // exacto), para que se vean apenas salen del destello grande.
-        go.transform.localPosition = new Vector3(vx * 0.12f, vy * 0.12f, 0f);
+        // Nacen en el CENTRO de la casilla (donde exploto), desplazados un
+        // minimo para no apilarse, y suben por Z para no quedar detras del
+        // destello. El movimiento se hace en localPosition desde ahi.
+        go.transform.localPosition = new Vector3(Random.Range(-0.1f, 0.1f), Random.Range(-0.1f, 0.1f), -0.02f);
 
         voladores.Add(new Volador
         {
@@ -86,7 +88,7 @@ public class BoomVoladores : MonoBehaviour
             vel = new Vector2(vx, vy),
             giro = Random.Range(-240f, 240f),
             nacido = Time.unscaledTime,
-            vida = Random.Range(pack.boomVida * 0.7f, pack.boomVida * 1.3f),
+            vida = Random.Range(pack.boomVida * 0.9f, pack.boomVida * 1.2f),
             escala = escala,
         });
     }
@@ -108,8 +110,8 @@ public class BoomVoladores : MonoBehaviour
             float edad = t - v.nacido;
             if (edad >= v.vida) { Destroy(v.sr.gameObject); voladores.RemoveAt(i); continue; }
 
-            // Gravedad leve: la subida se frena y cae un poco.
-            v.vel.y -= celda * 1.2f * dt;
+            // Gravedad suave: apenas frena la subida, no se caen al suelo.
+            v.vel.y -= celda * 0.5f * dt;
             v.sr.transform.localPosition += (Vector3)(v.vel * dt);
             v.sr.transform.localRotation = Quaternion.Euler(0f, 0f, v.giro * edad);
 
