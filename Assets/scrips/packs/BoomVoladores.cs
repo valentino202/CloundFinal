@@ -56,13 +56,18 @@ public class BoomVoladores : MonoBehaviour
         go.transform.SetParent(transform, false);
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = sp;
-        sr.color = tinte;
+        // Arte REAL del objeto (blanco = colores del PNG), NO el tinte del
+        // liquido: asi se distingue de la explosion (que si va teñida) y
+        // se ven como hongos/ojo/hueso volando, no como destellos verdes.
+        sr.color = Color.white;
         sr.sortingOrder = explosionOrderBoom;
 
-        // Direccion: diagonal LATERAL al azar (izq/der) con subida.
+        // Diagonal LATERAL marcada: salen hacia los costados y arriba,
+        // bien separados del centro de la explosion (no se mezclan con el
+        // destello). Van mas rapido que el clip para que se vean volar.
         float lado = Random.value < 0.5f ? -1f : 1f;
-        float vx = lado * Random.Range(pack.boomVelocidad * 0.5f, pack.boomVelocidad);
-        float vy = Random.Range(pack.boomVelocidad * 0.5f, pack.boomVelocidad);
+        float vx = lado * Random.Range(pack.boomVelocidad * 0.8f, pack.boomVelocidad * 1.4f);
+        float vy = Random.Range(pack.boomVelocidad * 0.6f, pack.boomVelocidad * 1.2f);
         float escala = celda * Random.Range(0.08f, 0.16f);
         // Normalizar el sprite (PNG no mide 1 unidad), igual que los objetos.
         if (sp != null)
@@ -83,8 +88,10 @@ public class BoomVoladores : MonoBehaviour
         });
     }
 
-    // Por encima del vidrio (glassOrder=1) para que se vean los voladores.
-    const int explosionOrderBoom = 4;
+    // Entre el vidrio (1) y la explosion (3): por encima del cristal para
+    // que se vean, pero por DEBAJO del destello para que no se mezclen con
+    // la animacion 4 y se distingan como objetos separados volando.
+    const int explosionOrderBoom = 2;
 
     void Update()
     {
@@ -101,10 +108,10 @@ public class BoomVoladores : MonoBehaviour
             v.sr.transform.localPosition += (Vector3)(v.vel * dt);
             v.sr.transform.localRotation = Quaternion.Euler(0f, 0f, v.giro * edad);
 
-            // Se desvanecen al final de su vida.
+            // Se desvanecen al final de su vida (conservando el arte real).
             float k = Mathf.Clamp01(edad / v.vida);
             var c = v.sr.color;
-            c.a = tinte.a * (1f - k * k);
+            c.a = 1f - k * k;
             v.sr.color = c;
         }
 
