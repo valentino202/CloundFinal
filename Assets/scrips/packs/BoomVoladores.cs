@@ -76,6 +76,9 @@ public class BoomVoladores : MonoBehaviour
             if (nativo > 0.01f) escala /= nativo;
         }
         go.transform.localScale = Vector3.one * escala;
+        // Nacen un poco DESPLAZADOS hacia su diagonal (no en el centro
+        // exacto), para que se vean apenas salen del destello grande.
+        go.transform.localPosition = new Vector3(vx * 0.12f, vy * 0.12f, 0f);
 
         voladores.Add(new Volador
         {
@@ -88,10 +91,12 @@ public class BoomVoladores : MonoBehaviour
         });
     }
 
-    // Entre el vidrio (1) y la explosion (3): por encima del cristal para
-    // que se vean, pero por DEBAJO del destello para que no se mezclen con
-    // la animacion 4 y se distingan como objetos separados volando.
-    const int explosionOrderBoom = 2;
+    // Encima de la explosion (explosionOrder=3): el destello de 4animation
+    // es una imagen GRANDE que se escala a 2.4 celdas y, si los voladores
+    // estan por debajo (order 2), los tapa por completo. Con order 4 se ven
+    // por encima del destello. El tinte verde ya se quito, asi que se
+    // distinguen como objetos con su arte real.
+    const int explosionOrderBoom = 4;
 
     void Update()
     {
