@@ -977,20 +977,24 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         var anim = go.AddComponent<Animator>();
         anim.applyRootMotion = false;
 
-        // Clip del pack de QUIEN exploto (paso 2). PackDeCelda garantiza arte.
+        // Clip del pack de QUIEN exploto (paso 2). PackDeCelda garantiza arte
+        // (el caldero no tiene clips propios => cae al clasico para el clip).
         var boomPack = PackDeCelda(BoardFx.LastAttacker);
         // BOOM del caldero: objetos volando en diagonales que desaparecen.
-        // Solo si el pack trae objetos (el premio visual del pack especial).
-        if (boomPack.TieneObjetos)
+        // IMPORTANTE: los sprites de objetos estan en el pack EFECTOS (el
+        // caldero crudo), NO en boomPack (que es el clasico de respaldo sin
+        // sprites). Por eso antes no se creaban los voladores.
+        var fxPackDelDueno = PackEfectos(BoardFx.LastAttacker);
+        if (fxPackDelDueno != null && fxPackDelDueno.TieneObjetos)
         {
-            Debug.Log($"[CellVisuals] BOOM voladores disparados en ({coord.x},{coord.y}) pack='{boomPack.id}' " +
-                      $"objetos={boomPack.boomObjetos} hongo1={(boomPack.hongo1Sprite != null ? "OK" : "NULL")}", this);
+            Debug.Log($"[CellVisuals] BOOM voladores en ({coord.x},{coord.y}) pack='{fxPackDelDueno.id}' " +
+                      $"objetos={fxPackDelDueno.boomObjetos} hongo1={(fxPackDelDueno.hongo1Sprite != null ? "OK" : "NULL")}", this);
             var volGO = new GameObject($"BoomVoladores_{coord.x}_{coord.y}");
             volGO.transform.SetParent(cellsRoot != null ? cellsRoot : transform, false);
             volGO.transform.localPosition = pos;
             var vol = volGO.AddComponent<BoomVoladores>();
-            Color tinte = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker, boomPack));
-            vol.Configurar(boomPack, Vector3.zero, tinte);
+            Color tinte = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker, fxPackDelDueno));
+            vol.Configurar(fxPackDelDueno, Vector3.zero, tinte);
         }
         var playable = AnimationClipPlayable.Create(graph, boomPack.clipBoom);
         playable.SetApplyFootIK(false);
