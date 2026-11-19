@@ -51,6 +51,17 @@ public class BurbujasVaporCaldero : MonoBehaviour
     static readonly List<Sprite> anillos = new List<Sprite>();
     static readonly List<Sprite> humo = new List<Sprite>();
 
+    /// <summary>El sprite del anillo mide 0.64u (64px / PPU 100). Para que
+    /// 'sx' signifique el tamano real pedido por el menu hay que dividir
+    /// localScale por el bounds del sprite (igual que los objetos). Sin
+    /// esto las burbujas salen 1.6x mas chicas y casi no se ven.</summary>
+    static float EscalaAnillo(Sprite sp)
+    {
+        if (sp == null) return 1f;
+        float nativo = Mathf.Max(sp.bounds.size.x, sp.bounds.size.y);
+        return nativo > 0.01f ? 1f / nativo : 1f;
+    }
+
     Transform capaAtras, capaDelante, capaVapor;
     FxPack pack;
     SpriteRenderer liquid;
@@ -138,8 +149,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
         float fondo = -h * 0.5f;
         float superficie = fondo + h * superficieFraccion;
 
-        // === BURBUJAS: tasa fija * densidad, sin escalado por nivel ===
-        acumB += pack.bubbleRate * pack.densidadEfectos * dt;
+        // === BURBUJAS: tasa fija * densidad * cantidad, sin escalado por nivel ===
+        acumB += pack.bubbleRate * pack.densidadEfectos * pack.burbujaCantidad * dt;
         while (acumB >= 1f) { acumB -= 1f; NacerBurbuja(w, h, fondo); }
 
         float subida = h * pack.bubbleRise * pack.velocidadEfectos;
@@ -158,7 +169,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
                 b.popT += dt;
                 float k = Mathf.Clamp01(b.popT / 0.15f);
                 float esc = 1.15f + 0.45f * k;
-                b.sr.transform.localScale = new Vector3(b.sx * esc, b.sy * esc, 1f);
+                float ea = EscalaAnillo(b.sr.sprite);
+                b.sr.transform.localScale = new Vector3(b.sx * esc * ea, b.sy * esc * ea, 1f);
                 baseC.a = b.alphaPropia * pack.opacidadEfectos * (1f - k);
                 b.sr.color = baseC;
                 if (k >= 1f) LiberarBurbuja(i);
@@ -175,7 +187,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
             baseC.a = b.alphaPropia * pack.opacidadEfectos * resp * Mathf.Clamp01(edad / 0.12f);
             b.sr.color = baseC;
             b.sr.transform.localPosition = new Vector3(x, b.y, 0f);
-            b.sr.transform.localScale = new Vector3(b.sx * crece, b.sy * crece, 1f);
+            float ea = EscalaAnillo(b.sr.sprite);
+            b.sr.transform.localScale = new Vector3(b.sx * crece * ea, b.sy * crece * ea, 1f);
         }
 
         // === VAPOR: lineas que nacen juntas, limitadas junto al agua ===
@@ -240,7 +253,10 @@ public class BurbujasVaporCaldero : MonoBehaviour
         dado = delante
             ? Mathf.Lerp(dado, 1f, pack.burbujaSesgoProfundidad)
             : Mathf.Lerp(dado, 0f, pack.burbujaSesgoProfundidad);
-        b.alphaPropia = Mathf.Clamp01(pack.bubbleAlpha * pack.opacidadEfectos *
+        // Contraste extra de capas: las de DELANTE se refuerzan y las de
+        // ATRAS se atenuan, para que se vea el doble plano del menu.
+        float capa = delante ? (1f + pack.burbujaContrasteCapas) : (1f - pack.burbujaContrasteCapas);
+        b.alphaPropia = Mathf.Clamp01(pack.bubbleAlpha * pack.opacidadEfectos * capa *
             Mathf.Lerp(1f - pack.burbujaVariacionAlpha, 1f + pack.burbujaVariacionAlpha, dado));
         b.mezclaPropia = Mathf.Clamp01(pack.burbujaMezclaLiquido *
             Random.Range(1f - pack.burbujaVariacionMezcla, 1f + pack.burbujaVariacionMezcla));
@@ -252,7 +268,7 @@ public class BurbujasVaporCaldero : MonoBehaviour
 
         b.sr.sprite = Elegir(anillos, 4);
         b.sr.transform.localPosition = new Vector3(b.x0, b.y, 0f);
-        b.sr.transform.localScale = new Vector3(b.sx, b.sy, 1f);
+        b.sr.transform.localScale = new Vector3(b.sx * EscalaAnillo(b.sr.sprite), b.sy * EscalaAnillo(b.sr.sprite), 1f);
         var c = b.sr.color; c.a = 0f; b.sr.color = c;
     }
 

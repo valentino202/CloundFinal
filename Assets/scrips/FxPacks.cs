@@ -158,6 +158,10 @@ public class FxPack
     [Range(0f, 1f)] public float burbujaPorcentajeDelante = 0.875f;
     [Tooltip("Las de delante marcadas, las de atras tenues (menu: 0.206).")]
     [Range(0f, 1f)] public float burbujaSesgoProfundidad = 0.206f;
+    [Tooltip("CANTIDAD extra de burbujas: compensa que las celdas nivel 1 recorren menos que el menu siempre-lleno. 1 = valores del menu.")]
+    [Range(1f, 5f)] public float burbujaCantidad = 3f;
+    [Tooltip("Contraste entre la capa DELANTE (marcada) y la de ATRAS (tenue). 0 = como el menu; subir para notar mas las dos capas.")]
+    [Range(0f, 1f)] public float burbujaContrasteCapas = 0.45f;
 
     [Header("Vapor en lineas (menu)")]
     [Tooltip("El pack TRAE vapor. false = clasico (sin vapor), true = caldero.")]
