@@ -983,6 +983,8 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         // Solo si el pack trae objetos (el premio visual del pack especial).
         if (boomPack.TieneObjetos)
         {
+            Debug.Log($"[CellVisuals] BOOM voladores disparados en ({coord.x},{coord.y}) pack='{boomPack.id}' " +
+                      $"objetos={boomPack.boomObjetos} hongo1={(boomPack.hongo1Sprite != null ? "OK" : "NULL")}", this);
             var volGO = new GameObject($"BoomVoladores_{coord.x}_{coord.y}");
             volGO.transform.SetParent(cellsRoot != null ? cellsRoot : transform, false);
             volGO.transform.localPosition = pos;
