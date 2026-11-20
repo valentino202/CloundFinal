@@ -43,8 +43,8 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Range(4f, 30f)] public float fps = 14f;
     [Tooltip("Pausa entre niveles del llenado, en segundos.")]
     [Range(0f, 1.5f)] public float pausaNivel = 0.45f;
-    [Tooltip("Brillo del liquido en el MENU. Igual que 'Color Boost' de CellVisuals en el juego (2.3). Lo heredan tambien los botones de color.")]
-    [Range(0.5f, 3f)] public float colorBoost = 2.3f;
+    [Tooltip("Brillo del liquido en el MENU. Igual que 'Color Boost' de CellVisuals en el juego. 1.0 = colores exactos (rosa/naranja no se distorsionan).")]
+    [Range(0.5f, 3f)] public float colorBoost = 1f;
 
     [Header("Animaciones de toque (igual que ColorSwatch)")]
     [Range(1f, 1.5f)] public float hoverScale = 1.14f;

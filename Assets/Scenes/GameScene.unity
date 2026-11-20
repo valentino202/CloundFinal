@@ -181,7 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CellVisuals
   packId: clasico
   glassPrefab: {fileID: 3176565274343680119, guid: 653c78b8b3f6a32469aecb72b7860fc2, type: 3}
-  glassAlpha: 0.8
+  glassAlpha: 1
   colorBoost: 2.3
   bubbleSprites: []
   bubbleRate: 5.31
@@ -202,7 +202,7 @@ MonoBehaviour:
   numberOrder: 2
   explosionOrder: 3
   numberLow: {r: 1, g: 1, b: 1, a: 1}
-  numberHigh: {r: 1, g: 0, b: 0, a: 1}
+  numberHigh: {r: 0.5622641, g: 0.011991518, b: 0, a: 1}
   numberAlpha: 1
   numberFontSize: 4
   numberSize: 1

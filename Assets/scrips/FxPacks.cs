@@ -308,7 +308,7 @@ public static class FxPackCatalog
         var caldero = Get("caldero");
         if (caldero == null) return;
         caldero.usaColorPropio = true;
-        caldero.colorLiquidoPropio = new Color(0.15f, 0.65f, 0.25f, 1f); // verde
+        caldero.colorLiquidoPropio = new Color(0.1f, 0.95f, 0.22f, 1f); // verde bruja VIVO (con boost 1.0)
         caldero.burbujasOn = true;
         caldero.vaporOn = true;
         caldero.numeroPropio = true; // numeros amarillo->naranja con contraste sobre el verde

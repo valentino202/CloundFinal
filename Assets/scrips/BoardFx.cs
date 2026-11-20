@@ -155,7 +155,7 @@ public static class BoardFx
         {
             if (px[i].a < 0.02f) continue;
             float g = Mathf.Clamp01((px[i].r - min) / rango); // 0..1 normalizado
-            g = Mathf.Lerp(0.65f, 1f, g);                      // gris claro (vivo, tono exacto)
+            g = Mathf.Lerp(0.8f, 1f, g);                       // gris muy claro (vivo, tono exacto)
             px[i] = new Color(g, g, g, px[i].a);
         }
         var nueva = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
