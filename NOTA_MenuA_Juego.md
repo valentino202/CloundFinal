@@ -146,8 +146,10 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > El blanco→rojo del numero se perdia sobre el liquido verde del caldero.
 > Igual que color/efectos/objetos/sonido, el **pack define su paleta de
 > numeros**: `numeroPropio`, `numeroColorBajo`, `numeroColorAlto`.
-> Caldero = amarillo→naranja (contraste sobre verde); clasico = blanco→rojo
-> del Inspector. `NumberColorFor(level, owner)` resuelve por pack del dueno.
+> Caldero = amarillo claro (1) → amarillo explosion (3), con CONTORNO NEGRO
+> (`numeroContorno`, `numeroContornoColor`) para que se lea aunque haya
+> muchos objetos en nivel 3. Clasico = blanco→rojo del Inspector, sin
+> contorno. `NumberColorFor(level, owner)` resuelve por pack del dueno.
 
 ## 3. CAMPO DE APLICACIÓN
 
