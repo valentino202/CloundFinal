@@ -984,18 +984,11 @@ private void OnExplosionFx(List<Vector2Int> chain, string boomKey)
         // IMPORTANTE: los sprites de objetos estan en el pack EFECTOS (el
         // caldero crudo), NO en boomPack (que es el clasico de respaldo sin
         // sprites). Por eso antes no se creaban los voladores.
-        var fxPackDelDueno = PackEfectos(BoardFx.LastAttacker);
-        if (fxPackDelDueno != null && fxPackDelDueno.TieneObjetos)
-        {
-            Debug.Log($"[CellVisuals] BOOM voladores en ({coord.x},{coord.y}) pack='{fxPackDelDueno.id}' " +
-                      $"objetos={fxPackDelDueno.boomObjetos} hongo1={(fxPackDelDueno.hongo1Sprite != null ? "OK" : "NULL")}", this);
-            var volGO = new GameObject($"BoomVoladores_{coord.x}_{coord.y}");
-            volGO.transform.SetParent(cellsRoot != null ? cellsRoot : transform, false);
-            volGO.transform.localPosition = pos;
-            var vol = volGO.AddComponent<BoomVoladores>();
-            Color tinte = BoardFx.Boost(BoardFx.LiquidColorFor(BoardFx.LastAttacker, fxPackDelDueno));
-            vol.Configurar(fxPackDelDueno, Vector3.zero, tinte);
-        }
+        // BOOM con voladores DESACTIVADO (el usuario pidio sacarlo; se
+        // retomara mejor en el futuro). El codigo BoomVoladores.cs queda
+        // guardado, pero no se dispara. El boom sigue siendo clip+sonido+destello.
+        // var fxPackDelDueno = PackEfectos(BoardFx.LastAttacker);
+        // if (fxPackDelDueno != null && fxPackDelDueno.TieneObjetos) { ... }
         var playable = AnimationClipPlayable.Create(graph, boomPack.clipBoom);
         playable.SetApplyFootIK(false);
         playable.SetSpeed(Mathf.Max(0.05f, boomPack.SpeedForLevel(4)));

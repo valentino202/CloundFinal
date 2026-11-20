@@ -77,6 +77,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
     int nivel;
     float sup1, sup2, sup3;
     float acumB, acumV;
+    float cicloTiempo;   // donde estamos dentro del ciclo rafaga/descanso
+    bool cicloActivo = true; // true = generando, false = descanso
 
     /// <summary>Llama CellVisuals al crear la celda.</summary>
     public void Configurar(FxPack pack, SpriteRenderer liquid, Vector3 centroLocal,
@@ -110,6 +112,8 @@ public class BurbujasVaporCaldero : MonoBehaviour
     void Limpiar()
     {
         acumB = acumV = 0f;
+        cicloTiempo = 0f;
+        cicloActivo = true;
         for (int i = burbujas.Count - 1; i >= 0; i--)
         {
             burbujas[i].sr.gameObject.SetActive(false);
@@ -154,13 +158,31 @@ public class BurbujasVaporCaldero : MonoBehaviour
         float t = Time.unscaledTime;
         Color liq = liquid != null ? liquid.color : Color.white;
 
+        // CICLO RAFAGA / DESCANSO: alterna periodos generando efectos con
+        // periodos sin generar, para no saturar la vista con tanto elemento
+        // (numero, cristal, objetos, burbujas y vapor a la vez).
+        cicloTiempo += dt;
+        float duracion = cicloActivo
+            ? Mathf.Max(0.1f, pack.efectosRafaga)
+            : Mathf.Max(0.1f, pack.efectosDescanso);
+        if (cicloTiempo >= duracion)
+        {
+            cicloTiempo = 0f;
+            cicloActivo = !cicloActivo;
+        }
+
         MedidasLiquido(out float w, out float h);
         float fondo = -h * 0.5f;
         float superficie = fondo + h * superficieFraccion;
 
         // === BURBUJAS: tasa fija * densidad * cantidad, sin escalado por nivel ===
-        acumB += pack.bubbleRate * pack.densidadEfectos * pack.burbujaCantidad * dt;
-        while (acumB >= 1f) { acumB -= 1f; NacerBurbuja(w, h, fondo); }
+        // Solo NACEN durante la rafaga; en el descanso los vivos terminan solos.
+        if (cicloActivo)
+        {
+            acumB += pack.bubbleRate * pack.densidadEfectos * pack.burbujaCantidad * dt;
+            while (acumB >= 1f) { acumB -= 1f; NacerBurbuja(w, h, fondo); }
+        }
+        else acumB = 0f;
 
         float subida = h * pack.bubbleRise * pack.velocidadEfectos;
         for (int i = burbujas.Count - 1; i >= 0; i--)
@@ -204,11 +226,12 @@ public class BurbujasVaporCaldero : MonoBehaviour
         }
 
         // === VAPOR: lineas que nacen juntas, limitadas junto al agua ===
-        if (pack.vaporOn && pack.vaporLineas > 0f)
+        if (cicloActivo && pack.vaporOn && pack.vaporLineas > 0f)
         {
             acumV += pack.vaporLineas * pack.densidadEfectos * dt;
             while (acumV >= 1f) { acumV -= 1f; NacerLinea(w, h, fondo, superficie); }
         }
+        else acumV = 0f;
 
         float tope = Mathf.Min(superficie + BoardFx.CellSize * pack.vaporTecho, h * 0.5f);
         for (int i = puffs.Count - 1; i >= 0; i--)

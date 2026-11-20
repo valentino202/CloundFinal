@@ -148,6 +148,12 @@ public class FxPack
     [Range(0.2f, 3f)] public float velocidadEfectos = 1f;
     [Tooltip("Opacidad de burbujas y vapor.")]
     [Range(0f, 3f)] public float opacidadEfectos = 1f;
+
+    [Header("Ciclo de descanso de efectos (evita saturar la vista)")]
+    [Tooltip("Segundos que los efectos estan ACTIVOS (rafaga).")]
+    [Range(0.5f, 10f)] public float efectosRafaga = 2f;
+    [Tooltip("Segundos de DESCANSO sin burbujas ni vapor; luego vuelven.")]
+    [Range(0f, 10f)] public float efectosDescanso = 2f;
     [Header("Burbujas: variacion y planos (menu)")]
     [Range(0f, 2f)] public float burbujaVariacionAlpha = 2f;      // menu: 2
     [Range(0f, 1f)] public float burbujaVariacionMezcla = 0.299f; // menu: 0.299
