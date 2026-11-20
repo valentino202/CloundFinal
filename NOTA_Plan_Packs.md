@@ -212,9 +212,15 @@ pena y se reintenta con celdas de prueba.
 - `SwatchCaldero` ya NO desbloquea automaticamente: si no compraste el
   pack, el boton se ve atenuado (`CanvasGroup.alpha=0.45`,
   `interactable=false`) y no se puede equipar. Al comprarlo se habilita.
-- **Setup en el Inspector**: poner `TiendaPacks` en el ShopPanel y arrastrar
-  `botonComprar`, `textoBoton`, `textoPrecio`, `textoEstado`, y los textos
-  de monedas/gemas. El boton Tienda del menu llama a `UIManager.ShowShop`.
+- **Setup en el Inspector**: poner `TiendaPacks` en el GameObject
+  `Tienda_Caldero` y arrastrar: `botonComprar` (Boton_comprar),
+  `textoBoton` (el de "COMPRAR"), `textoEstado` (el de "comprado"),
+  `textoMonedas`/`textoGemas` (CoinsText_cald / GemasText_cald = SALDO),
+  `textoPrecioMonedas`/`textoPrecioGemas` (oro_cald / diamante_cald =
+  PRECIO FIJO 1000/500, se escriben solos). NO hay texto de precio suelto.
+  Estado: "Monedas/gemas insuficientes" si no alcanza; "COMPRADO ✅" de
+  forma persistente una vez comprado.
+- El boton Tienda del menu llama a `UIManager.ShowShop`.
 - [ ] Aprobado por el usuario (PENDIENTE de armar la UI y probar)
 - **Que**: comprar con `SpendCurrencyAsync` (existe) antes de
   desbloquear. Precios por pack (tabla en esta nota o Remote Config).
