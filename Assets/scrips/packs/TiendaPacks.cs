@@ -44,6 +44,8 @@ public class TiendaPacks : MonoBehaviour
     [Tooltip("Etiquetas del PRECIO fijo (ej: oro_cald / diamante_cald). Se escriben una vez con el precio.")]
     public TMP_Text textoPrecioMonedas;
     public TMP_Text textoPrecioGemas;
+    [Tooltip("Imagen/ilustracion del pack que se muestra en la tienda (arrastra el sprite del caldero).")]
+    public Image imagenPack;
 
     bool comprando;
 
@@ -62,7 +64,7 @@ public class TiendaPacks : MonoBehaviour
         var perfil = UGSProfileManager.Instance;
         if (perfil == null) { SetEstado("Sin sesion / perfil", new Color(1f, 0.4f, 0.4f)); return; }
         if (!UGSProfileManager.PerfilListo) { SetEstado("Cargando perfil...", Color.yellow); return; }
-        if (perfil.OwnsPack(packId)) { SetEstado("Ya lo tenes ✅", new Color(0.4f, 1f, 0.5f)); ActualizarUI(); return; }
+        if (perfil.OwnsPack(packId)) { SetEstado("Ya lo tenes", new Color(0.4f, 1f, 0.5f)); ActualizarUI(); return; }
 
         comprando = true;
         SetEstado("Comprando...", Color.yellow);
@@ -86,7 +88,7 @@ public class TiendaPacks : MonoBehaviour
                 ActualizarUI();
                 return;
             }
-            SetEstado("¡Comprado! Ya podes equiparlo ✅", new Color(0.4f, 1f, 0.5f));
+            SetEstado("Comprado! Ya podes equiparlo", new Color(0.4f, 1f, 0.5f));
             Debug.Log($"[Tienda] Pack '{packId}' comprado y guardado en la nube. " +
                       $"-{precioMonedas} monedas, -{precioGemas} gemas.");
         }
@@ -111,9 +113,19 @@ public class TiendaPacks : MonoBehaviour
         if (botonComprar != null) botonComprar.interactable = !propio && !comprando;
         if (textoBoton != null) textoBoton.text = propio ? "COMPRADO" : "COMPRAR";
 
+        // La imagen del caldero siempre se ve en la tienda; al comprarlo
+        // se muestra a color completo (antes un poco atenuada).
+        if (imagenPack != null)
+        {
+            var c = imagenPack.color;
+            c.a = propio ? 1f : 0.85f;
+            imagenPack.color = c;
+            imagenPack.enabled = true;
+        }
+
         // Estado PERSISTENTE: una vez comprado siempre dice COMPRADO.
         if (propio)
-            SetEstado("COMPRADO ✅ — equipable en Personalizacion", new Color(0.4f, 1f, 0.5f));
+            SetEstado("COMPRADO - equipable en Personalizacion", new Color(0.4f, 1f, 0.5f));
         else if (textoEstado != null && !comprando &&
                  !textoEstado.text.Contains("insuficientes"))
             SetEstado("Disponible en la tienda", Color.white);
