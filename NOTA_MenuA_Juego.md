@@ -167,7 +167,11 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > oscuro a gris CLARO (0.45..1.0, normalizado, manteniendo olas y alpha) en
 > runtime y lo cachea. Se aplica en `CellVisuals.LateUpdate` (juego) y al
 > asignarFrames en `ColorSwatch`/`SwatchCaldero` (menu). El boost volvio a
-> **1.4** → rosa y naranja vuelven a ser rosa y naranja, vivos y correctos.
+> **1.0** → rosa y naranja son los colores EXACTOS (con 1.4 se volvian
+> magenta y amarillo). El sprite aclarado subio a 0.65..1.0 para seguir
+> vivo sin distorsionar el tono. Ademas se unifico la seleccion por MODO en
+> `ColorSwatch.Update` y `UIManager.UpdateSwatchSelection` (antes peleaban
+> y el boton naranja no se agrandaba).
 
 ## 2e. SELECCION DE COLOR POR MODO
 > El naranja no se podia seleccionar: `UpdateSwatchSelection` comparaba el
