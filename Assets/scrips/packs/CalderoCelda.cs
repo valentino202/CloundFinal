@@ -332,7 +332,10 @@ public class CalderoCelda : MonoBehaviour
                 {
                     // Hueso: arriba al AIRE se ve normal (sumergido=0),
                     // solo su COPIA recibe el velo verde mas abajo.
-                    o.sr.color = Color.white;
+                    // Aun asi recibe la opacidad del pack (85%).
+                    Color huesoC = Color.white;
+                    huesoC.a = pack.hongosOpacidad;
+                    o.sr.color = huesoC;
                 }
                 else
                 {

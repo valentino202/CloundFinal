@@ -94,7 +94,8 @@ public class FxPack
     [Tooltip("Cuanto reciben del color del liquido (1.0 del menu = totalmente sumergidos).")]
     [Range(0f, 1f)] public float hongosFuerzaSumergido = 1f;
     [Tooltip("Opacidad del objeto (0.82 del menu).")]
-    [Range(0.3f, 1f)] public float hongosOpacidad = 0.82f;
+    [Tooltip("Opacidad de los objetos (0.85 = 85%). Bajar para que se vean mas dentro del liquido.")]
+    [Range(0.3f, 1f)] public float hongosOpacidad = 0.85f;
 
     // --- Objetos del nivel 2 (paso 9): ojo vivo + hongo grande ---
     [Tooltip("Hongo grande del nivel 2 (17/100 del boton => 0.24 de celda).")]
