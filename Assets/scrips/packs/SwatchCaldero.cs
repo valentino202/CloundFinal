@@ -261,13 +261,18 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         }
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * smooth);
 
-        // Si no lo compro, el boton se ve atenuado (bloqueado) en la
-        // seleccion. CanvasGroup multiplya la alpha de TODO el boton sin
-        // pisar los colores/transparencias internas (burbujas, liquido, etc).
+        // OCULTO hasta comprar: alpha 0 = no se ve en CustomizationPanel
+        // (solo se ven los 3 colores), pero el GameObject SIGUE ACTIVO para
+        // que este Update detecte la compra y lo haga aparecer solo.
+        // NO usar SetActive(false): mataria el Update y nunca volveria.
+        // Esperamos a PerfilListo para no ocultarlo por un dato no cargado.
         var cg = GetComponent<CanvasGroup>();
         if (cg == null) cg = gameObject.AddComponent<CanvasGroup>();
-        cg.alpha = Comprado ? 1f : 0.45f;
-        cg.interactable = Comprado; // no se puede clicar si no lo compro
+        bool visible = !UGSProfileManager.PerfilListo || Comprado;
+        cg.alpha = visible ? 1f : 0f;
+        cg.blocksRaycasts = Comprado;  // no recibe clics si no lo compro
+        cg.interactable = Comprado;
+
         AplicarOpcionesDeEfectos();
     }
 
