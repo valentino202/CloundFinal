@@ -483,6 +483,11 @@ pena y se reintenta con celdas de prueba.
   los puffs/burbujas VISIBLES en su ultimo estado (congelados). El menu no
   tenia este problema porque siempre esta lleno. Ahora, cuando no hay
   nivel, se LIBERAN todos los puffs/burbujas al pool antes de volver.
+- **CICLO RAFAGA/DESCANSO** (usuario: "saturo la vista, que descansen 2s"):
+  `FxPack.efectosRafaga=2` y `efectosDescanso=2`. En la rafaga nacen
+  burbujas/vapor; en el descanso no nacen nuevos y los vivos terminan solos
+  (transicion suave). Al limpiar la celda el ciclo vuelve en rafaga. Baja la
+  fatiga visual (numero+cristal+objetos+burbujas+vapor a la vez).
 - **CORRECCION DEFINITIVA del usuario** (mostro el Inspector de
   "OPCIONES DE EFECTOS": valores identicos en los 3 niveles, solo cambia
   la franja del liquido; multiplicadores generales en 1):
@@ -533,7 +538,13 @@ pena y se reintenta con celdas de prueba.
   el espacio del liquido y la franja del nivel; las del bot intactas.
 - [ ] 8 aprobado  [ ] 9 aprobado  [ ] 10 aprobado  [ ] 11 aprobado
 
-### Paso 12 — Boom con voladores ⭐⭐⭐⭐⭐ (IMPLEMENTADO)
+### Paso 12 — ⛔ DESACTIVADO (se retomara mejor en el futuro)
+> El usuario pidio sacar el boom con voladores: no termino de convencer.
+> `BoomVoladores.cs` queda guardado, pero `CellVisuals.PlayBoom` Ya NO lo
+> dispara (codigo comentado). El boom sigue siendo clip + sonido + destello
+> de siempre.
+
+### Paso 12 (historial) — Boom con voladores ⭐⭐⭐⭐⭐
 - Nuevo `BoomVoladores.cs`: al explotar una casilla del caldero salen
   `boomObjetos` (6) sprites de objetos (hongos/ojo/hueso) en diagonales
   laterales al azar, con giro, gravedad leve y desvanecimiento. Se
