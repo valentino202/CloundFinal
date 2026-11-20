@@ -149,6 +149,14 @@ public class FxPack
     [Tooltip("Opacidad de burbujas y vapor.")]
     [Range(0f, 3f)] public float opacidadEfectos = 1f;
 
+    [Header("Numeros del pack (color por nivel 1->3)")]
+    [Tooltip("Color del numero en nivel 1. Vacio = usa el blanco del Inspector.")]
+    public Color numeroColorBajo = new Color(1f, 0.95f, 0.2f, 1f);   // amarillo
+    [Tooltip("Color del numero en nivel alto. Contrasta con el verde del caldero.")]
+    public Color numeroColorAlto = new Color(1f, 0.35f, 0.05f, 1f);   // naranja
+    [Tooltip("Si el pack define su propia paleta de numeros (caldero = si; clasico = no).")]
+    public bool numeroPropio = false;
+
     [Header("Ciclo de descanso de efectos (evita saturar la vista)")]
     [Tooltip("Segundos que los efectos estan ACTIVOS (rafaga).")]
     [Range(0.5f, 10f)] public float efectosRafaga = 2f;
@@ -299,6 +307,7 @@ public static class FxPackCatalog
         caldero.colorLiquidoPropio = new Color(0.15f, 0.65f, 0.25f, 1f); // verde
         caldero.burbujasOn = true;
         caldero.vaporOn = true;
+        caldero.numeroPropio = true; // numeros amarillo->naranja con contraste sobre el verde
 
         // Tamaños EXACTOS del menu convertidos por dimension lineal
         // (px del boton de 100 / 100 = fraccion de celda).

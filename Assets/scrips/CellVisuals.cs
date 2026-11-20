@@ -508,12 +508,19 @@ graph = PlayableGraph.Create("CellVisuals");
         cells[coord] = cv;
     }
 
-    /// <summary>Color del numero segun el nivel: blanco (1) -> rojo (max).</summary>
-    private Color NumberColorFor(int level)
+    /// <summary>
+    /// Color del numero segun el nivel. Si el pack del dueno define su
+    /// propia paleta (caldero: amarillo->naranja, contraste sobre el verde),
+    /// la usa; si no, blanco->rojo del Inspector (clasico).
+    /// </summary>
+    private Color NumberColorFor(int level, int owner)
     {
         int maxVisible = match != null ? Mathf.Max(2, match.game.maxLevel - 1) : 3;
-        float t = (float)(level - 1) / (maxVisible - 1);
-        return Color.Lerp(numberLow, numberHigh, Mathf.Clamp01(t));
+        float t = Mathf.Clamp01((float)(level - 1) / (maxVisible - 1));
+        var p = PackEfectos(owner);
+        Color bajo = p != null && p.numeroPropio ? p.numeroColorBajo : numberLow;
+        Color alto = p != null && p.numeroPropio ? p.numeroColorAlto : numberHigh;
+        return Color.Lerp(bajo, alto, t);
     }
 
     // Textura de burbuja generada por codigo (anillo suave): sin assets nuevos.
@@ -735,7 +742,7 @@ graph = PlayableGraph.Create("CellVisuals");
             cv.label.text = level <= 0 ? "" : level.ToString();
             if (level > 0)
             {
-                var nc = NumberColorFor(level);
+                var nc = NumberColorFor(level, owner);
                 nc.a = numberAlpha;
                 cv.label.color = nc;
             }
