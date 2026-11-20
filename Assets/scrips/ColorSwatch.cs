@@ -126,12 +126,14 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             UGSProfileManager.Instance != null)
         {
             var perfil = UGSProfileManager.Instance.Profile;
-            Color actual = PlayerColorOptions.Get(perfil.PlayerColorMode, perfil.PlayerCustomColor);
-            var mio = ColorResuelto();
+            // Seleccion por MODO (0=rosa, 1=naranja, 2=custom), IGUAL que
+            // UIManager.UpdateSwatchSelection: antes comparabamos colores
+            // exactos aqui y los dos sistemas se sobrescribian, por eso el
+            // boton naranja no se agrandaba nunca.
             bool sel = perfil.EquippedPackId == "clasico" &&
-                       Mathf.Abs(mio.r - actual.r) < 0.02f &&
-                       Mathf.Abs(mio.g - actual.g) < 0.02f &&
-                       Mathf.Abs(mio.b - actual.b) < 0.02f;
+                (colorDelJuego == PlayerColorOptions.CustomIndex
+                    ? perfil.PlayerColorMode == PlayerColorOptions.CustomIndex
+                    : colorDelJuego == perfil.PlayerColorMode);
             if (sel != selected) SetSelected(sel);
         }
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * smooth);

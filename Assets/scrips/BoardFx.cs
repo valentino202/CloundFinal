@@ -105,7 +105,13 @@ public static class BoardFx
     /// que hace falta un boost alto para que el color del jugador se vea
     /// vivo tanto en el juego como en el menu (ambos usan Boost).
     /// </summary>
-    public static float ColorBoost = 1.4f;
+    /// <summary>
+    /// 1.0 = colores EXACTOS (rosa 1/0.15/0.6, naranja 1/0.45/0.05).
+    /// El sprite del liquido ya se aclara en runtime (AclararLiquido), asi
+    /// que no hace falta boost: con 1.4 el rosa se volvia magenta y el
+    /// naranja amarillo.
+    /// </summary>
+    public static float ColorBoost = 1f;
 
     public static Color Boost(Color c)
         => new Color(c.r * ColorBoost, c.g * ColorBoost, c.b * ColorBoost, c.a);
@@ -149,7 +155,7 @@ public static class BoardFx
         {
             if (px[i].a < 0.02f) continue;
             float g = Mathf.Clamp01((px[i].r - min) / rango); // 0..1 normalizado
-            g = Mathf.Lerp(0.45f, 1f, g);                      // gris claro
+            g = Mathf.Lerp(0.65f, 1f, g);                      // gris claro (vivo, tono exacto)
             px[i] = new Color(g, g, g, px[i].a);
         }
         var nueva = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
