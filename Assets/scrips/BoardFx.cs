@@ -89,18 +89,17 @@ public static class BoardFx
     /// </summary>
     public static Color LiquidColorFor(int owner, FxPack pack)
         => pack != null && pack.usaColorPropio
-            ? new Color(pack.colorLiquidoPropio.r * pack.colorBoostPropio,
-                        pack.colorLiquidoPropio.g * pack.colorBoostPropio,
-                        pack.colorLiquidoPropio.b * pack.colorBoostPropio,
-                        pack.colorLiquidoPropio.a)
+            ? pack.colorLiquidoPropio
             : LiquidColorFor(owner);
+    // El brillo lo da el boost GLOBAL (ColorBoost), que es el que usan los
+    // clasicos y que el usuario quiere vivo. No hace falta boost por pack.
 
     /// <summary>
     /// Multiplicador de brillo. Los sprites del atlas estan desaturados y su
     /// brillo maximo es ~0.74, asi que el tint normal queda lavado. Con boost
     /// el pixel mas brillante llega a 1.0 y el color se ve vivo.
     /// </summary>
-    public static float ColorBoost = 1.4f;
+    public static float ColorBoost = 1.8f; // clasicos mas vivos (antes 1.4)
 
     public static Color Boost(Color c)
         => new Color(c.r * ColorBoost, c.g * ColorBoost, c.b * ColorBoost, c.a);
