@@ -206,6 +206,11 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > - **MENU**: NO usa Boost. `ColorSwatch` y `SwatchCaldero` asignan el color
 >   directo (`liquidImage.color = color`), asi respira el rosa/naranja/verde
 >   natural sin virar a morado. El menu ya NO setea BoardFx.ColorBoost.
+>
+> **Diferenciacion en el juego**: `FxPack.colorIntensidadJuego = 0.7`
+> oscurece un poco el liquido de los packs especiales en
+> `BoardFx.LiquidColorFor(owner, pack)`. Los clasicos (usaColorPropio=false)
+> mantienen su intensidad y el menu no se ve afectado (no usa esa funcion).
 
 ## 2g. BOTONES CLASICOS = COLORES OFICIALES
 > Los 2 botones clasicos del menu se veian con tonos raros porque tenian
