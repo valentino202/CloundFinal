@@ -175,10 +175,10 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void Awake()
     {
-        // El MENU usa el MISMO brillo que el juego: BoardFx.ColorBoost es
-        // global, asi todos los botones de color y este caldero se tinen
-        // con el mismo valor (2.3 = el que se ve vivo en el juego).
-        BoardFx.ColorBoost = colorBoost;
+        // NO pisar BoardFx.ColorBoost: el sprite del liquido ya se aclara
+        // solo (AclararLiquido) y el boost global fijo en 1.0 da los colores
+        // EXACTOS. Si se pisaba con un valor de escena, el rosa viraba a
+        // magenta/morado. Unica fuente de verdad = BoardFx.ColorBoost = 1f.
 
         // Paso 4: el pack se registra como DATOS (sin arte) para que
         // EquipPackAsync lo acepte y pueda guardarse en el perfil.
@@ -212,7 +212,6 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void OnEnable()
     {
-        BoardFx.ColorBoost = colorBoost; // por si el valor cambio en Play
         UGSProfileManager.OnProfileLoaded += AlCargarPerfil;
         // Cada vez que se abre el panel, el caldero se llena de nuevo:
         // una pasada y queda lleno (nada de loop).
