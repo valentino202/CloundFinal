@@ -169,6 +169,15 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > asignarFrames en `ColorSwatch`/`SwatchCaldero` (menu). El boost volvio a
 > **1.4** → rosa y naranja vuelven a ser rosa y naranja, vivos y correctos.
 
+## 2e. SELECCION DE COLOR POR MODO
+> El naranja no se podia seleccionar: `UpdateSwatchSelection` comparaba el
+> color del botón con `ColP1` con tolerancia 0.02; si el naranja del
+> Inspector no era EXACTAMENTE (1,0.45,0.05), nunca se marcaba activo.
+> Ahora se compara por **modo** (`ColorSwatch.colorDelJuego`: 0=rosa,
+> 1=naranja, 2=custom) contra `Profile.PlayerColorMode`. El botón OnClick
+> de cada swatch debe seguir llamando a `UIManager.OnClickPlayerColorMode(
+> indice)` para guardar el color en Cloud Save.
+
 ## 3. CAMPO DE APLICACIÓN
 
 Este manual aplica a **cualquier pack futuro**: el esqueleto (catálogo,
