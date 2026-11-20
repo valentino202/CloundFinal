@@ -162,9 +162,12 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > **Causa raíz**: el PNG `liquido animacion.png` exportado es GRIS OSCURO;
 > el azul de Photoshop venia de una capa Tono/saturacion (Tono -100) que no
 > se aplico al exportar. Unity multiplica gris×color → apagado. Por eso el
-> boost se subio a 2.6 (juego y menu usan `BoardFx.Boost`). Opcion ideal a
-> futuro: reexportar el PNG en gris CLARO/blanco con la capa aplicada y
-> bajar el boost a ~1.4.
+> **Solucion final**: subir el boost quemaba el rosa/naranja (se volvian
+> blanquecinos). Ahora `BoardFx.AclararLiquido(sprite)` convierte el gris
+> oscuro a gris CLARO (0.45..1.0, normalizado, manteniendo olas y alpha) en
+> runtime y lo cachea. Se aplica en `CellVisuals.LateUpdate` (juego) y al
+> asignarFrames en `ColorSwatch`/`SwatchCaldero` (menu). El boost volvio a
+> **1.4** → rosa y naranja vuelven a ser rosa y naranja, vivos y correctos.
 
 ## 3. CAMPO DE APLICACIÓN
 
