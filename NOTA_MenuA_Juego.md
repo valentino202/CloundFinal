@@ -151,9 +151,10 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > muchos objetos en nivel 3. Clasico = blanco→rojo VIVO (`numberHigh`
 > 1/0.12/0.12) con contorno negro 0.35 que resalta sobre liquido/cristal.
 > `NumberColorFor(level, owner)` resuelve por pack del dueno. Fix final: el
-> numero es BLANCO PURO en niveles 1 y 2 (antes interpolaba a rosa/ambar en
-> el 2 y se camuflaba con el liquido); color de explosion SOLO en el nivel
-> maximo (3). Ojo: estos
+> **DECISION FINAL**: numero CLASICO = BLANCO FIJO en todos los niveles
+> (con contorno negro 0.35), sin rojo: el nivel se entiende por la altura
+> del liquido, no por el color. Pack caldero = amarillo->naranja propio.
+> Ojo: estos
 > colores son campos serializados: si GameScene tiene valores viejos hay
 > que actualizarlos a mano en el Inspector (el default no los pisa).
 
