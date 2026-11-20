@@ -148,8 +148,11 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > numeros**: `numeroPropio`, `numeroColorBajo`, `numeroColorAlto`.
 > Caldero = amarillo claro (1) → amarillo explosion (3), con CONTORNO NEGRO
 > (`numeroContorno`, `numeroContornoColor`) para que se lea aunque haya
-> muchos objetos en nivel 3. Clasico = blanco→rojo del Inspector, sin
-> contorno. `NumberColorFor(level, owner)` resuelve por pack del dueno.
+> muchos objetos en nivel 3. Clasico = blanco→rojo VIVO (`numberHigh`
+> 1/0.12/0.12) con contorno negro 0.22 que resalta sobre liquido/cristal.
+> `NumberColorFor(level, owner)` resuelve por pack del dueno. Ojo: estos
+> colores son campos serializados: si GameScene tiene valores viejos hay
+> que actualizarlos a mano en el Inspector (el default no los pisa).
 
 ## 2d. COLOR DE LIQUIDO VIVO
 > El usuario aclaro que quiere el brillo en los CLASICOS (que ya estaban
