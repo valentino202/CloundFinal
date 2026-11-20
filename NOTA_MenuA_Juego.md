@@ -151,6 +151,12 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > muchos objetos en nivel 3. Clasico = blanco→rojo del Inspector, sin
 > contorno. `NumberColorFor(level, owner)` resuelve por pack del dueno.
 
+## 2d. COLOR DE LIQUIDO VIVO POR PACK
+> Los colores propios se veian apagados. `FxPack.colorBoostPropio = 1.8`
+> multiplica SOLO `colorLiquidoPropio` en `BoardFx.LiquidColorFor(owner,
+> pack)`, sin tocar el clasico. El boost global (1.4) sigue aplicandose
+> encima al tint final. Subir `colorBoostPropio` si se quiere mas vivo.
+
 ## 3. CAMPO DE APLICACIÓN
 
 Este manual aplica a **cualquier pack futuro**: el esqueleto (catálogo,
