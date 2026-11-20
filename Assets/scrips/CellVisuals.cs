@@ -534,23 +534,22 @@ graph = PlayableGraph.Create("CellVisuals");
     }
 
     /// <summary>
-    /// Color del numero segun el nivel. Si el pack del dueno define su
-    /// propia paleta (caldero: amarillo->naranja, contraste sobre el verde),
-    /// la usa; si no, blanco->rojo del Inspector (clasico).
+    /// Color del numero. CLASICO = SIEMPRE BLANCO (con contorno negro):
+    /// el nivel ya se entiende por la altura del liquido, no hace falta
+    /// cambiar el color a rojo. Pack especial (caldero) = su propia paleta
+    /// amarillo->naranja para contrastar sobre el verde.
     /// </summary>
     private Color NumberColorFor(int level, int owner)
     {
         var p = PackEfectos(owner);
-        Color bajo = p != null && p.numeroPropio ? p.numeroColorBajo : numberLow;
-        Color alto = p != null && p.numeroPropio ? p.numeroColorAlto : numberHigh;
-
-        // El古人 blanco->rojo interpolado hacia que en nivel 2 el numero
-        // quedara rosa/anaranjado = mismo color del liquido y se camuflara.
-        // Ahora: BLANCO PURO en niveles 1 y 2 (resalta sobre cualquier
-        // liquido), y color de explosion SOLO en el nivel maximo (3).
-        int maxVisible = match != null ? Mathf.Max(2, match.game.maxLevel - 1) : 3;
-        if (level < maxVisible) return bajo; // blanco hasta el penultimo nivel
-        return alto;                          // rojo/amarillo solo al final
+        if (p != null && p.numeroPropio)
+        {
+            // Caldero: amarillo (niveles bajos) -> naranja (nivel maximo).
+            int maxVisible = match != null ? Mathf.Max(2, match.game.maxLevel - 1) : 3;
+            return level >= maxVisible ? p.numeroColorAlto : p.numeroColorBajo;
+        }
+        // Clasico: BLANCO FIJO en todos los niveles.
+        return Color.white;
     }
 
     // Textura de burbuja generada por codigo (anillo suave): sin assets nuevos.
