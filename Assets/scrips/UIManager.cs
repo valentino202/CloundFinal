@@ -423,12 +423,23 @@ public class UIManager : MonoBehaviour
     private void UpdateSwatchSelection()
     {
         if (playerColorSwatches == null) return;
-        Color current = BoardFx.ColP1;
+        int modoActual = UGSProfileManager.Instance != null
+            ? UGSProfileManager.Instance.Profile.PlayerColorMode : 0;
+
         for (int i = 0; i < playerColorSwatches.Length; i++)
         {
             var sw = playerColorSwatches[i];
             if (sw == null) continue;
-            bool selected = ColorCloseEnough(sw.Color, current);
+
+            // Seleccion por MODO (0=rosa, 1=naranja, 2=custom), no por
+            // comparacion de color exacto: si el naranja del Inspector no
+            // era EXACTAMENTE (1,0.45,0.05) nunca se marcaba como activo.
+            bool selected;
+            if (sw.colorDelJuego == PlayerColorOptions.CustomIndex)
+                selected = modoActual == PlayerColorOptions.CustomIndex;
+            else
+                selected = sw.colorDelJuego == modoActual;
+
             sw.SetSelected(selected);
 
             var frame = sw.transform.Find("SelectedFrame");
