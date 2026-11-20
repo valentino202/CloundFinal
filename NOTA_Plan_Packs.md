@@ -229,6 +229,14 @@ pena y se reintenta con celdas de prueba.
   `diamante_cald` y saldo en `CoinsText_cald`/`GemasText_cald`, lectura del
   perfil). No hay saldos duplicados ni sincronizaciones nuevas.
 - El boton Tienda del menu llama a `UIManager.ShowShop`.
+- **Vista previa animada** (usuario: "no imagen, el personalizado con sus
+  animaciones"): `TiendaPacks` tiene `selectorCaldero`, `slotEnTienda` y
+  `slotEnPersonalizacion`. Al abrir la tienda, **mueve el MISMO GameObject**
+  `Selector_Caldero` al slot de la tienda (conserva llenado, burbujas,
+  vapor, hongos, ojo, hueso). Al abrir Personalizacion (`UIManager.
+  ShowCustomization`) lo devuelve a su slot. No es una copia ni una imagen.
+- **Setup**: arrastrar `Selector_Caldero`, crear un slot (RectTransform)
+  dentro del ShopPanel y el slot original dentro del CustomizationPanel.
 - [ ] Aprobado por el usuario (PENDIENTE de armar la UI y probar)
 - **Que**: comprar con `SpendCurrencyAsync` (existe) antes de
   desbloquear. Precios por pack (tabla en esta nota o Remote Config).
