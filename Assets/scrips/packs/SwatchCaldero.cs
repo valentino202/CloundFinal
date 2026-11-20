@@ -56,7 +56,12 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public string packIdSeleccion = "caldero";
     [Tooltip("Clic: si no esta equipado lo desbloquea, equipa y guarda (nube + local); si ya esta, vuelve al clasico.")]
     public bool seleccionarAlClic = true;
+    [Tooltip("Slot de la TIENDA: si el caldero esta ahi, solo se MUESTRA (no se puede seleccionar). Arrastralo desde TiendaPacks.")]
+    public Transform slotEnTienda;
     bool seleccionEnMarcha;
+
+    /// <summary>True si este boton esta actualmente en la tienda (vista previa).</summary>
+    bool EnTienda => slotEnTienda != null && transform.parent == slotEnTienda;
 
     [Header("Objetos del caldero (los armas vos a mano)")]
     [Tooltip("Nivel 1: hongos, de a dos. Hijos DESACTIVADOS del boton.")]
@@ -357,7 +362,9 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void OnPointerUp(PointerEventData _)
     {
         targetScale = baseScale * FactorSeleccion;
-        if (seleccionarAlClic) SeleccionarPack();
+        // SOLO se puede seleccionar/equipar en Personalizacion. En la
+        // tienda es solo vista previa: ni clic, ni equipar, ni guardar.
+        if (seleccionarAlClic && !EnTienda) SeleccionarPack();
     }
 
     /// <summary>
@@ -370,6 +377,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     public async void SeleccionarPack()
     {
+        if (EnTienda) return; // la tienda es SOLO vista, nunca selecciona
         if (seleccionEnMarcha) return;
         seleccionEnMarcha = true;
         try

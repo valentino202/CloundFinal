@@ -157,6 +157,10 @@ public class TiendaPacks : MonoBehaviour
             t.localRotation = Quaternion.identity;
             t.localScale = Vector3.one;
         }
+        // Le decimos al boton que esta en la tienda: asi ignora clics de
+        // seleccion/equipo (solo se muestra animado).
+        var sw = selectorCaldero.GetComponent<SwatchCaldero>();
+        if (sw != null) sw.slotEnTienda = slotEnTienda;
         selectorCaldero.SetActive(true);
     }
 
