@@ -233,6 +233,8 @@ public class FxPack
     public bool usaColorPropio = false;
     [Tooltip("Color del liquido cuando 'Usa Color Propio' esta prendido.")]
     public Color colorLiquidoPropio = new Color(0.15f, 0.65f, 0.25f, 1f); // verde bruja
+    [Tooltip("Oscurecido SOLO en el JUEGO para packs especiales (1 = igual que el clasico; 0.7 = un poco mas oscuro). El menu no lo usa.")]
+    [Range(0.3f, 1f)] public float colorIntensidadJuego = 0.7f;
 
     /// <summary>Clip real para un nivel (1-3). 4 = boom. Null si el pack no lo trae.</summary>
     public AnimationClip ClipForLevel(int level) => level switch

@@ -89,8 +89,14 @@ public static class BoardFx
     /// </summary>
     public static Color LiquidColorFor(int owner, FxPack pack)
         => pack != null && pack.usaColorPropio
-            ? pack.colorLiquidoPropio
+            ? new Color(pack.colorLiquidoPropio.r * pack.colorIntensidadJuego,
+                        pack.colorLiquidoPropio.g * pack.colorIntensidadJuego,
+                        pack.colorLiquidoPropio.b * pack.colorIntensidadJuego,
+                        pack.colorLiquidoPropio.a)
             : LiquidColorFor(owner);
+    // Los packs especiales se oscurecen un poco en el JUEGO para que se
+    // distingan de los clasicos (que mantienen su intensidad). El menu NO
+    // usa esta funcion: pone su color directo, asi que no se ve afectado.
     // El brillo lo da el boost GLOBAL (ColorBoost), que es el que usan los
     // clasicos y que el usuario quiere vivo. No hace falta boost por pack.
 
