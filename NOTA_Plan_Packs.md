@@ -220,6 +220,12 @@ pena y se reintenta con celdas de prueba.
   PRECIO FIJO 1000/500, se escriben solos). NO hay texto de precio suelto.
   Estado: "Monedas/gemas insuficientes" si no alcanza; "COMPRADO ✅" de
   forma persistente una vez comprado.
+- **Saldos = UGSEconomy** (lee `Profile.Coins/Gems`, lo mismo que se gana
+  jugando y se guarda en Cloud Save). `RefrescarSaldos()` sincroniza JUNTOS
+  los textos de `Tienda_Caldero` y los GENERALES (`UIManager.coinsTexts`/
+  `gemsTexts` = CoinsText/GemsText del ShopPanel), para que todos digan lo
+  mismo. Se actualiza al abrir (`OnEnable`) y al ganar partida
+  (`UGSEconomy.BalancesUpdated`).
 - El boton Tienda del menu llama a `UIManager.ShowShop`.
 - [ ] Aprobado por el usuario (PENDIENTE de armar la UI y probar)
 - **Que**: comprar con `SpendCurrencyAsync` (existe) antes de
