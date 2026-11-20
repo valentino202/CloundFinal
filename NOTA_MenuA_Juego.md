@@ -190,8 +190,15 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > es lo que hace vivos los colores en el juego, y lo queria en el menu.
 > `SwatchCaldero` gana el campo `colorBoost = 2.3` y en Awake/OnEnable
 > setea `BoardFx.ColorBoost` (global), asi el caldero Y los 3 botones de
-> color del menu se tinen con el MISMO brillo vivo del juego. Ajustar ese
-> numero en el caldero del menu cambia todo el menu al instante.
+> color del menu se tinen con el MISMO brillo del juego. **Valor final 1.0**:
+> con 2.3 el verde se veia bien pero el rosa/naranja se recortaban a
+> magenta/amarillo (sus canales ya estan en 1.0). Para que el verde siga
+> vivo con boost 1.0 se subio `colorLiquidoPropio` del caldero a
+> (0.1, 0.95, 0.22) y el sprite aclarado a gris 0.8..1.0. Asi rosa=naranja=
+> verde son los colores EXACTOS e iguales en menu y juego. IMPORTANTE: los
+> valores guardados en los Inspectors (GameScene `colorBoost`, sample
+> `colorBoost`) hay que bajarlos a 1.0 a mano (default del codigo no pisa
+> valores serializados).
 
 ## 3. CAMPO DE APLICACIÓN
 
