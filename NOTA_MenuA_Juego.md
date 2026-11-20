@@ -200,6 +200,16 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > `colorBoost`) hay que bajarlos a 1.0 a mano (default del codigo no pisa
 > valores serializados).
 
+## 2g. BOTONES CLASICOS = COLORES OFICIALES
+> Los 2 botones clasicos del menu se veian con tonos raros porque tenian
+> `colorDelJuego = -1` (color manual del Inspector). `ColorSwatch.ModoResuelto()`
+> ahora infiere el modo del nombre del GameObject ("Rosa"/"Naranja"/
+> "Pink"/"Orange") y `ColorResuelto()` usa SIEMPRE `PlayerColorOptions.Get`:
+> rosa (1/0.15/0.6) y naranja (1/0.45/0.05) oficiales = IGUAL que el juego.
+> Seleccion y tint usan `ModoResuelto()` en `ColorSwatch` y `UIManager`.
+> Si los GameObject no se llaman Rosa/Naranja, poner `Color Del Juego` a
+> 0 y 1 en el Inspector (es mas directo y evita la inferencia por nombre).
+
 ## 3. CAMPO DE APLICACIÓN
 
 Este manual aplica a **cualquier pack futuro**: el esqueleto (catálogo,
