@@ -43,6 +43,8 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Range(4f, 30f)] public float fps = 14f;
     [Tooltip("Pausa entre niveles del llenado, en segundos.")]
     [Range(0f, 1.5f)] public float pausaNivel = 0.45f;
+    [Tooltip("Brillo del liquido en el MENU. Igual que 'Color Boost' de CellVisuals en el juego (2.3). Lo heredan tambien los botones de color.")]
+    [Range(0.5f, 3f)] public float colorBoost = 2.3f;
 
     [Header("Animaciones de toque (igual que ColorSwatch)")]
     [Range(1f, 1.5f)] public float hoverScale = 1.14f;
@@ -173,6 +175,11 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void Awake()
     {
+        // El MENU usa el MISMO brillo que el juego: BoardFx.ColorBoost es
+        // global, asi todos los botones de color y este caldero se tinen
+        // con el mismo valor (2.3 = el que se ve vivo en el juego).
+        BoardFx.ColorBoost = colorBoost;
+
         // Paso 4: el pack se registra como DATOS (sin arte) para que
         // EquipPackAsync lo acepte y pueda guardarse en el perfil.
         // La receta visual completa llega en el paso 6b; el juego sigue
@@ -205,6 +212,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void OnEnable()
     {
+        BoardFx.ColorBoost = colorBoost; // por si el valor cambio en Play
         UGSProfileManager.OnProfileLoaded += AlCargarPerfil;
         // Cada vez que se abre el panel, el caldero se llena de nuevo:
         // una pasada y queda lleno (nada de loop).
