@@ -185,6 +185,14 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > de cada swatch debe seguir llamando a `UIManager.OnClickPlayerColorMode(
 > indice)` para guardar el color en Cloud Save.
 
+## 2f. COLOR BOOST IGUAL EN MENU Y JUEGO
+> El usuario mostro que el `Color Boost = 2.3` del Inspector de `CellVisuals`
+> es lo que hace vivos los colores en el juego, y lo queria en el menu.
+> `SwatchCaldero` gana el campo `colorBoost = 2.3` y en Awake/OnEnable
+> setea `BoardFx.ColorBoost` (global), asi el caldero Y los 3 botones de
+> color del menu se tinen con el MISMO brillo vivo del juego. Ajustar ese
+> numero en el caldero del menu cambia todo el menu al instante.
+
 ## 3. CAMPO DE APLICACIÓN
 
 Este manual aplica a **cualquier pack futuro**: el esqueleto (catálogo,
