@@ -175,6 +175,14 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     private void Awake()
     {
+        // Encontrar el slot de la tienda al arrancar para que 'EnTienda'
+        // funcione desde el primer frame (sin parpadeo del caldero).
+        if (slotEnTienda == null)
+        {
+            var tienda = FindFirstObjectByType<TiendaPacks>();
+            if (tienda != null) slotEnTienda = tienda.slotEnTienda;
+        }
+
         // NO pisar BoardFx.ColorBoost: el sprite del liquido ya se aclara
         // solo (AclararLiquido) y el boost global fijo en 1.0 da los colores
         // EXACTOS. Si se pisaba con un valor de escena, el rosa viraba a
@@ -280,10 +288,12 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         // Esperamos a PerfilListo para no ocultarlo por un dato no cargado.
         var cg = GetComponent<CanvasGroup>();
         if (cg == null) cg = gameObject.AddComponent<CanvasGroup>();
-        bool visible = !UGSProfileManager.PerfilListo || Comprado;
+        // En la TIENDA se ve SIEMPRE (es la vitrina del pack, aunque no
+        // lo hayas comprado). En PERSONALIZACION solo si ya lo compraste.
+        bool visible = EnTienda || !UGSProfileManager.PerfilListo || Comprado;
         cg.alpha = visible ? 1f : 0f;
-        cg.blocksRaycasts = Comprado;  // no recibe clics si no lo compro
-        cg.interactable = Comprado;
+        cg.blocksRaycasts = !EnTienda && Comprado; // en tienda nunca recibe clics
+        cg.interactable = !EnTienda && Comprado;
 
         AplicarOpcionesDeEfectos();
     }

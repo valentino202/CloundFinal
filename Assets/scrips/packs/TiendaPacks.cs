@@ -154,15 +154,12 @@ public class TiendaPacks : MonoBehaviour
                  !textoEstado.text.Contains("insuficientes"))
             SetEstado("Disponible en la tienda", Color.white);
 
-        // NO tocar la economia del juego: los textos generales
-        // (CoinsText/GemsText) los sigue manejando UIManager como siempre.
-        // Aqui solo mostramos los valores del caldero: el PRECIO ya se
-        // escribio arriba en oro_cald/diamante_cald y el SALDO global se
-        // lee del perfil SOLO para los textos del Tienda_Caldero.
-        if (textoMonedas != null)
-            textoMonedas.text = perfil != null ? perfil.Profile.Coins.ToString() : "0";
-        if (textoGemas != null)
-            textoGemas.text = perfil != null ? perfil.Profile.Gems.ToString() : "0";
+        // Los textos del Tienda_Caldero (CoinsText_cald/GemasText_cald)
+        // muestran el PRECIO del pack (1000/500), NO el saldo: el saldo
+        // general ya lo muestra UIManager arriba (CoinsText/GemsText) y
+        // duplicates el numero se veia dos veces.
+        if (textoMonedas != null) textoMonedas.text = precioMonedas.ToString();
+        if (textoGemas != null) textoGemas.text = precioGemas.ToString();
     }
 
     /// <summary>

@@ -487,7 +487,7 @@ MonoBehaviour:
   sumergido: 0
   fuerzaSumergido: 0.35
   tenirHijos: 1
-  opacidad: 1
+  opacidad: 0.7
   arcoiris: 0
   velocidadArcoiris: 0.25
 --- !u!114 &37278684
@@ -1726,7 +1726,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.30989265, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.30989265, b: 1, a: 0.74509805}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2108,7 +2108,7 @@ MonoBehaviour:
   glassAlpha: 1
   fps: 14
   pausaNivel: 0.45
-  colorBoost: 1
+  colorBoost: 0.5
   hoverScale: 1.14
   pressScale: 0.86
   smooth: 14
@@ -9768,7 +9768,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.7764706}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -11784,7 +11784,7 @@ MonoBehaviour:
   sumergido: 1
   fuerzaSumergido: 1
   tenirHijos: 0
-  opacidad: 0.82
+  opacidad: 0.791
   arcoiris: 0
   velocidadArcoiris: 0.25
 --- !u!114 &1297815672
@@ -11800,7 +11800,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.84705883}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -16133,7 +16133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.87058824}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
