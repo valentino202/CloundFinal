@@ -55,6 +55,30 @@ public class TiendaPacks : MonoBehaviour
 
     bool comprando;
 
+    // Referencia estatica: UIManager necesita devolver el caldero DESPUES
+    // de apagar el ShopPanel, y FindFirstObjectByType no encuentra objetos
+    // inactivos. Con esto funciona aunque la tienda este apagada.
+    static TiendaPacks instancia;
+    Transform padreOriginal; // respaldo: donde estaba el caldero al arrancar
+
+    void Awake()
+    {
+        instancia = this;
+        if (selectorCaldero != null) padreOriginal = selectorCaldero.transform.parent;
+    }
+
+    void OnDestroy()
+    {
+        if (instancia == this) instancia = null;
+    }
+
+    /// <summary>Llamar desde UIManager al abrir Personalizacion (aunque la
+    /// tienda este apagada).</summary>
+    public static void DevolverCaldero()
+    {
+        if (instancia != null) instancia.DevolverCalderoAPersonalizacion();
+    }
+
     void Start()
     {
         if (botonComprar != null) botonComprar.onClick.AddListener(Comprar);
@@ -167,9 +191,18 @@ public class TiendaPacks : MonoBehaviour
     /// <summary>Devuelve el caldero a su lugar en Personalizacion.</summary>
     public void DevolverCalderoAPersonalizacion()
     {
-        if (selectorCaldero == null || slotEnPersonalizacion == null) return;
+        if (selectorCaldero == null) return;
+        // Usar el slot asignado, o el padre original como respaldo (por si
+        // el usuario no arrastro el slot en el Inspector).
+        Transform destino = slotEnPersonalizacion != null
+            ? slotEnPersonalizacion : padreOriginal;
+        if (destino == null)
+        {
+            Debug.LogWarning("[Tienda] No se puede devolver el caldero: asigna 'Slot En Personalizacion' o deja el caldero en su lugar original.", this);
+            return;
+        }
         var t = selectorCaldero.transform;
-        t.SetParent(slotEnPersonalizacion, false);
+        t.SetParent(destino, false);
         t.localPosition = Vector3.zero;
         t.localRotation = Quaternion.identity;
         t.localScale = Vector3.one;

@@ -316,9 +316,10 @@ public class UIManager : MonoBehaviour
         RefreshColorPreviews();
 
         // Si el caldero estaba en la tienda (vista previa), lo devolvemos
-        // a su lugar en Personalizacion para que se pueda seleccionar.
-        var tienda = FindFirstObjectByType<TiendaPacks>();
-        if (tienda != null) tienda.DevolverCalderoAPersonalizacion();
+        // a su lugar en Personalizacion. Se llama ANTES/Despues de apagar
+        // paneles da igual: el metodo estatico funciona aunque la tienda
+        // este inactiva (FindFirstObjectByType no lo encontraria).
+        TiendaPacks.DevolverCaldero();
     }
 
     /// <summary>Lee balances de la nube y los escribe en los 3 pares de textos.</summary>
