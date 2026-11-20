@@ -17,7 +17,8 @@ using UnityEngine.UI;
 ///
 /// Uso: pon este script en un GameObject del ShopPanel y arrastra:
 ///   - botonComprar, textoBoton, textoPrecio, textoEstado
-///   - textos de monedas/gemas (o deja vacios y usa UIManager.RefreshCurrencyTexts)
+///   - textos de monedas/gemas del Tienda_Caldero (solo lectura del perfil;
+///     la economia general y sus textos los maneja UIManager como siempre)
 /// </summary>
 public class TiendaPacks : MonoBehaviour
 {
@@ -49,16 +50,8 @@ public class TiendaPacks : MonoBehaviour
     void Start()
     {
         if (botonComprar != null) botonComprar.onClick.AddListener(Comprar);
-        UGSEconomy.BalancesUpdated += AlCambiarBalances;
         ActualizarUI();
     }
-
-    void OnDestroy()
-    {
-        UGSEconomy.BalancesUpdated -= AlCambiarBalances;
-    }
-
-    void AlCambiarBalances() { ActualizarUI(); }
 
     void OnEnable() { ActualizarUI(); }
 
@@ -125,30 +118,15 @@ public class TiendaPacks : MonoBehaviour
                  !textoEstado.text.Contains("insuficientes"))
             SetEstado("Disponible en la tienda", Color.white);
 
-        // Saldo del jugador: UGSEconomy lee del MISMO perfil de Cloud Save
-        // donde se guardan las monedas/gemas que se ganan jugando.
-        // Refrescamos para que este al dia y actualizamos los textos de
-        // Tienda_Caldero y losGENERALES del panel (CoinsText/GemsText) juntos.
-        _ = RefrescarSaldos();
-    }
-
-    async System.Threading.Tasks.Task RefrescarSaldos()
-    {
-        await UGSEconomy.RefreshAsync();
-        long coins = UGSEconomy.Coins;
-        long gems = UGSEconomy.Gems;
-        // Textos del Tienda_Caldero.
-        if (textoMonedas != null) textoMonedas.text = coins.ToString();
-        if (textoGemas != null) textoGemas.text = gems.ToString();
-        // Textos GENERALES del ShopPanel (para que todos digan lo mismo).
-        var ui = FindFirstObjectByType<UIManager>();
-        if (ui != null)
-        {
-            if (ui.coinsTexts != null)
-                foreach (var t in ui.coinsTexts) if (t != null) t.text = coins.ToString();
-            if (ui.gemsTexts != null)
-                foreach (var t in ui.gemsTexts) if (t != null) t.text = gems.ToString();
-        }
+        // NO tocar la economia del juego: los textos generales
+        // (CoinsText/GemsText) los sigue manejando UIManager como siempre.
+        // Aqui solo mostramos los valores del caldero: el PRECIO ya se
+        // escribio arriba en oro_cald/diamante_cald y el SALDO global se
+        // lee del perfil SOLO para los textos del Tienda_Caldero.
+        if (textoMonedas != null)
+            textoMonedas.text = perfil != null ? perfil.Profile.Coins.ToString() : "0";
+        if (textoGemas != null)
+            textoGemas.text = perfil != null ? perfil.Profile.Gems.ToString() : "0";
     }
 
     void SetEstado(string mensaje, Color color)
