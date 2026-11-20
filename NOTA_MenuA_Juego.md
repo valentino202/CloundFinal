@@ -198,11 +198,14 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > verde son los colores EXACTOS e iguales en menu y juego. **Fix final**: el
 > valor guardado en GameScene era `colorBoost: 2` y `CellVisuals.Awake` lo
 > pisaba en `BoardFx.ColorBoost` → rosa `(1,0.15,0.6)×2` se recortaba a
-> `(1,0.3,1)` = MORADO. Se desactivaron los seteos de `BoardFx.ColorBoost`
-> en `CellVisuals` y `SwatchCaldero`. Unica fuente de verdad = el valor fijo
-> del codigo `BoardFx.ColorBoost = 1f`. El campo `colorBoost` de los
-> Inspectors queda ignorado (no hace falta tocarlo). Asi rosa=naranja=verde
-> son identicos en juego y menu sin depender de valores guardados.
+> `(1,0.3,1)` = MORADO.
+>
+> **DECISION FINAL del usuario**: dos intensidades INDEPENDIENTES.
+> - **JUEGO**: mantiene su intensidad actual. `CellVisuals.Awake` setea
+>   `BoardFx.ColorBoost = colorBoost` (2 de la escena); solo lo usa el juego.
+> - **MENU**: NO usa Boost. `ColorSwatch` y `SwatchCaldero` asignan el color
+>   directo (`liquidImage.color = color`), asi respira el rosa/naranja/verde
+>   natural sin virar a morado. El menu ya NO setea BoardFx.ColorBoost.
 
 ## 2g. BOTONES CLASICOS = COLORES OFICIALES
 > Los 2 botones clasicos del menu se veian con tonos raros porque tenian
