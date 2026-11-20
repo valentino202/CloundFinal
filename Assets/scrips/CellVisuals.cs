@@ -65,7 +65,8 @@ public class CellVisuals : MonoBehaviour
 
     [Header("Numero de nivel (blanco -> rojo)")]
     public Color numberLow = Color.white;
-    public Color numberHigh = Color.red;
+    [Tooltip("Rojo vivo y brillante que resalta sobre el liquido y el cristal.")]
+    public Color numberHigh = new Color(1f, 0.12f, 0.12f, 1f);
     [Tooltip("1 = solido, 0 = invisible.")]
     [Range(0f, 1f)] public float numberAlpha = 1f;
     [Tooltip("Tamano directo de la fuente. Mas chico = numero mas chico.")]
@@ -749,13 +750,13 @@ graph = PlayableGraph.Create("CellVisuals");
                 var nc = NumberColorFor(level, owner);
                 nc.a = numberAlpha;
                 cv.label.color = nc;
-                // Contorno del pack (caldero: negro grueso) para que el
-                // numero destaque aunque haya muchos objetos detras.
+                // Contorno para que el numero resalte sobre el liquido y
+                // el cristal. Caldero usa el suyo (negro grueso); el clasico
+                // tambien lleva contorno negro para que se vea marcado.
                 var numPack = PackEfectos(owner);
-                cv.label.outlineColor = numPack != null && numPack.numeroPropio
-                    ? numPack.numeroContornoColor : Color.black;
-                cv.label.outlineWidth = numPack != null && numPack.numeroPropio
-                    ? numPack.numeroContorno : 0f;
+                bool propio = numPack != null && numPack.numeroPropio;
+                cv.label.outlineColor = propio ? numPack.numeroContornoColor : Color.black;
+                cv.label.outlineWidth = propio ? numPack.numeroContorno : 0.22f;
             }
         }
 

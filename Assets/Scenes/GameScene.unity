@@ -182,7 +182,7 @@ MonoBehaviour:
   packId: clasico
   glassPrefab: {fileID: 3176565274343680119, guid: 653c78b8b3f6a32469aecb72b7860fc2, type: 3}
   glassAlpha: 1
-  colorBoost: 1.4
+  colorBoost: 1.8
   bubbleSprites: []
   bubbleRate: 5.31
   bubbleSize: 0.07
