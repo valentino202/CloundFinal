@@ -142,6 +142,13 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 8. **Limpieza al quedar sin nivel / cambiar de dueno**: liberar TODO al
    pool; nunca hacer `return` dejando particulas visibles (humo congelado).
 
+## 2c. LA CAJA TAMBIÉN DEFINE LOS NÚMEROS
+> El blanco→rojo del numero se perdia sobre el liquido verde del caldero.
+> Igual que color/efectos/objetos/sonido, el **pack define su paleta de
+> numeros**: `numeroPropio`, `numeroColorBajo`, `numeroColorAlto`.
+> Caldero = amarillo→naranja (contraste sobre verde); clasico = blanco→rojo
+> del Inspector. `NumberColorFor(level, owner)` resuelve por pack del dueno.
+
 ## 3. CAMPO DE APLICACIÓN
 
 Este manual aplica a **cualquier pack futuro**: el esqueleto (catálogo,
