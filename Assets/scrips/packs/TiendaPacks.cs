@@ -44,8 +44,14 @@ public class TiendaPacks : MonoBehaviour
     [Tooltip("Etiquetas del PRECIO fijo (ej: oro_cald / diamante_cald). Se escriben una vez con el precio.")]
     public TMP_Text textoPrecioMonedas;
     public TMP_Text textoPrecioGemas;
-    [Tooltip("Imagen/ilustracion del pack que se muestra en la tienda (arrastra el sprite del caldero).")]
-    public Image imagenPack;
+
+    [Header("Vista previa del caldero (el MISMO boton animado)")]
+    [Tooltip("El GameObject Selector_Caldero del menu (con SwatchCaldero, burbujas, vapor, objetos). Se mueve aqui en la tienda y vuelve a Personalizacion.")]
+    public GameObject selectorCaldero;
+    [Tooltip("Donde se muestra en la TIENDA (un RectTransform hijo del ShopPanel).")]
+    public RectTransform slotEnTienda;
+    [Tooltip("Donde se muestra en PERSONALIZACION (el lugar original dentro del CustomizationPanel).")]
+    public RectTransform slotEnPersonalizacion;
 
     bool comprando;
 
@@ -113,15 +119,9 @@ public class TiendaPacks : MonoBehaviour
         if (botonComprar != null) botonComprar.interactable = !propio && !comprando;
         if (textoBoton != null) textoBoton.text = propio ? "COMPRADO" : "COMPRAR";
 
-        // La imagen del caldero siempre se ve en la tienda; al comprarlo
-        // se muestra a color completo (antes un poco atenuada).
-        if (imagenPack != null)
-        {
-            var c = imagenPack.color;
-            c.a = propio ? 1f : 0.85f;
-            imagenPack.color = c;
-            imagenPack.enabled = true;
-        }
+        // El MISMO caldero animado se coloca en el slot de la tienda para
+        // que se vea con todas sus animaciones (burbujas, vapor, objetos).
+        ColocarCalderoEnTienda();
 
         // Estado PERSISTENTE: una vez comprado siempre dice COMPRADO.
         if (propio)
@@ -139,6 +139,36 @@ public class TiendaPacks : MonoBehaviour
             textoMonedas.text = perfil != null ? perfil.Profile.Coins.ToString() : "0";
         if (textoGemas != null)
             textoGemas.text = perfil != null ? perfil.Profile.Gems.ToString() : "0";
+    }
+
+    /// <summary>
+    /// Mueve el MISMO GameObject del caldero al slot de la tienda. Como es
+    /// el mismo objeto (no una copia), conserva SwatchCaldero con el
+    /// llenado, burbujas, vapor, hongos, ojo y hueso animados.
+    /// </summary>
+    void ColocarCalderoEnTienda()
+    {
+        if (selectorCaldero == null || slotEnTienda == null) return;
+        var t = selectorCaldero.transform;
+        if (t.parent != slotEnTienda)
+        {
+            t.SetParent(slotEnTienda, false);
+            t.localPosition = Vector3.zero;
+            t.localRotation = Quaternion.identity;
+            t.localScale = Vector3.one;
+        }
+        selectorCaldero.SetActive(true);
+    }
+
+    /// <summary>Devuelve el caldero a su lugar en Personalizacion.</summary>
+    public void DevolverCalderoAPersonalizacion()
+    {
+        if (selectorCaldero == null || slotEnPersonalizacion == null) return;
+        var t = selectorCaldero.transform;
+        t.SetParent(slotEnPersonalizacion, false);
+        t.localPosition = Vector3.zero;
+        t.localRotation = Quaternion.identity;
+        t.localScale = Vector3.one;
     }
 
     void SetEstado(string mensaje, Color color)
