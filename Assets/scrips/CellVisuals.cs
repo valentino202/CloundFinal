@@ -535,12 +535,17 @@ graph = PlayableGraph.Create("CellVisuals");
     /// </summary>
     private Color NumberColorFor(int level, int owner)
     {
-        int maxVisible = match != null ? Mathf.Max(2, match.game.maxLevel - 1) : 3;
-        float t = Mathf.Clamp01((float)(level - 1) / (maxVisible - 1));
         var p = PackEfectos(owner);
         Color bajo = p != null && p.numeroPropio ? p.numeroColorBajo : numberLow;
         Color alto = p != null && p.numeroPropio ? p.numeroColorAlto : numberHigh;
-        return Color.Lerp(bajo, alto, t);
+
+        // El古人 blanco->rojo interpolado hacia que en nivel 2 el numero
+        // quedara rosa/anaranjado = mismo color del liquido y se camuflara.
+        // Ahora: BLANCO PURO en niveles 1 y 2 (resalta sobre cualquier
+        // liquido), y color de explosion SOLO en el nivel maximo (3).
+        int maxVisible = match != null ? Mathf.Max(2, match.game.maxLevel - 1) : 3;
+        if (level < maxVisible) return bajo; // blanco hasta el penultimo nivel
+        return alto;                          // rojo/amarillo solo al final
     }
 
     // Textura de burbuja generada por codigo (anillo suave): sin assets nuevos.
@@ -771,7 +776,7 @@ graph = PlayableGraph.Create("CellVisuals");
                 var numPack = PackEfectos(owner);
                 bool propio = numPack != null && numPack.numeroPropio;
                 cv.label.outlineColor = propio ? numPack.numeroContornoColor : Color.black;
-                cv.label.outlineWidth = propio ? numPack.numeroContorno : 0.22f;
+                cv.label.outlineWidth = propio ? numPack.numeroContorno : 0.35f;
             }
         }
 
