@@ -237,6 +237,12 @@ pena y se reintenta con celdas de prueba.
   ShowCustomization`) lo devuelve a su slot. No es una copia ni una imagen.
 - **Setup**: arrastrar `Selector_Caldero`, crear un slot (RectTransform)
   dentro del ShopPanel y el slot original dentro del CustomizationPanel.
+- **FIX de retorno**: `UIManager.ShowCustomization` apaga paneles antes de
+  devolver el caldero, y `FindFirstObjectByType` no encuentra objetos
+  inactivos → el caldero no volvia. Ahora `TiendaPacks.DevolverCaldero()`
+  es **estatico** (instancia en Awake) y funciona con la tienda apagada.
+  Ademas guarda `padreOriginal` en Awake como respaldo si no se asigno el
+  slot. Asi el caldero SIEMPRE reaparece en la seleccion.
 - **SELECCION SOLO EN PERSONALIZACION** (usuario): `SwatchCaldero` tiene
   `slotEnTienda` y la propiedad `EnTienda`. `OnPointerUp` y `SeleccionarPack`
   hacen `return` si esta en la tienda → ahi el caldero SOLO se ve (con sus
