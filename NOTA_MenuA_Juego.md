@@ -149,8 +149,11 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > Caldero = amarillo claro (1) → amarillo explosion (3), con CONTORNO NEGRO
 > (`numeroContorno`, `numeroContornoColor`) para que se lea aunque haya
 > muchos objetos en nivel 3. Clasico = blanco→rojo VIVO (`numberHigh`
-> 1/0.12/0.12) con contorno negro 0.22 que resalta sobre liquido/cristal.
-> `NumberColorFor(level, owner)` resuelve por pack del dueno. Ojo: estos
+> 1/0.12/0.12) con contorno negro 0.35 que resalta sobre liquido/cristal.
+> `NumberColorFor(level, owner)` resuelve por pack del dueno. Fix final: el
+> numero es BLANCO PURO en niveles 1 y 2 (antes interpolaba a rosa/ambar en
+> el 2 y se camuflaba con el liquido); color de explosion SOLO en el nivel
+> maximo (3). Ojo: estos
 > colores son campos serializados: si GameScene tiene valores viejos hay
 > que actualizarlos a mano en el Inspector (el default no los pisa).
 
