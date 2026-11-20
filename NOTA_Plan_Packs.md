@@ -237,6 +237,11 @@ pena y se reintenta con celdas de prueba.
   ShowCustomization`) lo devuelve a su slot. No es una copia ni una imagen.
 - **Setup**: arrastrar `Selector_Caldero`, crear un slot (RectTransform)
   dentro del ShopPanel y el slot original dentro del CustomizationPanel.
+- **SELECCION SOLO EN PERSONALIZACION** (usuario): `SwatchCaldero` tiene
+  `slotEnTienda` y la propiedad `EnTienda`. `OnPointerUp` y `SeleccionarPack`
+  hacen `return` si esta en la tienda → ahi el caldero SOLO se ve (con sus
+  animaciones); no equipa, no guarda, no selecciona. El unico lugar que
+  puede equiparse para las partidas es Personalizacion.
 - [ ] Aprobado por el usuario (PENDIENTE de armar la UI y probar)
 - **Que**: comprar con `SpendCurrencyAsync` (existe) antes de
   desbloquear. Precios por pack (tabla en esta nota o Remote Config).
