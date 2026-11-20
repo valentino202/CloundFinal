@@ -105,10 +105,62 @@ public static class BoardFx
     /// que hace falta un boost alto para que el color del jugador se vea
     /// vivo tanto en el juego como en el menu (ambos usan Boost).
     /// </summary>
-    public static float ColorBoost = 2.6f;
+    public static float ColorBoost = 1.4f;
 
     public static Color Boost(Color c)
         => new Color(c.r * ColorBoost, c.g * ColorBoost, c.b * ColorBoost, c.a);
+
+    // --- Aclarado del PNG gris del liquido (sin tocar el archivo) ---
+    static readonly System.Collections.Generic.Dictionary<Sprite, Sprite> liquidosAclarados
+        = new System.Collections.Generic.Dictionary<Sprite, Sprite>();
+    static readonly System.Collections.Generic.HashSet<Sprite> yaAclarados
+        = new System.Collections.Generic.HashSet<Sprite>();
+
+    /// <summary>
+    /// El PNG del liquido es GRIS OSCURO (la capa de tono/saturacion de
+    /// Photoshop no se exporto). Multiplicado por rosa/naranja da colores
+    /// apagados, y subir el boost los quema. Aqui convertimos el gris a
+    /// GRIS CLARO (0.45..1.0) manteniendo el relieve de las olas y el alpha,
+    /// para que el tint del jugador de el color exacto con boost 1.4.
+    /// Se aplica UNA vez por sprite y se cachea.
+    /// </summary>
+    public static Sprite AclararLiquido(Sprite original)
+    {
+        if (original == null) return null;
+        if (yaAclarados.Contains(original)) return original; // ya esta aclarado
+        if (liquidosAclarados.TryGetValue(original, out var ya)) return ya;
+
+        var tex = original.texture;
+        // Leer pixels de la textura original (Unity permite GetPixels si es readable).
+        Color[] px;
+        try { px = tex.GetPixels(); }
+        catch { return original; } // textura no readable: se usa tal cual
+
+        float min = 1f, max = 0f;
+        for (int i = 0; i < px.Length; i++)
+        {
+            if (px[i].a < 0.02f) continue;
+            float g = px[i].r;
+            if (g < min) min = g;
+            if (g > max) max = g;
+        }
+        float rango = Mathf.Max(0.01f, max - min);
+        for (int i = 0; i < px.Length; i++)
+        {
+            if (px[i].a < 0.02f) continue;
+            float g = Mathf.Clamp01((px[i].r - min) / rango); // 0..1 normalizado
+            g = Mathf.Lerp(0.45f, 1f, g);                      // gris claro
+            px[i] = new Color(g, g, g, px[i].a);
+        }
+        var nueva = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, false);
+        nueva.SetPixels(px);
+        nueva.Apply();
+        var sp = Sprite.Create(nueva, original.rect, original.pivot,
+            original.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+        liquidosAclarados[original] = sp;
+        yaAclarados.Add(sp);
+        return sp;
+    }
 
     /// <summary>
     /// Posicion del centro de la celda (x, y) en world space, centrado en origen.

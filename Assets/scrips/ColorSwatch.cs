@@ -158,13 +158,13 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             if (nivel == null || nivel.Length == 0) continue;
             for (int i = 0; i < nivel.Length; i++)
             {
-                liquidImage.sprite = nivel[i];
+                liquidImage.sprite = BoardFx.AclararLiquido(nivel[i]);
                 yield return espera;
             }
             if (pausaNivel > 0f) yield return pausa;
         }
         // Congela en el ultimo frame del nivel 3, como las casillas del juego.
-        liquidImage.sprite = Ultimo(framesNivel3);
+        liquidImage.sprite = BoardFx.AclararLiquido(Ultimo(framesNivel3));
         llenado = null;
     }
 
@@ -215,7 +215,7 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             var lrt = go.AddComponent<RectTransform>();
             Center(lrt, liquidFill);
             liquidImage = go.AddComponent<Image>();
-            liquidImage.sprite = Ultimo(framesNivel3);
+            liquidImage.sprite = BoardFx.AclararLiquido(Ultimo(framesNivel3));
             liquidImage.color = BoardFx.Boost(ColorResuelto());
             liquidImage.raycastTarget = false;
         }

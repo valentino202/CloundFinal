@@ -187,6 +187,21 @@ public class CellVisuals : MonoBehaviour
     /// </summary>
     private FxPack PackEfectos(int owner) => BoardFx.PackFor(owner) ?? pack;
 
+    /// <summary>Despues de que la animacion pone el frame, lo cambiamos por
+    /// su version aclarada (cacheada) para que el tint de jugador de el
+    /// color exacto con boost 1.4, sin quemarlo con boost alto.</summary>
+    private void LateUpdate()
+    {
+        if (!graphReady) return;
+        foreach (var cv in cells.Values)
+        {
+            if (cv.liquid == null || cv.liquid.sprite == null) continue;
+            var aclarado = BoardFx.AclararLiquido(cv.liquid.sprite);
+            if (aclarado != null && aclarado != cv.liquid.sprite)
+                cv.liquid.sprite = aclarado;
+        }
+    }
+
     private void Update()
     {
         // Si el jugador cambio de pack en el menu, reconstruye con el nuevo

@@ -422,7 +422,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void PonerLleno()
     {
         if (liquidImage == null) return;
-        liquidImage.sprite = Ultimo(framesNivel3);
+        liquidImage.sprite = BoardFx.AclararLiquido(Ultimo(framesNivel3));
     }
 
     /// <summary>
@@ -453,7 +453,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 liquidImage = go.AddComponent<Image>();
             }
         }
-        liquidImage.sprite = Ultimo(framesNivel3);
+        liquidImage.sprite = BoardFx.AclararLiquido(Ultimo(framesNivel3));
         liquidImage.color = BoardFx.Boost(colorLiquido);
         liquidImage.raycastTarget = false;
 
@@ -513,7 +513,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             if (nivel == null || nivel.Length == 0) continue;
             for (int i = 0; i < nivel.Length; i++)
             {
-                liquidImage.sprite = nivel[i];
+                liquidImage.sprite = BoardFx.AclararLiquido(nivel[i]);
                 yield return espera;
             }
             // Al completar cada nivel aparece su objeto (se acumulan) y el
