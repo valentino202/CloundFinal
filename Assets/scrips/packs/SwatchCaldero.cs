@@ -238,6 +238,11 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         UGSProfileManager.Instance != null &&
         UGSProfileManager.Instance.Profile.EquippedPackId == packIdSeleccion;
 
+    /// <summary>True si el jugador ya compro este pack (esta en su perfil).</summary>
+    bool Comprado => Application.isPlaying && UGSProfileManager.PerfilListo &&
+        UGSProfileManager.Instance != null &&
+        UGSProfileManager.Instance.Profile.OwnedPackIds.Contains(packIdSeleccion);
+
     /// <summary>Escala del estado seleccionado (1 = no seleccionado).</summary>
     float FactorSeleccion => EquipadoAhora ? escalaSeleccion : 1f;
 
@@ -255,6 +260,14 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             targetScale = baseScale * FactorSeleccion;
         }
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * smooth);
+
+        // Si no lo compro, el boton se ve atenuado (bloqueado) en la
+        // seleccion. CanvasGroup multiplya la alpha de TODO el boton sin
+        // pisar los colores/transparencias internas (burbujas, liquido, etc).
+        var cg = GetComponent<CanvasGroup>();
+        if (cg == null) cg = gameObject.AddComponent<CanvasGroup>();
+        cg.alpha = Comprado ? 1f : 0.45f;
+        cg.interactable = Comprado; // no se puede clicar si no lo compro
         AplicarOpcionesDeEfectos();
     }
 
@@ -366,12 +379,17 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
             else
             {
+                // Ya NO se desbloquea automaticamente: hay que COMPRARLO en
+                // la tienda. Si no lo tiene, solo avisamos (no se equipa).
                 if (!perfil.OwnsPack(packIdSeleccion))
-                    await perfil.UnlockPackAsync(packIdSeleccion);
+                {
+                    Debug.LogWarning($"[Selector] Pack '{packIdSeleccion}' NO comprado. " +
+                                     "Compralo en la TIENDA para poder equiparlo.", this);
+                    return;
+                }
                 await perfil.EquipPackAsync(packIdSeleccion);
                 Debug.Log($"[Selector] ✅ Pack '{packIdSeleccion}' EQUIPADO y GUARDADO (nube + local). " +
-                          "Caja guardada: '{packIdSeleccion}' → LISTO PARA JUGAR CON CALDERO " +
-                          "(el look del pack se aplica en el paso 7).", this);
+                          "LISTO PARA JUGAR CON CALDERO.", this);
             }
         }
         finally { seleccionEnMarcha = false; }
