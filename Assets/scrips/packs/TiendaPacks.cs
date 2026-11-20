@@ -36,11 +36,13 @@ public class TiendaPacks : MonoBehaviour
     [Header("UI del ShopPanel (arrastra desde el Inspector)")]
     public Button botonComprar;
     public TMP_Text textoBoton;
-    public TMP_Text textoPrecio;
     public TMP_Text textoEstado;
-    [Tooltip("Opcional: textos de monedas/gemas del panel. Si se dejan vacios se usa UIManager.")]
+    [Tooltip("Tu saldo: textos de monedas/gemas del panel.")]
     public TMP_Text textoMonedas;
     public TMP_Text textoGemas;
+    [Tooltip("Etiquetas del PRECIO fijo (ej: oro_cald / diamante_cald). Se escriben una vez con el precio.")]
+    public TMP_Text textoPrecioMonedas;
+    public TMP_Text textoPrecioGemas;
 
     bool comprando;
 
@@ -97,19 +99,25 @@ public class TiendaPacks : MonoBehaviour
     /// <summary>Refresca precios, balances y el estado del boton.</summary>
     public void ActualizarUI()
     {
-        if (textoPrecio != null)
-            textoPrecio.text = precioGemas > 0
-                ? $"{precioMonedas} monedas  +  {precioGemas} gemas"
-                : $"{precioMonedas} monedas";
+        // Precio FIJO en las etiquetas (oro_cald / diamante_cald): cuanto
+        // pide cada moneda. No es el saldo, es el costo del pack.
+        if (textoPrecioMonedas != null) textoPrecioMonedas.text = precioMonedas.ToString();
+        if (textoPrecioGemas != null) textoPrecioGemas.text = precioGemas.ToString();
 
         var perfil = UGSProfileManager.Instance;
         bool propio = perfil != null && UGSProfileManager.PerfilListo && perfil.OwnsPack(packId);
 
         if (botonComprar != null) botonComprar.interactable = !propio && !comprando;
         if (textoBoton != null) textoBoton.text = propio ? "COMPRADO" : "COMPRAR";
-        if (propio) SetEstado("Ya lo tenes ✅ — equipable en Personalizacion", new Color(0.4f, 1f, 0.5f));
 
-        // Balances: si no me pasaron textos, uso el UIManager (que ya los actualiza).
+        // Estado PERSISTENTE: una vez comprado siempre dice COMPRADO.
+        if (propio)
+            SetEstado("COMPRADO ✅ — equipable en Personalizacion", new Color(0.4f, 1f, 0.5f));
+        else if (textoEstado != null && !comprando &&
+                 !textoEstado.text.Contains("insuficientes"))
+            SetEstado("Disponible en la tienda", Color.white);
+
+        // Saldo del jugador en los textos de Tienda_Caldero.
         if (textoMonedas != null) textoMonedas.text = perfil != null ? perfil.Profile.Coins.ToString() : "0";
         if (textoGemas != null) textoGemas.text = perfil != null ? perfil.Profile.Gems.ToString() : "0";
         if (textoMonedas == null && textoGemas == null)
