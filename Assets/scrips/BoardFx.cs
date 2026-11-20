@@ -99,7 +99,13 @@ public static class BoardFx
     /// brillo maximo es ~0.74, asi que el tint normal queda lavado. Con boost
     /// el pixel mas brillante llega a 1.0 y el color se ve vivo.
     /// </summary>
-    public static float ColorBoost = 1.8f; // clasicos mas vivos (antes 1.4)
+    /// <summary>
+    /// Brillo del tint. El PNG del liquido se exporto en GRIS OSCURO (la
+    /// capa de tono/saturacion de Photoshop no se aplico al exportar), asi
+    /// que hace falta un boost alto para que el color del jugador se vea
+    /// vivo tanto en el juego como en el menu (ambos usan Boost).
+    /// </summary>
+    public static float ColorBoost = 2.6f;
 
     public static Color Boost(Color c)
         => new Color(c.r * ColorBoost, c.g * ColorBoost, c.b * ColorBoost, c.a);
