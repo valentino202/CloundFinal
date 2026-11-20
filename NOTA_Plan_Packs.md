@@ -204,7 +204,18 @@ pena y se reintenta con celdas de prueba.
   reabrir; el juego sigue con el clasico.
 - [ ] Aprobado por el usuario (PENDIENTE de probar)
 
-### Paso 5 — Compra de packs ⭐⭐
+### Paso 5 — Compra de packs ⭐⭐ (IMPLEMENTADO)
+- `TiendaPacks.cs`: vende el caldero (200 monedas, 0 gemas por defecto),
+  descuenta con `SpendCurrencyAsync`, desbloquea con `UnlockPackAsync`,
+  guarda en nube, actualiza textos y estado. Reembolsa si falla el
+  desbloqueo. Balances: textos propios o `UIManager.RefreshCurrencyTexts`.
+- `SwatchCaldero` ya NO desbloquea automaticamente: si no compraste el
+  pack, el boton se ve atenuado (`CanvasGroup.alpha=0.45`,
+  `interactable=false`) y no se puede equipar. Al comprarlo se habilita.
+- **Setup en el Inspector**: poner `TiendaPacks` en el ShopPanel y arrastrar
+  `botonComprar`, `textoBoton`, `textoPrecio`, `textoEstado`, y los textos
+  de monedas/gemas. El boton Tienda del menu llama a `UIManager.ShowShop`.
+- [ ] Aprobado por el usuario (PENDIENTE de armar la UI y probar)
 - **Que**: comprar con `SpendCurrencyAsync` (existe) antes de
   desbloquear. Precios por pack (tabla en esta nota o Remote Config).
 - **Prueba**: comprar, quedar `OwnedPacks` actualizado, monedas bajan,
