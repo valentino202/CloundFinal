@@ -195,10 +195,14 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > magenta/amarillo (sus canales ya estan en 1.0). Para que el verde siga
 > vivo con boost 1.0 se subio `colorLiquidoPropio` del caldero a
 > (0.1, 0.95, 0.22) y el sprite aclarado a gris 0.8..1.0. Asi rosa=naranja=
-> verde son los colores EXACTOS e iguales en menu y juego. IMPORTANTE: los
-> valores guardados en los Inspectors (GameScene `colorBoost`, sample
-> `colorBoost`) hay que bajarlos a 1.0 a mano (default del codigo no pisa
-> valores serializados).
+> verde son los colores EXACTOS e iguales en menu y juego. **Fix final**: el
+> valor guardado en GameScene era `colorBoost: 2` y `CellVisuals.Awake` lo
+> pisaba en `BoardFx.ColorBoost` → rosa `(1,0.15,0.6)×2` se recortaba a
+> `(1,0.3,1)` = MORADO. Se desactivaron los seteos de `BoardFx.ColorBoost`
+> en `CellVisuals` y `SwatchCaldero`. Unica fuente de verdad = el valor fijo
+> del codigo `BoardFx.ColorBoost = 1f`. El campo `colorBoost` de los
+> Inspectors queda ignorado (no hace falta tocarlo). Asi rosa=naranja=verde
+> son identicos en juego y menu sin depender de valores guardados.
 
 ## 2g. BOTONES CLASICOS = COLORES OFICIALES
 > Los 2 botones clasicos del menu se veian con tonos raros porque tenian
