@@ -218,8 +218,15 @@ pena y se reintenta con celdas de prueba.
   `textoMonedas`/`textoGemas` (CoinsText_cald / GemasText_cald = SALDO),
   `textoPrecioMonedas`/`textoPrecioGemas` (oro_cald / diamante_cald =
   PRECIO FIJO 1000/500, se escriben solos). NO hay texto de precio suelto.
-  Estado: "Monedas/gemas insuficientes" si no alcanza; "COMPRADO ✅" de
+  Estado: "Monedas/gemas insuficientes" si no alcanza; "COMPRADO" de
   forma persistente una vez comprado.
+- **Fix captura tienda**: los textos `CoinsText_cald`/`GemasText_cald`
+  muestran el **PRECIO (1000/500)**, no el saldo (que ya muestra UIManager
+  arriba → antes aparecia duplicado 2160/1070). El caldero es visible en
+  la tienda SIEMPRE aunque no lo hayas comprado (`EnTienda` fuerza
+  `CanvasGroup.alpha=1`), porque es la vitrina; enPersonalizacion sigue
+  oculto hasta comprar. `slotEnTienda` se busca en Awake para evitar
+  parpadeo del primer frame.
 - ** economia NO se toca** (usuario): la economia general del juego
   (`UGSEconomy.Coins/Gems`, monedas/gemas ganadas al jugar) y sus textos
   generales (`UIManager.coinsTexts/gemsTexts`) quedan EXACTAMENTE como
