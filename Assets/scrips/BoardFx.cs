@@ -89,7 +89,10 @@ public static class BoardFx
     /// </summary>
     public static Color LiquidColorFor(int owner, FxPack pack)
         => pack != null && pack.usaColorPropio
-            ? pack.colorLiquidoPropio
+            ? new Color(pack.colorLiquidoPropio.r * pack.colorBoostPropio,
+                        pack.colorLiquidoPropio.g * pack.colorBoostPropio,
+                        pack.colorLiquidoPropio.b * pack.colorBoostPropio,
+                        pack.colorLiquidoPropio.a)
             : LiquidColorFor(owner);
 
     /// <summary>

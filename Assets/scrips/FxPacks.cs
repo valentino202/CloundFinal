@@ -224,6 +224,8 @@ public class FxPack
     public bool TieneObjetos => hongo1Sprite != null || hongo2Sprite != null;
 
     // --- Color del liquido del pack (paso 1 del plan de packs individualistas) ---
+    [Tooltip("Brillo extra SOLO para el color propio del pack (1 = usa el color tal cual; subir para mas vivo).")]
+    [Range(1f, 2.5f)] public float colorBoostPropio = 1.8f;
     /// <summary>
     /// false = el liquido se tiñe con el color del DUEÑO de la celda
     /// (rosa/naranja, como siempre). true = el pack trae su propio color
