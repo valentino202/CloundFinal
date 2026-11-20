@@ -49,8 +49,16 @@ public class TiendaPacks : MonoBehaviour
     void Start()
     {
         if (botonComprar != null) botonComprar.onClick.AddListener(Comprar);
+        UGSEconomy.BalancesUpdated += AlCambiarBalances;
         ActualizarUI();
     }
+
+    void OnDestroy()
+    {
+        UGSEconomy.BalancesUpdated -= AlCambiarBalances;
+    }
+
+    void AlCambiarBalances() { ActualizarUI(); }
 
     void OnEnable() { ActualizarUI(); }
 
@@ -117,13 +125,29 @@ public class TiendaPacks : MonoBehaviour
                  !textoEstado.text.Contains("insuficientes"))
             SetEstado("Disponible en la tienda", Color.white);
 
-        // Saldo del jugador en los textos de Tienda_Caldero.
-        if (textoMonedas != null) textoMonedas.text = perfil != null ? perfil.Profile.Coins.ToString() : "0";
-        if (textoGemas != null) textoGemas.text = perfil != null ? perfil.Profile.Gems.ToString() : "0";
-        if (textoMonedas == null && textoGemas == null)
+        // Saldo del jugador: UGSEconomy lee del MISMO perfil de Cloud Save
+        // donde se guardan las monedas/gemas que se ganan jugando.
+        // Refrescamos para que este al dia y actualizamos los textos de
+        // Tienda_Caldero y losGENERALES del panel (CoinsText/GemsText) juntos.
+        _ = RefrescarSaldos();
+    }
+
+    async System.Threading.Tasks.Task RefrescarSaldos()
+    {
+        await UGSEconomy.RefreshAsync();
+        long coins = UGSEconomy.Coins;
+        long gems = UGSEconomy.Gems;
+        // Textos del Tienda_Caldero.
+        if (textoMonedas != null) textoMonedas.text = coins.ToString();
+        if (textoGemas != null) textoGemas.text = gems.ToString();
+        // Textos GENERALES del ShopPanel (para que todos digan lo mismo).
+        var ui = FindFirstObjectByType<UIManager>();
+        if (ui != null)
         {
-            var ui = FindFirstObjectByType<UIManager>();
-            if (ui != null) _ = ui.RefreshCurrencyTexts();
+            if (ui.coinsTexts != null)
+                foreach (var t in ui.coinsTexts) if (t != null) t.text = coins.ToString();
+            if (ui.gemsTexts != null)
+                foreach (var t in ui.gemsTexts) if (t != null) t.text = gems.ToString();
         }
     }
 
