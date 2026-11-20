@@ -104,7 +104,7 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public void SetColor(Color c)
     {
         color = c;
-        if (liquidImage != null) liquidImage.color = BoardFx.Boost(c);
+        if (liquidImage != null) liquidImage.color = c; // menu: color natural, sin boost del juego
     }
 
     /// <summary>Lo llama UIManager para marcar el boton activo.</summary>
@@ -242,7 +242,7 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             Center(lrt, liquidFill);
             liquidImage = go.AddComponent<Image>();
             liquidImage.sprite = BoardFx.AclararLiquido(Ultimo(framesNivel3));
-            liquidImage.color = BoardFx.Boost(ColorResuelto());
+            liquidImage.color = ColorResuelto(); // menu: rosa/naranja natural, sin boost
             liquidImage.raycastTarget = false;
         }
 

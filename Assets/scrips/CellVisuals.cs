@@ -245,11 +245,12 @@ public class CellVisuals : MonoBehaviour
     private void Awake()
     {
         FxPackCatalog.AttachArt(packId, glassPrefab, clip1, clip2, clip3, clipBoom, speed1, speed2, speed3, speedBoom, bubbleSprites, boomSoundA);
-        // NO pisar BoardFx.ColorBoost con el valor serializado de la escena
-        // (tenia 2 guardado → el rosa se volvia magenta/morado). El sprite
-        // del liquido ya se ACLARA en runtime (BoardFx.AclararLiquido), asi
-        // que el tint usa el color EXACTO (boost 1.0) igual que el menu.
-        // BoardFx.ColorBoost = colorBoost;  // desactivado
+        // El JUEGO mantiene su intensidad: BoardFx.ColorBoost se setea con
+        // el valor del Inspector (colorBoost = 2 en la escena) y solo afecta
+        // al juego. El MENU ya NO usa Boost (ColorSwatch/SwatchCaldero ponen
+        // el color directo), asi que su rosa/naranja respira natural sin
+        // virar a morado. Dos intensidades independientes, sin conflictos.
+        BoardFx.ColorBoost = colorBoost;
         pack = FxPackCatalog.Get(packId) ?? FxPackCatalog.Get("clasico");
         activePackId = pack != null ? pack.id : "clasico";
 

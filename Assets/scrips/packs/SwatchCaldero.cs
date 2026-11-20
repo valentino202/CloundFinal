@@ -461,7 +461,7 @@ public class SwatchCaldero : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             }
         }
         liquidImage.sprite = BoardFx.AclararLiquido(Ultimo(framesNivel3));
-        liquidImage.color = BoardFx.Boost(colorLiquido);
+        liquidImage.color = colorLiquido; // menu: verde natural, sin boost del juego
         liquidImage.raycastTarget = false;
 
         // --- Cristal: encima, con su alpha propio (nunca se tinta) ---
