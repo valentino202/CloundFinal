@@ -434,11 +434,10 @@ public class UIManager : MonoBehaviour
             // Seleccion por MODO (0=rosa, 1=naranja, 2=custom), no por
             // comparacion de color exacto: si el naranja del Inspector no
             // era EXACTAMENTE (1,0.45,0.05) nunca se marcaba como activo.
-            bool selected;
-            if (sw.colorDelJuego == PlayerColorOptions.CustomIndex)
-                selected = modoActual == PlayerColorOptions.CustomIndex;
-            else
-                selected = sw.colorDelJuego == modoActual;
+            int modo = sw.ModoResuelto();
+            bool selected = modo == PlayerColorOptions.CustomIndex
+                ? modoActual == PlayerColorOptions.CustomIndex
+                : modo == modoActual;
 
             sw.SetSelected(selected);
 

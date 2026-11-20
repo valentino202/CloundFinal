@@ -43,9 +43,32 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public int colorDelJuego = -1;
     public Color color = Color.white;
 
-    /// <summary>El color que este boton representa: del juego si esta sincronizado, o el manual.</summary>
+    /// <summary>
+    /// El color que este boton representa: SIEMPRE el oficial del juego
+    /// para los clasicos (0=rosa, 1=naranja), sin importar el color manual
+    /// del Inspector. Si esta en -1 lo inferimos del nombre del GameObject
+    /// ("Rosa"/"Naranja"/"Orange"/"Pink") para que los botones clasicos
+    /// del menu se vean IGUALES a las casillas del juego.
+    /// </summary>
+    /// <summary>Modo que representa este boton (0 rosa / 1 naranja / 2 custom),
+    /// infiriendolo del nombre si el Inspector dice -1.</summary>
+    public int ModoResuelto()
+    {
+        int modo = colorDelJuego;
+        if (modo < 0)
+        {
+            string n = (gameObject != null ? gameObject.name : "").ToLowerInvariant();
+            if (n.Contains("naranj") || n.Contains("orange")) modo = PlayerColorOptions.NaranjaIndex;
+            else if (n.Contains("rosa") || n.Contains("pink")) modo = PlayerColorOptions.RosaIndex;
+        }
+        return modo;
+    }
+
     public Color ColorResuelto()
-        => colorDelJuego >= 0 ? PlayerColorOptions.Get(colorDelJuego, color) : color;
+    {
+        int modo = ModoResuelto();
+        return modo >= 0 ? PlayerColorOptions.Get(modo, color) : color;
+    }
 
     [Header("Igual que en el juego")]
     [Tooltip("Fraccion del boton que ocupa el liquido.")]
@@ -130,10 +153,11 @@ public class ColorSwatch : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             // UIManager.UpdateSwatchSelection: antes comparabamos colores
             // exactos aqui y los dos sistemas se sobrescribian, por eso el
             // boton naranja no se agrandaba nunca.
+            int modo = ModoResuelto();
             bool sel = perfil.EquippedPackId == "clasico" &&
-                (colorDelJuego == PlayerColorOptions.CustomIndex
+                (modo == PlayerColorOptions.CustomIndex
                     ? perfil.PlayerColorMode == PlayerColorOptions.CustomIndex
-                    : colorDelJuego == perfil.PlayerColorMode);
+                    : modo == perfil.PlayerColorMode);
             if (sel != selected) SetSelected(sel);
         }
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * smooth);

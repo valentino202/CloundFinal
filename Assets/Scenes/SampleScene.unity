@@ -2108,6 +2108,7 @@ MonoBehaviour:
   glassAlpha: 1
   fps: 14
   pausaNivel: 0.45
+  colorBoost: 1
   hoverScale: 1.14
   pressScale: 0.86
   smooth: 14
