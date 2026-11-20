@@ -159,6 +159,12 @@ cada jugador*. Nunca subir la receta a la nube (se desactualizaría).
 > vivos antes). Se subio el boost GLOBAL `BoardFx.ColorBoost` de 1.4 a 1.8,
 > que es el que usan todos los colores al tinter el liquido. Se quito el
 > `colorBoostPropio` del pack (no hacia falta y daba doble boost al caldero).
+> **Causa raíz**: el PNG `liquido animacion.png` exportado es GRIS OSCURO;
+> el azul de Photoshop venia de una capa Tono/saturacion (Tono -100) que no
+> se aplico al exportar. Unity multiplica gris×color → apagado. Por eso el
+> boost se subio a 2.6 (juego y menu usan `BoardFx.Boost`). Opcion ideal a
+> futuro: reexportar el PNG en gris CLARO/blanco con la capa aplicada y
+> bajar el boost a ~1.4.
 
 ## 3. CAMPO DE APLICACIÓN
 
