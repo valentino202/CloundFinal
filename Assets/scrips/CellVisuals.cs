@@ -497,6 +497,10 @@ graph = PlayableGraph.Create("CellVisuals");
         cv.label.enableAutoSizing = false;
         cv.label.color = Color.white;
         cv.label.text = "";
+        // Contorno del numero para que se lea siempre (lo aplica ApplyState
+        // segun el pack del dueno; caldero = contorno negro grueso).
+        cv.label.outlineWidth = 0f;
+        cv.label.outlineColor = Color.black;
         var lrt = labelGO.GetComponent<RectTransform>();
         // Caja chica y pivote al centro: el auto-size encaja el digito dentro
         // y queda centrado en la celda.
@@ -745,6 +749,13 @@ graph = PlayableGraph.Create("CellVisuals");
                 var nc = NumberColorFor(level, owner);
                 nc.a = numberAlpha;
                 cv.label.color = nc;
+                // Contorno del pack (caldero: negro grueso) para que el
+                // numero destaque aunque haya muchos objetos detras.
+                var numPack = PackEfectos(owner);
+                cv.label.outlineColor = numPack != null && numPack.numeroPropio
+                    ? numPack.numeroContornoColor : Color.black;
+                cv.label.outlineWidth = numPack != null && numPack.numeroPropio
+                    ? numPack.numeroContorno : 0f;
             }
         }
 

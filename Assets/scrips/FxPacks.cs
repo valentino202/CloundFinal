@@ -151,11 +151,15 @@ public class FxPack
 
     [Header("Numeros del pack (color por nivel 1->3)")]
     [Tooltip("Color del numero en nivel 1. Vacio = usa el blanco del Inspector.")]
-    public Color numeroColorBajo = new Color(1f, 0.95f, 0.2f, 1f);   // amarillo
-    [Tooltip("Color del numero en nivel alto. Contrasta con el verde del caldero.")]
-    public Color numeroColorAlto = new Color(1f, 0.35f, 0.05f, 1f);   // naranja
+    public Color numeroColorBajo = new Color(1f, 0.97f, 0.35f, 1f);   // amarillo claro
+    [Tooltip("Color del numero en nivel alto (3 = a punto de explotar): amarillo brillante tipo indicador, que destaque aunque haya muchos objetos.")]
+    public Color numeroColorAlto = new Color(1f, 0.92f, 0.05f, 1f);   // amarillo explosion
     [Tooltip("Si el pack define su propia paleta de numeros (caldero = si; clasico = no).")]
     public bool numeroPropio = false;
+    [Tooltip("Contorno del numero para que destaque sobre objetos/verde. Negativo = negro, 0 = sin contorno.")]
+    public float numeroContorno = 0.25f;
+    [Tooltip("Color del contorno (negro por defecto = maximo contraste).")]
+    public Color numeroContornoColor = new Color(0f, 0f, 0f, 0.85f);
 
     [Header("Ciclo de descanso de efectos (evita saturar la vista)")]
     [Tooltip("Segundos que los efectos estan ACTIVOS (rafaga).")]
