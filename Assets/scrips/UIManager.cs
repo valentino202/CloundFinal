@@ -182,6 +182,42 @@ public class UIManager : MonoBehaviour
             ? $"Esperando Normal ({selectedMaxTurns})"
             : "Esperando Infinito";
         esperaText.gameObject.SetActive(true);
+        // Siempre encima del todo y a plena opacidad.
+        esperaText.transform.SetAsLastSibling();
+        var cg = esperaText.GetComponent<UnityEngine.CanvasGroup>();
+        if (cg != null) cg.alpha = 1f;
+        var c = esperaText.color;
+        esperaText.color = new Color(c.r, c.g, c.b, 1f);
+    }
+
+    /// <summary>Saca el texto "Espera" del panel en el que este (podria ser
+    /// uno que se oculta al jugar) y lo pone directo en el Canvas, arriba de
+    /// todo. Así siempre es visible cuando aparece.</summary>
+    private void PrepararTextoEspera()
+    {
+        if (esperaText == null)
+        {
+            Debug.LogWarning("[UI] 'Espera Text' no asignado en el UIManager.");
+            return;
+        }
+
+        // Buscar el Canvas mas cercano y moverse ahi (conservando su
+        // posicion en pantalla, por eso worldPositionStays = true).
+        var canvas = esperaText.GetComponentInParent<Canvas>();
+        if (canvas != null && esperaText.transform.parent != canvas.transform)
+        {
+            esperaText.transform.SetParent(canvas.transform, true);
+            Debug.Log($"[UI] Texto 'Espera' movido al Canvas (estaba en un panel que se oculta).");
+        }
+        esperaText.transform.SetAsLastSibling(); // encima de los demas
+
+        // Asegurar opacidad completa.
+        var cg = esperaText.GetComponent<UnityEngine.CanvasGroup>();
+        if (cg != null) cg.alpha = 1f;
+        var c = esperaText.color;
+        esperaText.color = new Color(c.r, c.g, c.b, 1f);
+
+        esperaText.gameObject.SetActive(false); // oculto hasta jugar
     }
 
     /// <summary>Espera un poco con "Espera" en pantalla y luego carga la partida.</summary>
@@ -265,7 +301,9 @@ public class UIManager : MonoBehaviour
         LoadSelection(); // modo de juego elegido antes de darle a Jugar
 
         // El texto "Espera" arranca oculto (aparece solo al darle a Jugar).
-        if (esperaText != null) esperaText.gameObject.SetActive(false);
+        // Ademas se SACA de cualquier panel que se pueda ocultar y se pone
+        // directo en el Canvas (encima de todo), para que SIEMPRE se vea.
+        PrepararTextoEspera();
 
         if (maxTurnsScrollbar != null)
         {
