@@ -71,16 +71,28 @@ public class UIManager : MonoBehaviour
     private void ActualizarColoresModo()
     {
         bool normal = selectedMatchMode == GameManager.MatchMode.Normal;
-        if (botonModoNormal != null)
-        {
-            var img = botonModoNormal.GetComponent<Image>();
-            if (img != null) img.color = normal ? colorModoSeleccionado : colorModoNormal;
-        }
-        if (botonModoInfinito != null)
-        {
-            var img = botonModoInfinito.GetComponent<Image>();
-            if (img != null) img.color = !normal ? colorModoSeleccionado : colorModoInfinito;
-        }
+        PintarBoton(botonModoNormal, normal ? colorModoSeleccionado : colorModoNormal);
+        PintarBoton(botonModoInfinito, !normal ? colorModoSeleccionado : colorModoInfinito);
+    }
+
+    /// <summary>Pinta un boton desactivando la transicion de color de Unity
+    /// (si no, el Button sobreescribe el Image.color cada frame y no se ve).</summary>
+    void PintarBoton(Button boton, Color color)
+    {
+        if (boton == null) return;
+        // ColorTransition pisaba nuestro color: lo desactivamos.
+        if (boton.transition == Selectable.Transition.ColorTint)
+            boton.transition = Selectable.Transition.None;
+        var img = boton.GetComponent<Image>();
+        if (img == null) img = boton.targetGraphic as Image;
+        if (img != null) img.color = color;
+    }
+
+    private void Update()
+    {
+        // Reaplicar por si otro sistema (transiciones, hover) cambia el color.
+        if (modeSelectionPanel != null && modeSelectionPanel.activeSelf)
+            ActualizarColoresModo();
     }
 
     private void UpdateTurnsText()
