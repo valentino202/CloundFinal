@@ -30,3 +30,17 @@
 ## Nota
 Los clips entraron al commit (estaban sin track). No se toco ningun otro
 audio (boom, burbujas, vapor siguen igual).
+
+## BUILD (ejecutable) — importante
+- Build Settings: SampleScene + GameScene habilitadas ✅
+- `UnityEditor` solo dentro de `#if UNITY_EDITOR` → compila ✅
+- **Los clips de musica van en el GameObject MusicManager del Inspector**,
+  asi que se incluyen en el build automaticamente ✅ (no hace falta Resources).
+- **Recursos del pack caldero**: `FxPacks.Cargar<T>()` usa `Resources.Load`
+  (funciona en build). Para que el caldero tenga hongos/ojo/hueso/sonido en
+  el ejecutable, **copiar estos archivos a `Assets/Resources/`** (yo cree la
+  carpeta, pero no muevo binarios):
+  `explosion_caldero.mp3`, `hongo_color1.png`, `Hongo_color2.png`,
+  `base_ojo_color.png`, `ojo_iris_central/lateral/vertical.png`, `Huesito.png`.
+  Sin esto el Editor sigue funcionando (fallback por AssetDatabase), pero el
+  build se veria sin esos objetos. Version del producto: `1.0` (ProjectSettings).
