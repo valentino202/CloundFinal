@@ -29,11 +29,18 @@ Alternativa: Photon (más robusto, pero servicio externo).
       `SelectedMaxTurns` (30..100 de 10 en 10).
 - [ ] Leaderboards normal e infinito funcionan.
 
-### Paso 1 — Modelo de "busqueda" (solo datos, sin red) ⭐
+### Paso 1 — Modelo de "busqueda" (solo datos, sin red) ⭐ ✅ HECHO
 - **Qué**: una clase `BusquedaPvP` con `{ modo, maxTurns, playerId }`.
   Es lo que un jugador "pone" en la cola.
-- **Prueba**: imprimir por consola la búsqueda al dar Play.
-- **Sin riesgo**: no cambia el juego.
+- **Implementado**: `Assets/scrips/pvp/BusquedaPvP.cs` (commit del Paso 1).
+  - `BusquedaPvP.Crear(mode, maxTurns)` toma la selección del menú.
+  - `CompatibleCon(otra)` = regla de emparejamiento (Normal exige maxTurns
+    EXACTO; Infinito solo pide mismo modo). Se usará en el Paso 4.
+  - `ToString()` legible para consola.
+- **Conectado en** `UIManager.SelectModeAndPlay`: al dar Play imprime
+  `[PvP] Buscando partida... modo=Normal (40 turnos) playerId=...`
+- **Prueba**: dar Play y ver el log en consola.
+- **Sin riesgo**: no cambia el juego (solo un Debug.Log).
 
 ### Paso 2 — Espejo por cliente (ya diseñado, se hace antes de red) ⭐⭐
 - **Qué**: cada pantalla ve al jugador LOCAL "abajo" con su pack/color, y al
@@ -98,5 +105,8 @@ local se revierte al commit anterior. El juego local debe seguir funcionando
 ---
 
 ## ESTADO ACTUAL
-⏸ **No se escribió código de PvP.** Este MD es solo el plan.
-El juego sigue 100% local (humano vs bot) y listo para entregar.
+▶ **Paso 1 completo**: modelo `BusquedaPvP` (solo datos) + log al dar Play.
+Paso 0 pendiente de verificación manual del usuario (checklist de arriba).
+Sigue sin escribirse red: el juego sigue 100% local (humano vs bot) y
+listo para entregar.
+Próximo: Paso 2 (espejo por cliente: local abajo / rival arriba).

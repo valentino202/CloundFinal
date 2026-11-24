@@ -167,6 +167,11 @@ public class UIManager : MonoBehaviour
 
         if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
 
+        // PASO 1 PvP: armar la busqueda de partida y mostrarla (solo datos,
+        // todavia no hay red). En el Paso 4 esto viajara por el Lobby.
+        var busqueda = BusquedaPvP.Crear(mode, selectedMaxTurns);
+        Debug.Log($"[PvP] Buscando partida... {busqueda}");
+
         // Muestra "Esperando Normal (40)" / "Esperando Infinito" y carga
         // tras un momento (para que se alcance a ver).
         MostrarEspera(mode);
