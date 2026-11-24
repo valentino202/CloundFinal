@@ -167,15 +167,21 @@ public class UIManager : MonoBehaviour
 
         if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
 
-        // Muestra "Espera..." y carga tras un momento (para que se alcance a ver).
-        MostrarEspera();
+        // Muestra "Esperando Normal (40)" / "Esperando Infinito" y carga
+        // tras un momento (para que se alcance a ver).
+        MostrarEspera(mode);
         StartCoroutine(CargarPartidaTrasEspera());
     }
 
-    /// <summary>Muestra el texto "Espera" (si esta asignado).</summary>
-    private void MostrarEspera()
+    /// <summary>Muestra el texto de espera con el modo elegido:
+    /// "Esperando Normal (40)" si es normal, "Esperando Infinito" si es infinito.</summary>
+    private void MostrarEspera(GameManager.MatchMode mode)
     {
-        if (esperaText != null) esperaText.gameObject.SetActive(true);
+        if (esperaText == null) return;
+        esperaText.text = mode == GameManager.MatchMode.Normal
+            ? $"Esperando Normal ({selectedMaxTurns})"
+            : "Esperando Infinito";
+        esperaText.gameObject.SetActive(true);
     }
 
     /// <summary>Espera un poco con "Espera" en pantalla y luego carga la partida.</summary>
