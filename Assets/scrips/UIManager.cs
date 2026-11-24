@@ -38,6 +38,17 @@ public class UIManager : MonoBehaviour
     [Tooltip("Texto que muestra el número de turnos mientras mueves la rueda/slider.")]
     public TMP_Text turnsText;
 
+    [Header("Botones de modo (se resaltan en ROJO el seleccionado)")]
+    [Tooltip("Boton 'Normal'. Arrastralo desde el Inspector.")]
+    public Button botonModoNormal;
+    [Tooltip("Boton 'Infinito'. Arrastralo desde el Inspector.")]
+    public Button botonModoInfinito;
+    [Tooltip("Color del boton seleccionado (rojo por defecto).")]
+    public Color colorModoSeleccionado = new Color(1f, 0.25f, 0.25f, 1f);
+    [Tooltip("Color de los botones NO seleccionados (se guarda el original si no se asigna).")]
+    public Color colorModoNormal = new Color(0.35f, 0.85f, 0.85f, 1f);
+    public Color colorModoInfinito = new Color(1f, 0.55f, 0.15f, 1f);
+
     [Tooltip("Scrollbar que selecciona el límite de turnos.")]
     public Scrollbar maxTurnsScrollbar;
 
@@ -52,6 +63,24 @@ public class UIManager : MonoBehaviour
             selectedMaxTurns = Mathf.Clamp(PlayerPrefs.GetInt(PREF_TURNS), 30, 100);
 
         UpdateTurnsText();
+        ActualizarColoresModo();
+    }
+
+    /// <summary>Pinta de ROJO el boton del modo seleccionado y deja el otro
+    /// con su color normal, para que se vea antes de darle a Jugar.</summary>
+    private void ActualizarColoresModo()
+    {
+        bool normal = selectedMatchMode == GameManager.MatchMode.Normal;
+        if (botonModoNormal != null)
+        {
+            var img = botonModoNormal.GetComponent<Image>();
+            if (img != null) img.color = normal ? colorModoSeleccionado : colorModoNormal;
+        }
+        if (botonModoInfinito != null)
+        {
+            var img = botonModoInfinito.GetComponent<Image>();
+            if (img != null) img.color = !normal ? colorModoSeleccionado : colorModoInfinito;
+        }
     }
 
     private void UpdateTurnsText()
@@ -72,6 +101,7 @@ public class UIManager : MonoBehaviour
     {
         selectedMatchMode = GameManager.MatchMode.Normal;
         SaveSelection();
+        ActualizarColoresModo();
         Debug.Log("[Modo] Normal seleccionado.");
     }
 
@@ -80,6 +110,7 @@ public class UIManager : MonoBehaviour
     {
         selectedMatchMode = GameManager.MatchMode.Infinito;
         SaveSelection();
+        ActualizarColoresModo();
         Debug.Log("[Modo] Infinito seleccionado.");
     }
 
@@ -97,6 +128,7 @@ public class UIManager : MonoBehaviour
         if (authPanel != null) authPanel.SetActive(false);
 
         modeSelectionPanel.SetActive(true);
+        ActualizarColoresModo(); // resaltar el modo guardado al abrir
     }
 
     /// <summary>Lo conecta el botón 'Volver'. Oculta el panel de selección y muestra el anterior.</summary>
