@@ -71,21 +71,31 @@ public class UIManager : MonoBehaviour
     private void ActualizarColoresModo()
     {
         bool normal = selectedMatchMode == GameManager.MatchMode.Normal;
-        PintarBoton(botonModoNormal, normal ? colorModoSeleccionado : colorModoNormal);
-        PintarBoton(botonModoInfinito, !normal ? colorModoSeleccionado : colorModoInfinito);
+        PintarBoton(botonModoNormal, normal ? colorModoSeleccionado : colorModoNormal, normal);
+        PintarBoton(botonModoInfinito, !normal ? colorModoSeleccionado : colorModoInfinito, !normal);
     }
 
-    /// <summary>Pinta un boton desactivando la transicion de color de Unity
-    /// (si no, el Button sobreescribe el Image.color cada frame y no se ve).</summary>
-    void PintarBoton(Button boton, Color color)
+    /// <summary>Pinta un boton usando el ColorBlock del Button (NO tocamos
+    /// Image.color: ColorTint lo sobreescribe y por eso se ponia negro).
+    /// selected = rojo + un poco mas grandecito (sensacion de presionado).</summary>
+    void PintarBoton(Button boton, Color color, bool selected = false)
     {
         if (boton == null) return;
-        // ColorTransition pisaba nuestro color: lo desactivamos.
-        if (boton.transition == Selectable.Transition.ColorTint)
-            boton.transition = Selectable.Transition.None;
-        var img = boton.GetComponent<Image>();
-        if (img == null) img = boton.targetGraphic as Image;
-        if (img != null) img.color = color;
+        boton.transition = Selectable.Transition.ColorTint;
+        var cb = boton.colors;
+        cb.normalColor = color;
+        cb.highlightedColor = Color.Lerp(color, Color.white, 0.15f);
+        cb.pressedColor = Color.Lerp(color, Color.black, 0.25f); // hundido al clicar
+        cb.selectedColor = color;
+        cb.disabledColor = new Color(color.r, color.g, color.b, 0.5f);
+        cb.colorMultiplier = 1f;
+        cb.fadeDuration = 0.08f;
+        boton.colors = cb;
+
+        // El seleccionado se sostiene un poco mas grande (como presionado).
+        var escala = boton.transform.localScale;
+        float objetivo = selected ? 1.06f : 1f;
+        boton.transform.localScale = Vector3.Lerp(escala, Vector3.one * objetivo, 0.25f);
     }
 
     private void Update()
