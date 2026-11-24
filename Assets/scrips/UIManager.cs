@@ -38,6 +38,12 @@ public class UIManager : MonoBehaviour
     [Tooltip("Texto que muestra el número de turnos mientras mueves la rueda/slider.")]
     public TMP_Text turnsText;
 
+    [Header("Texto de espera (al darle a Jugar)")]
+    [Tooltip("Texto 'Espera' que aparece mientras carga la partida. Arrastralo desde el Inspector.")]
+    public TMP_Text esperaText;
+    [Tooltip("Segundos que se muestra 'Espera' antes de cargar GameScene.")]
+    public float esperaSegundos = 0.6f;
+
     [Header("Botones de modo (el seleccionado queda un poco mas grande)")]
     [Tooltip("Boton 'Normal'. Arrastralo desde el Inspector.")]
     public Button botonModoNormal;
@@ -151,7 +157,8 @@ public class UIManager : MonoBehaviour
         if (back != null) back.SetActive(true);
     }
 
-    /// <summary>Elige el modo, guarda la selección y carga GameScene contra la IA.</summary>
+    /// <summary>Elige el modo, guarda la selección, muestra "Espera" y
+    /// carga GameScene contra la IA (con una pausa corta para que se vea).</summary>
     public void SelectModeAndPlay(GameManager.MatchMode mode, int turns = 30)
     {
         selectedMatchMode = mode;
@@ -159,6 +166,25 @@ public class UIManager : MonoBehaviour
         SaveSelection();
 
         if (modeSelectionPanel != null) modeSelectionPanel.SetActive(false);
+
+        // Muestra "Espera..." y carga tras un momento (para que se alcance a ver).
+        MostrarEspera();
+        StartCoroutine(CargarPartidaTrasEspera());
+    }
+
+    /// <summary>Muestra el texto "Espera" (si esta asignado).</summary>
+    private void MostrarEspera()
+    {
+        if (esperaText != null) esperaText.gameObject.SetActive(true);
+    }
+
+    /// <summary>Espera un poco con "Espera" en pantalla y luego carga la partida.</summary>
+    private System.Collections.IEnumerator CargarPartidaTrasEspera()
+    {
+        if (esperaText != null)
+            yield return new WaitForSeconds(esperaSegundos);
+        else
+            yield return null; // sin texto: carga casi directo
 
         UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
     }
@@ -231,6 +257,9 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         LoadSelection(); // modo de juego elegido antes de darle a Jugar
+
+        // El texto "Espera" arranca oculto (aparece solo al darle a Jugar).
+        if (esperaText != null) esperaText.gameObject.SetActive(false);
 
         if (maxTurnsScrollbar != null)
         {
