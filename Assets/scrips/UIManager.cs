@@ -38,16 +38,11 @@ public class UIManager : MonoBehaviour
     [Tooltip("Texto que muestra el número de turnos mientras mueves la rueda/slider.")]
     public TMP_Text turnsText;
 
-    [Header("Botones de modo (se resaltan en ROJO el seleccionado)")]
+    [Header("Botones de modo (el seleccionado queda un poco mas grande)")]
     [Tooltip("Boton 'Normal'. Arrastralo desde el Inspector.")]
     public Button botonModoNormal;
     [Tooltip("Boton 'Infinito'. Arrastralo desde el Inspector.")]
     public Button botonModoInfinito;
-    [Tooltip("Color del boton seleccionado (rojo por defecto).")]
-    public Color colorModoSeleccionado = new Color(1f, 0.25f, 0.25f, 1f);
-    [Tooltip("Color de los botones NO seleccionados (se guarda el original si no se asigna).")]
-    public Color colorModoNormal = new Color(0.35f, 0.85f, 0.85f, 1f);
-    public Color colorModoInfinito = new Color(1f, 0.55f, 0.15f, 1f);
 
     [Tooltip("Scrollbar que selecciona el límite de turnos.")]
     public Scrollbar maxTurnsScrollbar;
@@ -66,33 +61,24 @@ public class UIManager : MonoBehaviour
         ActualizarColoresModo();
     }
 
-    /// <summary>Pinta de ROJO el boton del modo seleccionado y deja el otro
-    /// con su color normal, para que se vea antes de darle a Jugar.</summary>
+    /// <summary>Marca el modo seleccionado SOLO con escala (un poco mas
+    /// grande = sensacion de presionado). NO se tocan colores: el boton
+    /// conserva el suyo propio.</summary>
     private void ActualizarColoresModo()
     {
         bool normal = selectedMatchMode == GameManager.MatchMode.Normal;
-        PintarBoton(botonModoNormal, normal ? colorModoSeleccionado : colorModoNormal, normal);
-        PintarBoton(botonModoInfinito, !normal ? colorModoSeleccionado : colorModoInfinito, !normal);
+        MarcarBoton(botonModoNormal, normal);
+        MarcarBoton(botonModoInfinito, !normal);
     }
 
-    /// <summary>Pinta un boton usando el ColorBlock del Button (NO tocamos
-    /// Image.color: ColorTint lo sobreescribe y por eso se ponia negro).
-    /// selected = rojo + un poco mas grandecito (sensacion de presionado).</summary>
-    void PintarBoton(Button boton, Color color, bool selected = false)
+    /// <summary>Deja el boton del modo seleccionado un poco mas grande
+    /// (como hundido). El color lo maneja el propio Button (ColorTint).</summary>
+    void MarcarBoton(Button boton, bool selected)
     {
         if (boton == null) return;
+        // Sensacion de presionado al hacer clic (su ColorBlock original).
         boton.transition = Selectable.Transition.ColorTint;
-        var cb = boton.colors;
-        cb.normalColor = color;
-        cb.highlightedColor = Color.Lerp(color, Color.white, 0.15f);
-        cb.pressedColor = Color.Lerp(color, Color.black, 0.25f); // hundido al clicar
-        cb.selectedColor = color;
-        cb.disabledColor = new Color(color.r, color.g, color.b, 0.5f);
-        cb.colorMultiplier = 1f;
-        cb.fadeDuration = 0.08f;
-        boton.colors = cb;
 
-        // El seleccionado se sostiene un poco mas grande (como presionado).
         var escala = boton.transform.localScale;
         float objetivo = selected ? 1.06f : 1f;
         boton.transform.localScale = Vector3.Lerp(escala, Vector3.one * objetivo, 0.25f);
@@ -100,7 +86,7 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        // Reaplicar por si otro sistema (transiciones, hover) cambia el color.
+        // Reaplicar la escala mientras el panel este abierto.
         if (modeSelectionPanel != null && modeSelectionPanel.activeSelf)
             ActualizarColoresModo();
     }
