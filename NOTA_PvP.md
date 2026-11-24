@@ -42,12 +42,12 @@ Alternativa: Photon (más robusto, pero servicio externo).
 - **Prueba**: dar Play y ver el log en consola.
 - **Sin riesgo**: no cambia el juego (solo un Debug.Log).
 
-### Paso 2 — Espejo por cliente (ya diseñado, se hace antes de red) ⭐⭐
-- **Qué**: cada pantalla ve al jugador LOCAL "abajo" con su pack/color, y al
+### Paso 2 — Espejo por cliente ❌ DESCARTADO por el usuario
+- **Qué era**: cada pantalla ve al jugador LOCAL "abajo" con su pack/color, y al
   rival "arriba". `SlotLocal(owner) = owner == viewerId ? 1 : 2`.
   `CellVisuals`/`PackFor` ya consultan por dueño (pasos 2-3 del plan viejo).
-- **Prueba**: simular 2 jugadores locales (viewerId=1 y 2) en la misma máquina.
-- **Por qué ahora**: es visual y no depende de la red.
+- **Decisión**: NO se hace (el usuario: "el 2 no"). Si en el futuro hace falta,
+  retomar de acá.
 
 ### Paso 3 — Simular 2 jugadores en la misma máquina ⭐⭐
 - **Qué**: 2 instancias del `GameManager` (o 2 ventanas) con un `MatchController`
@@ -106,7 +106,8 @@ local se revierte al commit anterior. El juego local debe seguir funcionando
 
 ## ESTADO ACTUAL
 ▶ **Paso 1 completo**: modelo `BusquedaPvP` (solo datos) + log al dar Play.
+❌ **Paso 2 descartado** por el usuario (espejo por cliente: NO se hace).
 Paso 0 pendiente de verificación manual del usuario (checklist de arriba).
 Sigue sin escribirse red: el juego sigue 100% local (humano vs bot) y
 listo para entregar.
-Próximo: Paso 2 (espejo por cliente: local abajo / rival arriba).
+Próximo: **Paso 3** (simular 2 jugadores en la misma máquina, sin red).
