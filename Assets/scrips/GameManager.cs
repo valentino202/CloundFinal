@@ -196,10 +196,12 @@ public class GameManager : MonoBehaviour
             gameOver = false;
             statusText.text = "";
             if (resultPanel != null) resultPanel.SetActive(false);
+            if (MusicManager.Instance != null) MusicManager.Instance.ReanudarPelea();
             Refresh();
         });
         MakeButton(canvasGO.transform, "BackBtn", "Menu", 0, -485, () =>
         {
+            if (MusicManager.Instance != null) MusicManager.Instance.IrAMenu();
             SceneManager.LoadScene("SampleScene");
         });
     }
@@ -461,6 +463,8 @@ private void FinishMove(GameLogic.MoveResult r)
         resultDetail.text = $"Duración: {FormatTime(duration)}\n+{coins} monedas   +{gems} gemas";
 
         resultPanel.SetActive(true);
+        // La musica de pelea se CORTA al ganar/perder/empatar.
+        if (MusicManager.Instance != null) MusicManager.Instance.Cortar();
     }
 
     private void BuildResultPanel()
@@ -490,10 +494,12 @@ private void FinishMove(GameLogic.MoveResult r)
             busy = false;
             gameOver = false;
             statusText.text = "";
+            if (MusicManager.Instance != null) MusicManager.Instance.ReanudarPelea();
             Refresh();
         });
         MakeButton(resultPanel.transform, "ResultMenuBtn", "Menú", 0, -135, () =>
         {
+            if (MusicManager.Instance != null) MusicManager.Instance.IrAMenu();
             UnityEngine.SceneManagement.SceneManager.LoadScene("SampleScene");
         });
 
