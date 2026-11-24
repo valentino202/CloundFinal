@@ -330,57 +330,50 @@ public static class FxPackCatalog
         caldero.bubbleDrift = 0.01f;
         caldero.bubbleAlpha = 0.55f;
 
-        // Sonido NUEVO del usuario: explosion_caldero.mp3 (en Assets/musica
-        // y sonidos). Se busca por nombre para no arrastrar nada a mano.
-        // El clasico conserva su sonido A/B del Inspector.
+        // Recursos del pack caldero. Se cargan con Resources.Load<T>, que
+        // funciona TANTO en el Editor COMO en el BUILD (a diferencia de
+        // AssetDatabase). Los archivos deben estar en Assets/Resources/ con
+        // estos nombres. Si no estan, en Editor se busca por nombre como
+        // respaldo (para no romper lo que ya funciona).
+        var sonido = Cargar<AudioClip>("explosion_caldero");
+        if (sonido != null)
+        {
+            caldero.sonidoBoom = sonido;      // ranura A del pack
+            caldero.sonidoBoomB = null;       // no alternar: solo el nuevo
+            caldero.modoSonidoBoom = 0;       // 0 = solo A
+            caldero.boomVolume = 0.5f;        // clasico = 0.8
+            Debug.Log($"[FxPacks] Sonido de explosion del caldero cargado (volumen {caldero.boomVolume})");
+        }
+
+        // Objetos del pack: sprites cargados por nombre desde Resources.
+        caldero.hongo1Sprite      = Cargar<Sprite>("hongo_color1");
+        caldero.hongo2Sprite      = Cargar<Sprite>("Hongo_color2");
+        caldero.hongoGrandeSprite = Cargar<Sprite>("hongo_color1"); // clon mas grande
+        caldero.ojoSprite         = Cargar<Sprite>("base_ojo_color");
+        caldero.irisCentral       = Cargar<Sprite>("ojo_iris_central");
+        caldero.irisLateral       = Cargar<Sprite>("ojo_iris_lateral");
+        caldero.irisVertical      = Cargar<Sprite>("ojo_iris_vertical");
+        caldero.huesoSprite       = Cargar<Sprite>("Huesito");
+    }
+
+    /// <summary>Carga un recurso por nombre. Funciona en Editor y en Build.</summary>
+    static T Cargar<T>(string nombre) where T : UnityEngine.Object
+    {
+        var r = Resources.Load<T>(nombre);
+        if (r != null) return r;
 #if UNITY_EDITOR
-        var guids = UnityEditor.AssetDatabase.FindAssets("explosion_caldero t:AudioClip");
+        // Respaldo en Editor: buscar en todo el proyecto por nombre.
+        var guids = UnityEditor.AssetDatabase.FindAssets(nombre + " t:" + typeof(T).Name);
         foreach (var g in guids)
         {
-            string ruta = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
-            var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(ruta);
-            if (clip == null || clip.name != "explosion_caldero") continue;
-            caldero.sonidoBoom = clip;      // ranura A del pack
-            caldero.sonidoBoomB = null;     // no alternar: solo el nuevo
-            caldero.modoSonidoBoom = 0;     // 0 = solo A
-            // El mp3 viene masterizado mas alto que el del clasico: se
-            // baja el volumen para que se perciban IGUAL de fuertes.
-            caldero.boomVolume = 0.5f;      // clasico = 0.8
-            Debug.Log($"[FxPacks] Sonido de explosion del caldero cargado: {ruta} (volumen {caldero.boomVolume})");
-            break;
-        }
-#endif
-        // NOTA para build: si el mp3 no esta en Resources, cuando hagas
-        // build habria que arrastrarlo al Inspector del pack o moverlo a
-        // Assets/Resources y usar Resources.Load. En el editor ya funciona.
-
-        // Objetos del paso 8: se cargan los sprites por NOMBRE del proyecto
-        // (igual que el sonido). Las proporciones vienen del menu calibrado.
-#if UNITY_EDITOR
-        caldero.hongo1Sprite = SpritePorNombre("hongo_color1");
-        caldero.hongo2Sprite = SpritePorNombre("Hongo_color2");
-        caldero.hongoGrandeSprite = SpritePorNombre("hongo_color1"); // clon mas grande
-        caldero.ojoSprite = SpritePorNombre("base_ojo_color");
-        caldero.irisCentral = SpritePorNombre("ojo_iris_central");
-        caldero.irisLateral = SpritePorNombre("ojo_iris_lateral");
-        caldero.irisVertical = SpritePorNombre("ojo_iris_vertical");
-        caldero.huesoSprite = SpritePorNombre("Huesito");
-#endif
-    }
-
-#if UNITY_EDITOR
-    static Sprite SpritePorNombre(string nombre)
-    {
-        foreach (var g in UnityEditor.AssetDatabase.FindAssets(nombre + " t:Sprite"))
-        {
-            string ruta = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
-            var sp = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(ruta);
+            var sp = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(
+                UnityEditor.AssetDatabase.GUIDToAssetPath(g));
             if (sp != null && sp.name == nombre) return sp;
         }
-        Debug.LogWarning($"[FxPacks] No se encontro el sprite '{nombre}'.");
+        Debug.LogWarning($"[FxPacks] '{nombre}' no esta en Resources (copialo a Assets/Resources para el build).");
+#endif
         return null;
     }
-#endif
 
     public static void RegisterPack(FxPack pack)
     {
