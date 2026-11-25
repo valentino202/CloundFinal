@@ -60,13 +60,20 @@ Alternativa: Photon (más robusto, pero servicio externo).
 - **Decisión**: NO se hace (el usuario: "el 2 no"). Si en el futuro hace falta,
   retomar de acá.
 
-### Paso 3 — Simular 2 jugadores en la misma máquina ⭐⭐
-- **Qué**: 2 instancias del `GameManager` (o 2 ventanas) con un `MatchController`
-  cada una, turnos alternados `humanId` 1 y 2, sin internet todavía.
-- **Prueba**: jugar una partida completa pasando el turno de "jugador 1" a
-  "jugador 2" en la misma pantalla.
-- **Objetivo**: validar que la lógica (`GameLogic.PlacePoint`) es
-  indiferente a quién mueve.
+### Paso 3 — Simular 2 jugadores en la misma máquina ⭐⭐ ✅ IMPLEMENTADO (prueba)
+- **Qué**: clase pura `GameLogic` ya es indiferente al jugador (PlacePoint recibe
+  `player` 1/2 y valida `player == currentPlayer`). El bot solo es un decisor
+  de celdas. Este paso solo CONFIRMA eso con una prueba.
+- **Implementado**: `Assets/scrips/pvp/Paso3PruebaDosJugadores.cs` (MonoBehaviour).
+  - Crea un GameLogic (6x6, nivel 4, 30 turnos) igual que el juego real.
+  - Juega una partida completa alternando jugador 1 -> 2 -> 1...
+  - Modo configurable: BotAgent para AMBOS (mas realista) o celda legal al azar.
+  - Imprime cada jugada y el resultado final (ganador, casillas, turnos).
+  - Tope de seguridad (200 movimientos) para no colgarse en infinito.
+- **Prueba**: adjuntar a cualquier GameObject, dar Play, mirar la consola.
+  Si termina con "[Paso3] FIN DE PARTIDA" sin errores rojos -> la logica es
+  indiferente al jugador.
+- **Sin riesgo**: archivo nuevo, no toca GameManager/MatchController/escena.
 
 ### Paso 4 — Lobby: crear / unirse con filtros ⭐⭐⭐
 - **Qué**: servicio de Lobby (UGS Lobby). El jugador crea o se une a una sala
@@ -120,6 +127,8 @@ local se revierte al commit anterior. El juego local debe seguir funcionando
 PlayerPrefs, Leaderboards). Falta la prueba manual en Play del usuario.
 ▶ **Paso 1 completo**: modelo `BusquedaPvP` (solo datos) + log al dar Play.
 ❌ **Paso 2 descartado** por el usuario (espejo por cliente: NO se hace).
+▶ **Paso 3 implementado**: `Paso3PruebaDosJugadores.cs` (prueba de lógica).
+  Falta que el usuario lo pruebe en Play (adjuntar a un GameObject, mirar consola).
 Sigue sin escribirse red: el juego sigue 100% local (humano vs bot) y
 listo para entregar.
-Próximo: **Paso 3** (simular 2 jugadores en la misma máquina, sin red).
+Próximo: **Paso 4** (Lobby con filtros, UGS) — requiere elegir servicio.
