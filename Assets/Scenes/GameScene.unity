@@ -209,7 +209,7 @@ MonoBehaviour:
   boomSoundA: {fileID: 8300000, guid: a62231eec917d76488f45f7e5a7509a1, type: 3}
   boomSoundB: {fileID: 8300000, guid: bec35f8ecfdcafa4e9683004e131f2a7, type: 3}
   boomSound: 1
-  boomVolume: 0.8
+  boomVolume: 1
   calderoBoomSoundA: {fileID: 0}
   calderoBoomSoundB: {fileID: 0}
   calderoBoomSound: 0

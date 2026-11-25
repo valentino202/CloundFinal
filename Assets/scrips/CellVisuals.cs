@@ -80,7 +80,7 @@ public class CellVisuals : MonoBehaviour
     public enum BoomSoundMode { A = 0, B = 1, Alternar = 2 }
     [Tooltip("A = solo A, B = solo B, Alternar = uno y uno para comparar en partida.")]
     public BoomSoundMode boomSound = BoomSoundMode.Alternar;
-    [Range(0f, 1f)] public float boomVolume = 0.8f;
+    [Range(0f, 1f)] public float boomVolume = 1f;
 
     [Header("Sonido de explosion del CALDERO (prueba futuros sonidos)")]
     [Tooltip("Arrastra un clip para probar. Si lo dejas VACIO se usa explosion_caldero.mp3 (automatico).")]
@@ -90,9 +90,9 @@ public class CellVisuals : MonoBehaviour
     public BoomSoundMode calderoBoomSound = BoomSoundMode.A;
     [Header("Volumen del boom por pack (ajusta a oido en Play)")]
     [Tooltip("Multiplicador sobre 'Boom Volume' para el clasico. Subir si se escucha bajo.")]
-    [Range(0f, 2f)] public float volumenBoomClasico = 1.3f;
+    [Range(0f, 2f)] public float volumenBoomClasico = 1.6f;
     [Tooltip("Multiplicador sobre 'Boom Volume' para el caldero (su mp3 viene mas alto).")]
-    [Range(0f, 2f)] public float volumenBoomCaldero = 0.6f;
+    [Range(0f, 2f)] public float volumenBoomCaldero = 0.85f;
 
     [Header("Feel")]
     public float shakeDuration = 0.22f;
@@ -280,6 +280,15 @@ graph = PlayableGraph.Create("CellVisuals");
     void MigrarEfectosAlPack()
     {
         if (pack == null) return;
+
+        // Migracion de volumen: la musica ahora va mas baja (0.35) y las
+        // explosiones mas fuertes. Si la escena tiene los valores viejos
+        // (0.8 / 1.3 / 0.6), se suben automaticamente. Valores custom se
+        // respetan (no se tocan).
+        if (Mathf.Approximately(boomVolume, 0.8f)) boomVolume = 1f;
+        if (Mathf.Approximately(volumenBoomClasico, 1.3f)) volumenBoomClasico = 1.6f;
+        if (Mathf.Approximately(volumenBoomCaldero, 0.6f)) volumenBoomCaldero = 0.85f;
+
         pack.bubbleSprites = bubbleSprites;
         pack.bubbleRate = bubbleRate;
         pack.bubbleSize = bubbleSize;

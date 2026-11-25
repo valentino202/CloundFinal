@@ -26,7 +26,8 @@ public class MusicManager : MonoBehaviour
     public AudioClip musicaPelea;
 
     [Header("Volumen")]
-    [Range(0f, 1f)] public float volumen = 0.6f;
+    [Range(0f, 1f)] public float volumen = 0.6f; // musica de menu (fondo)
+    [Range(0f, 1f)] public float volumenCombate = 0.35f; // musica de pelea (mas baja para no tapar explosiones)
 
     AudioSource source;
     bool cortada; // true despues de ganar/perder (no reacciona al cambio de escena)
@@ -79,6 +80,8 @@ public class MusicManager : MonoBehaviour
     void Reproducir(AudioClip clip)
     {
         if (clip == null) return;
+        // Volumen segun el clip: combate mas bajo para no tapar explosiones.
+        source.volume = (clip == musicaPelea) ? volumenCombate : volumen;
         if (source.clip == clip && source.isPlaying) return; // ya suena, no reiniciar
         source.clip = clip;
         source.Play();
