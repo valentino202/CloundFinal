@@ -22,12 +22,23 @@ Alternativa: Photon (más robusto, pero servicio externo).
 
 ## PASOS (fácil → difícil)
 
-### Paso 0 — Verificar lo que ya sirve (sin código) ✅
-- [ ] Auth funciona (invitado + usuario/contraseña, PlayerId único).
-- [ ] Cloud Save guarda pack/color/monedas por jugador.
-- [ ] `PlayerPrefs` tiene `SelectedMatchMode` (0 normal / 1 infinito) y
-      `SelectedMaxTurns` (30..100 de 10 en 10).
-- [ ] Leaderboards normal e infinito funcionan.
+### Paso 0 — Verificar lo que ya sirve (sin código) ✅ (verificado por código)
+- [x] Auth: anónimo/invitado + usuario/contraseña (alta, login, link y
+      logout). PlayerId único por sesión (`UGSAuthManager`).
+- [x] Cloud Save: claves `OwnedPacks`, `EquippedPack`, `Coins`, `Gems` (+J2)
+      guardadas y leídas por cuenta, con respaldo local por PlayerId
+      (`UGSProfileManager`).
+- [x] `PlayerPrefs` tiene `SelectedMatchMode` (0/1) y `SelectedMaxTurns`
+      (30..100): UIManager los ESCRIBE con clamp y GameManager los LEE
+      (líneas 65-68) — misma clave, mismo rango.
+- [x] Leaderboards: `RankingView` lee `ranked_normal` / `ranked_infinito`
+      (asignados en escena) y `ValidateMatchResult.js` ESCRIBE el correcto
+      según `matchMode` (0→normal, 1→infinito) al GANAR.
+- [ ] **Prueba manual en Play** (no se puede verificar por código):
+      1. Login invitado + usuario/contraseña → cada uno sus datos.
+      2. Comprar caldero con una cuenta → otra cuenta NO lo tiene.
+      3. Elegir Normal 40 → reiniciar → sigue en 40.
+      4. Ganar → ranking sube (requiere Cloud Code desplegado en UGS).
 
 ### Paso 1 — Modelo de "busqueda" (solo datos, sin red) ⭐ ✅ HECHO
 - **Qué**: una clase `BusquedaPvP` con `{ modo, maxTurns, playerId }`.
@@ -105,9 +116,10 @@ local se revierte al commit anterior. El juego local debe seguir funcionando
 ---
 
 ## ESTADO ACTUAL
+▶ **Paso 0 casi completo**: verificado TODO por código (Auth, Cloud Save,
+PlayerPrefs, Leaderboards). Falta la prueba manual en Play del usuario.
 ▶ **Paso 1 completo**: modelo `BusquedaPvP` (solo datos) + log al dar Play.
 ❌ **Paso 2 descartado** por el usuario (espejo por cliente: NO se hace).
-Paso 0 pendiente de verificación manual del usuario (checklist de arriba).
 Sigue sin escribirse red: el juego sigue 100% local (humano vs bot) y
 listo para entregar.
 Próximo: **Paso 3** (simular 2 jugadores en la misma máquina, sin red).
