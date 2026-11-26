@@ -24,6 +24,7 @@ public class UGSCloudCodeManager
     {
         public string winnerId;
         public string loserId;
+        public string playerName; // nombre del jugador local (para mostrar en ranking)
         public int gridSize;
         public int totalMoves;
         public int winnerCells;
