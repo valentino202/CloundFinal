@@ -45,7 +45,6 @@ public class RankingView : MonoBehaviour
         public int wins80;
         public int wins90;
         public int wins100;
-        public string playerName;
     }
 
     [Serializable]
@@ -54,7 +53,6 @@ public class RankingView : MonoBehaviour
         public int wins;
         public float bestTime;
         public int nearBest;
-        public string playerName;
     }
 
     private void OnEnable()
@@ -204,19 +202,15 @@ public class RankingView : MonoBehaviour
 
         foreach (var entry in page.Results)
         {
+            var row = Instantiate(rowPrefab, content);
+            SetText(row, "name", FormatName(string.IsNullOrEmpty(entry.PlayerName) ? entry.PlayerId : entry.PlayerName));
+
             NormalRankingMeta meta = null;
             if (!string.IsNullOrEmpty(entry.Metadata))
             {
                 try { meta = JsonUtility.FromJson<NormalRankingMeta>(entry.Metadata); }
                 catch { meta = null; }
             }
-
-            string displayName = entry.PlayerName;
-            if (meta != null && !string.IsNullOrEmpty(meta.playerName)) displayName = meta.playerName;
-            if (string.IsNullOrEmpty(displayName)) displayName = entry.PlayerId;
-
-            var row = Instantiate(rowPrefab, content);
-            SetText(row, "name", FormatName(displayName));
 
             int total = meta != null ? meta.total : Mathf.RoundToInt((float)entry.Score);
             SetText(row, "Numero_victorias", total.ToString());
@@ -248,19 +242,15 @@ public class RankingView : MonoBehaviour
 
         foreach (var entry in page.Results)
         {
+            var row = Instantiate(rowPrefab, content);
+            SetText(row, "name", FormatName(string.IsNullOrEmpty(entry.PlayerName) ? entry.PlayerId : entry.PlayerName));
+
             InfinitoRankingMeta meta = null;
             if (!string.IsNullOrEmpty(entry.Metadata))
             {
                 try { meta = JsonUtility.FromJson<InfinitoRankingMeta>(entry.Metadata); }
                 catch { meta = null; }
             }
-
-            string displayName = entry.PlayerName;
-            if (meta != null && !string.IsNullOrEmpty(meta.playerName)) displayName = meta.playerName;
-            if (string.IsNullOrEmpty(displayName)) displayName = entry.PlayerId;
-
-            var row = Instantiate(rowPrefab, content);
-            SetText(row, "name", FormatName(displayName));
 
             int wins = meta != null ? meta.wins : 0;
             float bestTime = meta != null ? meta.bestTime : 0f;

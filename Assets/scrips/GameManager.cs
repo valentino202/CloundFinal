@@ -411,7 +411,6 @@ private void FinishMove(GameLogic.MoveResult r)
                 {
                     winnerId = draw ? myId : (won ? myId : "BOT"),
                     loserId = draw ? "BOT" : (won ? "BOT" : myId),
-                    playerName = UGSAuthManager.Instance != null ? UGSAuthManager.Instance.GetPlayerName() : (AuthenticationService.Instance != null ? AuthenticationService.Instance.PlayerName : "Jugador"),
                     gridSize = game.gridSize,
                     totalMoves = game.totalMoves,
                     winnerCells = draw ? myCells : (won ? myCells : botCells),
