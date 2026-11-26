@@ -1,0 +1,8 @@
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\test.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\test.deps.json
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\test.pdb
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\Unity.Services.CloudCode.Apis.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\Unity.Services.CloudCode.Core.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation-cross-platform\Newtonsoft.Json.dll

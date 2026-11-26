@@ -1,0 +1,198 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\TestProject\\TestProject.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\Project\\test.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\Project\\test.csproj",
+        "projectName": "test",
+        "projectPath": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\Project\\test.csproj",
+        "packagesPath": "C:\\Users\\VALENTINO\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\Project\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\VALENTINO\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "framework": "net9.0",
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.400"
+      },
+      "frameworks": {
+        "net9.0": {
+          "framework": "net9.0",
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Com.Unity.Services.CloudCode.Apis": {
+              "target": "Package",
+              "version": "[0.0.26, )"
+            },
+            "Com.Unity.Services.CloudCode.Core": {
+              "target": "Package",
+              "version": "[0.0.5, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[7.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[9.0.20, 9.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[9.0.20, 9.0.20]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[9.0.20, 9.0.20]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\TestProject\\TestProject.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\TestProject\\TestProject.csproj",
+        "projectName": "TestProject",
+        "projectPath": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\TestProject\\TestProject.csproj",
+        "packagesPath": "C:\\Users\\VALENTINO\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\TestProject\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\VALENTINO\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "framework": "net9.0",
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\Project\\test.csproj": {
+                "projectPath": "C:\\Users\\VALENTINO\\Documents\\GitHub\\CloundFinal\\test\\Project\\test.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.400"
+      },
+      "frameworks": {
+        "net9.0": {
+          "framework": "net9.0",
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.12.0, )"
+            },
+            "NUnit": {
+              "target": "Package",
+              "version": "[4.2.2, )"
+            },
+            "NUnit.Analyzers": {
+              "target": "Package",
+              "version": "[4.4.0, )"
+            },
+            "NUnit3TestAdapter": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "coverlet.collector": {
+              "target": "Package",
+              "version": "[6.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[9.0.20, 9.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[9.0.20, 9.0.20]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[9.0.20, 9.0.20]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\test.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\test.deps.json
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\test.pdb
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\Unity.Services.CloudCode.Apis.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\Unity.Services.CloudCode.Core.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\VALENTINO\AppData\Local\Temp\test\module-compilation\Newtonsoft.Json.dll

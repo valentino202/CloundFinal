@@ -1,0 +1,8 @@
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\test.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\test.deps.json
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\test.pdb
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\Unity.Services.CloudCode.Apis.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\Unity.Services.CloudCode.Core.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Release\net9.0\publish\Newtonsoft.Json.dll

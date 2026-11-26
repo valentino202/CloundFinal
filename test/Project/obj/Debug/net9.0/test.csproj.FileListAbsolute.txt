@@ -1,0 +1,13 @@
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.csproj.AssemblyReference.cache
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.AssemblyInfoInputs.cache
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.AssemblyInfo.cs
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.csproj.CoreCompileInputs.cache
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.sourcelink.json
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Debug\net9.0\test.deps.json
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Debug\net9.0\test.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\bin\Debug\net9.0\test.pdb
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\refint\test.dll
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\test.pdb
+C:\Users\VALENTINO\Documents\GitHub\CloundFinal\test\Project\obj\Debug\net9.0\ref\test.dll
