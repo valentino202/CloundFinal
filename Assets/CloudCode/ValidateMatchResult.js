@@ -75,6 +75,7 @@ module.exports = async ({ params, context, logger }) => {
       matchMode,
       maxTurns,
       duration,
+      playerName,
     } = p;
 
     // --- Validacion anti-hack basica ---
@@ -252,6 +253,7 @@ module.exports = async ({ params, context, logger }) => {
         let total = 0;
         for (let t = 30; t <= 100; t += 10) total += meta[`wins${t}`];
         meta.total = total;
+         if (playerName) meta.playerName = playerName;
         await writeScore(LEADERBOARD_NORMAL, total, [{ label: "metaObj", meta: meta }]);
         csBackup.push({ key: `NormalWins_${maxTurns}`, value: meta[`wins${maxTurns}`] });
         csBackup.push({ key: "NormalWins_Total", value: total });
@@ -285,8 +287,8 @@ module.exports = async ({ params, context, logger }) => {
         const bestSinDur = lbPrevBest > 0 ? Math.min(lbPrevBest, duration) : duration;
         const nearSinDur = lbPrevNear + (lbPrevBest > 0 && duration <= lbPrevBest + NEAR_BEST_THRESHOLD ? 1 : 0);
         const candidates = [
-          { label: "metaObj+dur", meta: { wins: wins, bestTime: best, nearBest: near, durations: durations } },
-          { label: "metaObj", meta: { wins: wins, bestTime: bestSinDur, nearBest: nearSinDur } },
+          { label: "metaObj+dur", meta: { wins: wins, bestTime: best, nearBest: near, durations: durations, playerName: playerName } },
+          { label: "metaObj", meta: { wins: wins, bestTime: bestSinDur, nearBest: nearSinDur, playerName: playerName } },
         ];
 
         await writeScore(LEADERBOARD_INFINITO, wins * 1000000 - Math.round(bestSinDur), candidates);
