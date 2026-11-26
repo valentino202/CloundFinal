@@ -215,6 +215,8 @@ public class RankingView : MonoBehaviour
             if (meta != null && !string.IsNullOrEmpty(meta.playerName)) displayName = meta.playerName;
             if (string.IsNullOrEmpty(displayName)) displayName = entry.PlayerId;
 
+            Debug.Log($"[Ranking] Normal entry: PlayerName='{entry.PlayerName}' Metadata='{entry.Metadata}' -> displayName='{displayName}'");
+
             var row = Instantiate(rowPrefab, content);
             SetText(row, "name", FormatName(displayName));
 
@@ -258,6 +260,8 @@ public class RankingView : MonoBehaviour
             string displayName = entry.PlayerName;
             if (meta != null && !string.IsNullOrEmpty(meta.playerName)) displayName = meta.playerName;
             if (string.IsNullOrEmpty(displayName)) displayName = entry.PlayerId;
+
+            Debug.Log($"[Ranking] Infinito entry: PlayerName='{entry.PlayerName}' Metadata='{entry.Metadata}' -> displayName='{displayName}'");
 
             var row = Instantiate(rowPrefab, content);
             SetText(row, "name", FormatName(displayName));
